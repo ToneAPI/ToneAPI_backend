@@ -1,6 +1,12 @@
+import * as dotenv from "dotenv";
+dotenv.config();
 import express from "express";
 import client from "./client";
+import db from "./db/db";
 import server from "./server";
+
+console.log("dotenv");
+console.log(db);
 
 const app = express();
 const port = 3000;
