@@ -1,6 +1,6 @@
 import { Generated } from "kysely";
 
-interface KillTable {
+export interface KillTable {
   id: Generated<number>;
   server: string;
   attacker: number;
