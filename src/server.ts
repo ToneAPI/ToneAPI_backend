@@ -1,10 +1,10 @@
-import { Router } from "express";
-const router = Router();
+import { Router } from 'express'
+const router = Router()
 //auth middleware
-router.post("/*", (req, res, next) => {
-  next();
-});
-router.post("/*", (req, res, next) => {
-  next();
-});
-export default router;
+router.post('/*', (req, res, next) => {
+  next()
+})
+router.post('/*', (req, res, next) => {
+  next()
+})
+export default router
