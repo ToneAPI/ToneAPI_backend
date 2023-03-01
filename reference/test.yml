@@ -165,14 +165,13 @@ components:
       properties:
         id:
           $ref: '#/components/schemas/PlayerID'
-          description: Player Origin ID
         name:
           type: string
           example: Legonzaur
         opt-out:
           type: boolean
           default: false
-          description: 'If set to true, kill and deaths about this user won''t be sent to the database'
+          description: 'If set to true, kills and deaths about this user won''t be sent to the database'
         hide_TOS:
           type: boolean
           default: false
