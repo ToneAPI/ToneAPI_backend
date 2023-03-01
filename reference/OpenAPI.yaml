@@ -7,16 +7,15 @@ info:
 servers:
   - url: 'http://localhost:3000'
 paths:
-  '/users/{userId}':
+  '/players/id/{id}':
     parameters:
       - schema:
-          type: integer
-        name: userId
+          type: string
+        name: id
         in: path
         required: true
-        description: Id of an existing user.
     get:
-      summary: Get User Info by User ID
+      summary: Get Player by Username
       tags: []
       responses:
         '200':
@@ -24,7 +23,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: '#/components/schemas/Player'
               examples:
                 Get User Alice Smith:
                   value:
@@ -37,60 +36,8 @@ paths:
                     signUpDate: '2019-08-24'
         '404':
           description: User Not Found
-      operationId: get-users-userId
-      description: Retrieve the information of the user with the matching user ID.
-    patch:
-      summary: Update User Information
-      operationId: patch-users-userId
-      responses:
-        '200':
-          description: User Updated
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/User'
-              examples:
-                Updated User Rebecca Baker:
-                  value:
-                    id: 13
-                    firstName: Rebecca
-                    lastName: Baker
-                    email: rebecca@gmail.com
-                    dateOfBirth: '1985-10-02'
-                    emailVerified: false
-                    createDate: '2019-08-24'
-        '404':
-          description: User Not Found
-        '409':
-          description: Email Already Taken
-      description: Update the information of an existing user.
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                firstName:
-                  type: string
-                lastName:
-                  type: string
-                email:
-                  type: string
-                  description: 'If a new email is given, the user''s email verified property will be set to false.'
-                dateOfBirth:
-                  type: string
-            examples:
-              Update First Name:
-                value:
-                  firstName: Rebecca
-              Update Email:
-                value:
-                  email: rebecca@gmail.com
-              Update Last Name & Date of Birth:
-                value:
-                  lastName: Baker
-                  dateOfBirth: '1985-10-02'
-        description: Patch user properties to update.
+      operationId: get-player-by-id
+      description: Retrieve the information of the player with the matching id
   /user:
     post:
       summary: Create New User
@@ -155,7 +102,7 @@ components:
       examples: []
       properties:
         id:
-          $ref: '#/components/schemas/EntityID'
+          $ref: '#/components/schemas/PlayerID'
           description: Unique identifier for the given user.
         name:
           type: string
@@ -218,11 +165,13 @@ components:
           type: string
           example: fvnkhead's 7v7
         attacker:
-          $ref: '#/components/schemas/EntityID'
+          $ref: '#/components/schemas/PlayerID'
+        attacker_type:
+          type: string
         attacker_weapon:
           $ref: '#/components/schemas/WeaponID'
         victim:
-          $ref: '#/components/schemas/EntityID'
+          $ref: '#/components/schemas/PlayerID'
         victim_weapon:
           $ref: '#/components/schemas/WeaponID'
         map:
@@ -236,9 +185,9 @@ components:
           readOnly: true
       required:
         - server
-        - attacker
+        - attacker_type
         - victim
-    EntityID:
+    PlayerID:
       title: EntityID
       x-stoplight:
         id: 9icavmq5bgsqp
