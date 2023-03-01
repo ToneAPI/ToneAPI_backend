@@ -1,43 +1,43 @@
-import { Generated } from "kysely";
+import { ColumnType, Generated } from 'kysely'
 
 export interface KillTable {
-  id: Generated<number>;
-  server: string;
-  attacker: number;
-  victim: number;
-  weapon: string;
-  map: string;
-  distance: number;
-  date: Date;
+  id: Generated<number>
+  server: string
+  attacker: number
+  victim: number
+  weapon: string
+  map: string
+  distance: number
+  date: ColumnType<Date, string | Date | undefined, never>
 }
 
 interface EntityTable {
-  id: number;
-  name: string;
+  id: number
+  name: string
 }
 interface WeaponTable {
-  id: string;
-  name: string;
-  description: string;
-  image: string;
+  id: string
+  name: string
+  description: string
+  image: string
 }
 interface MapTable {
-  id: string;
-  name: string;
-  description: string;
-  image: string;
+  id: string
+  name: string
+  description: string
+  image: string
 }
 interface ServerTable {
-  id: string;
-  name: string;
-  description: string;
+  id: string
+  name: string
+  description: string
 }
 interface Database {
-  kill: KillTable;
-  entity: EntityTable;
-  weapon: WeaponTable;
-  maps: MapTable;
-  server: ServerTable;
+  kill: KillTable
+  entity: EntityTable
+  weapon: WeaponTable
+  maps: MapTable
+  server: ServerTable
 }
 
-export default Database;
+export default Database

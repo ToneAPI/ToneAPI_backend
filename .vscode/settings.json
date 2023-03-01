@@ -3,7 +3,6 @@
     "source.fixAll": true
   },
   "editor.formatOnSave": true,
-  "prettier.jsxSingleQuote": false,
   "typescript.preferences.quoteStyle": "single",
   "javascript.preferences.quoteStyle": "single",
   "prettier.singleQuote": true,

@@ -1,7 +1,7 @@
 import { Kysely, PostgresDialect } from 'kysely'
 import { Pool } from 'pg'
 import migrateToLatest from './migrations'
-import Database, { KillTable } from './model'
+import Database from './model'
 
 const migration = migrateToLatest()
 // You'd create one of these when you start your app.
@@ -17,6 +17,15 @@ const db = new Kysely<Database>({
   })
 })
 
+interface KillRecord {
+  server: string
+  attacker: number
+  victim: number
+  weapon: number
+  map: number
+  distance: number
+  date: Date
+}
 export async function CreateKillRecord({
   server,
   attacker,
@@ -25,10 +34,10 @@ export async function CreateKillRecord({
   map,
   distance,
   date
-}: KillTable) {
+}: KillRecord) {
   await db
     .insertInto('kill')
-    .values({ server, attacker, victim, weapon, map, distance, date })
+    .values({ server, attacker, victim, weapon, map, distance })
     .execute()
 }
 /*
@@ -56,7 +65,9 @@ async function demo() {
   }
 }
 */
-export default async function ready(): Promise<Kysely<Database>> {
+export async function dbReady(): Promise<Kysely<Database>> {
   await migration
   return db
 }
+
+export default db
