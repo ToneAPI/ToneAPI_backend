@@ -9,7 +9,7 @@ servers:
 paths:
   /weapons/:
     get:
-      summary: Your GET endpoint
+      summary: List Weapons
       tags: []
       responses:
         '200':
@@ -20,11 +20,11 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Weapon'
-      operationId: get-weapons
+      operationId: get-weapon-list
       description: ''
   /maps/:
     get:
-      summary: Your GET endpoint
+      summary: List Maps
       tags: []
       responses:
         '200':
@@ -35,59 +35,34 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Map'
-      operationId: get-maps
-  '/players/id/{id}':
+      operationId: get-map-list
+  /players:
+    get:
+      summary: List Players
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Player'
+      operationId: get-player-list
+  '/players/{playerId}':
     parameters:
-      - schema:
-          type: string
-        name: id
-        in: path
-        required: true
+      - $ref: '#/components/parameters/playerId'
     get:
       summary: Get Player by Username
       tags: []
       responses:
         '200':
-          description: Player Found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Player'
-              examples:
-                Get User Alice Smith:
-                  value:
-                    id: 142
-                    firstName: Alice
-                    lastName: Smith
-                    email: alice.smith@gmail.com
-                    dateOfBirth: '1997-10-31'
-                    emailVerified: true
-                    signUpDate: '2019-08-24'
+          $ref: '#/components/responses/Player-report'
         '404':
           description: User Not Found
-      operationId: get-player-by-id
+      operationId: get-player-report
       description: Retrieve the information of the player with the matching id
-  '/players/name/{name}':
-    parameters:
-      - schema:
-          type: string
-        name: name
-        in: path
-        required: true
-    get:
-      summary: Get Player by ID
-      tags: []
-      responses:
-        '200':
-          description: Player Found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Player'
-        '404':
-          description: Player Not Found
-      operationId: get-player-by-name
-      description: ''
   /servers/:
     get:
       summary: Get Server list
@@ -101,20 +76,32 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Server'
-      operationId: get-servers
+      operationId: get-server-list
   '/servers/{serverId}':
     parameters:
-      - name: serverId
-        in: path
-        required: true
-        schema:
-          type: string
+      - $ref: '#/components/parameters/serverId'
     get:
       summary: Get Server report
-      operationId: get-server-player-report
+      operationId: get-server-report
+      responses:
+        '200':
+          $ref: '#/components/responses/Server-report'
+  '/server/{serverId}/players':
+    get:
+      summary: List Players
+      tags: []
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Player'
+      operationId: get-player-list-for-server
+    parameters:
+      - $ref: '#/components/parameters/serverId'
   '/servers/{serverId}/kills':
     post:
       summary: Post kills
@@ -142,11 +129,24 @@ paths:
       summary: Get Weapon report for server
       tags: []
       responses: {}
-      operationId: get-server-weapons-report
+      operationId: get-weapons-report-for-server
       parameters: []
       x-internal: false
     parameters:
       - $ref: '#/components/parameters/serverId'
+  '/servers/{serverId}/players/{playerId}':
+    parameters:
+      - $ref: '#/components/parameters/playerId'
+      - $ref: '#/components/parameters/serverId'
+    get:
+      summary: Get Player report for Server
+      tags: []
+      responses:
+        '200':
+          $ref: '#/components/responses/Player-server-report'
+        '404':
+          description: Not Found
+      operationId: get-player-on-server
 components:
   schemas:
     Player:
@@ -158,10 +158,18 @@ components:
       properties:
         id:
           $ref: '#/components/schemas/PlayerID'
-          description: Unique identifier for the given user.
+          description: Player Origin ID
         name:
           type: string
           example: Legonzaur
+        opt-out:
+          type: boolean
+          default: false
+          description: 'If set to true, kill and deaths about this user won''t be sent to the database'
+        hide_TOS:
+          type: boolean
+          default: false
+          description: 'If set to true, TOS will be hidden when player joins a server'
       required:
         - id
     Weapon:
@@ -206,6 +214,7 @@ components:
         image:
           type: string
           format: uri
+          example: 'https://media.contentapi.ea.com/content/dam/eacom/en-us/common/articles-tf2-welcome-header.jpg.adapt.320w.jpg'
       required:
         - id
         - internal
@@ -217,10 +226,10 @@ components:
       properties:
         id:
           type: string
-        token:
-          type: string
+          example: '1'
         name:
           type: string
+          example: fvnknoots 7v7
     Kill:
       title: Kill
       x-stoplight:
@@ -298,6 +307,56 @@ components:
       x-stoplight:
         id: zoazw8eoi7qwr
       type: integer
+    PrefferredServer:
+      title: PrefferredServer
+      x-stoplight:
+        id: xok1i1668gx6o
+      type: object
+      properties:
+        server:
+          $ref: '#/components/schemas/Server'
+        killCount:
+          type: integer
+          example: 4988
+        deathCount:
+          type: integer
+          example: 4671
+    PrefferedWeapon:
+      title: PrefferedWeapon
+      x-stoplight:
+        id: b52mxxdsbv1wx
+      type: object
+      properties:
+        weapon:
+          $ref: '#/components/schemas/Weapon'
+        killCount:
+          type: integer
+        deathCount:
+          type: integer
+    PrefferedMap:
+      title: PrefferedMap
+      x-stoplight:
+        id: 17kjfi5wu6f4h
+      type: object
+      properties:
+        map:
+          $ref: '#/components/schemas/Map'
+        killCount:
+          type: integer
+        deathCount:
+          type: integer
+    TopPlayers:
+      title: TopPlayers
+      x-stoplight:
+        id: rsl4jqpvwunah
+      type: object
+      properties:
+        player:
+          $ref: '#/components/schemas/Player'
+        kill_count:
+          type: integer
+        death_count:
+          type: integer
   securitySchemes:
     server_token:
       name: API Key
@@ -319,23 +378,12 @@ components:
         type: string
   responses:
     Server-report:
-      description: Example response
+      description: OK
       content:
         application/json:
           schema:
             type: object
             properties:
-              id:
-                type: string
-    Player-server-report:
-      description: Example response
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              player:
-                $ref: '#/components/schemas/Player'
               server:
                 $ref: '#/components/schemas/Server'
               total_kills:
@@ -347,23 +395,166 @@ components:
                 type: string
                 format: date-time
               most_used_weapons:
-                type:
-                  - array
-                maxItems: 5
-                items:
-                  type: object
-                  additionalProperties: false
-              preferred_maps:
                 type: array
                 items:
-                  type: object
-          examples: {}
-    Player-report:
-      description: Example response
+                  $ref: '#/components/schemas/PrefferedWeapon'
+              preffered_maps:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PrefferedMap'
+              top_players:
+                type: array
+                maxItems: 5
+                items:
+                  $ref: '#/components/schemas/TopPlayers'
+    Player-server-report:
+      description: OK
       content:
         application/json:
           schema:
             type: object
             properties:
               player:
+                $ref: '#/components/schemas/Player'
+              server:
+                $ref: '#/components/schemas/Server'
+              total_kills:
+                type: integer
+                description: Number of kills of the user in this server
+              total_deaths:
+                type: integer
+                description: Number of deaths of the user in this server
+              first_record:
                 type: string
+                format: date-time
+              last_record:
+                type: string
+                format: date-time
+              most_used_weapons:
+                type: array
+                maxItems: 5
+                items:
+                  $ref: '#/components/schemas/PrefferedWeapon'
+              preferred_maps:
+                type: array
+                maxItems: 5
+                items:
+                  $ref: '#/components/schemas/PrefferedMap'
+              furthest_kill_distance:
+                type: number
+              average_kill_distance:
+                type: number
+          examples:
+            Example 1:
+              value:
+                player:
+                  id: 0
+                  name: Legonzaur
+                  opt-out: false
+                  hide_TOS: false
+                server:
+                  id: '1'
+                  name: fvnknoots 7v7
+                total_kills: 9865
+                total_deaths: 9954
+                first_record: '2019-08-24T14:15:22Z'
+                last_record: '2019-08-24T14:15:22Z'
+                most_used_weapons:
+                  - weapon:
+                      id: 0
+                      internal: mp_weapon_sniper
+                      name: Kraber
+                      description: string
+                      image: 'https://static.wikia.nocookie.net/titanfall_gamepedia/images/8/8b/Icon_kraber.png'
+                    killCount: 0
+                    deathCount: 0
+                preferred_maps:
+                  - map:
+                      id: 0
+                      internal: mp_angel_city
+                      name: Angel City
+                      description: string
+                      image: 'https://media.contentapi.ea.com/content/dam/eacom/en-us/common/articles-tf2-welcome-header.jpg.adapt.320w.jpg'
+                    killCount: 0
+                    deathCount: 0
+                furthest_kill_distance: 0
+                average_kill_distance: 0
+    Player-report:
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              player:
+                $ref: '#/components/schemas/Player'
+              preferred_servers:
+                type: array
+                maxItems: 5
+                items:
+                  $ref: '#/components/schemas/PrefferredServer'
+              total_kills:
+                type: integer
+                description: Number of kills of the user in the entire database
+              total_deaths:
+                type: integer
+                description: Number of kills of the user in the entire database
+              first_record:
+                type: string
+                format: date-time
+              last_record:
+                type: string
+                format: date-time
+              most_used_weapons:
+                type: array
+                maxItems: 5
+                items:
+                  $ref: '#/components/schemas/PrefferedWeapon'
+              preferred_maps:
+                type: array
+                maxItems: 5
+                items:
+                  $ref: '#/components/schemas/PrefferedMap'
+              furthest_kill_distance:
+                type: number
+              average_kill_distance:
+                type: number
+          examples:
+            Example 1:
+              value:
+                player:
+                  id: 0
+                  name: Legonzaur
+                  opt-out: false
+                  hide_TOS: false
+                preferred_servers:
+                  - server:
+                      id: '1'
+                      name: fvnknoots 7v7
+                    killCount: 4988
+                    deathCount: 4671
+                total_kills: 0
+                total_deaths: 0
+                first_record: '2019-08-24T14:15:22Z'
+                last_record: '2019-08-24T14:15:22Z'
+                most_used_weapons:
+                  - weapon:
+                      id: 0
+                      internal: mp_weapon_sniper
+                      name: Kraber
+                      description: string
+                      image: 'https://static.wikia.nocookie.net/titanfall_gamepedia/images/8/8b/Icon_kraber.png'
+                    killCount: 0
+                    deathCount: 0
+                preferred_maps:
+                  - map:
+                      id: 0
+                      internal: mp_angel_city
+                      name: Angel City
+                      description: string
+                      image: 'https://media.contentapi.ea.com/content/dam/eacom/en-us/common/articles-tf2-welcome-header.jpg.adapt.320w.jpg'
+                    killCount: 0
+                    deathCount: 0
+                furthest_kill_distance: 0
+                average_kill_distance: 0
+  examples: {}
