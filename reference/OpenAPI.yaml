@@ -7,6 +7,35 @@ info:
 servers:
   - url: 'http://localhost:3000'
 paths:
+  /weapons/:
+    get:
+      summary: Your GET endpoint
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Weapon'
+      operationId: get-weapons
+      description: ''
+  /maps/:
+    get:
+      summary: Your GET endpoint
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Map'
+      operationId: get-maps
   '/players/id/{id}':
     parameters:
       - schema:
@@ -73,6 +102,51 @@ paths:
                 items:
                   $ref: '#/components/schemas/Server'
       operationId: get-servers
+  '/servers/{serverId}':
+    parameters:
+      - name: serverId
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      summary: Get Server report
+      operationId: get-server-player-report
+      responses:
+        '200':
+          description: OK
+  '/servers/{serverId}/kills':
+    post:
+      summary: Post kills
+      operationId: post-kills
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+        '401':
+          description: Unauthorized
+      parameters: []
+      security:
+        - server_token: []
+      description: Allows a Northstar server to record kills on the database
+    parameters:
+      - $ref: '#/components/parameters/serverId'
+  '/servers/{serverId}/weapons':
+    get:
+      summary: Get Weapon report for server
+      tags: []
+      responses: {}
+      operationId: get-server-weapons-report
+      parameters: []
+      x-internal: false
+    parameters:
+      - $ref: '#/components/parameters/serverId'
 components:
   schemas:
     Player:
@@ -87,6 +161,7 @@ components:
           description: Unique identifier for the given user.
         name:
           type: string
+          example: Legonzaur
       required:
         - id
     Weapon:
@@ -125,6 +200,7 @@ components:
           example: mp_angel_city
         name:
           type: string
+          example: Angel City
         description:
           type: string
         image:
@@ -157,15 +233,41 @@ components:
         server:
           type: string
           example: fvnkhead's 7v7
+        damage_source:
+          $ref: '#/components/schemas/WeaponID'
         attacker:
           $ref: '#/components/schemas/PlayerID'
         attacker_type:
           type: string
         attacker_weapon:
           $ref: '#/components/schemas/WeaponID'
+        attacker_weapon_2:
+          $ref: '#/components/schemas/WeaponID'
+        attacker_weapon_3:
+          $ref: '#/components/schemas/WeaponID'
+        attacker_ordnance:
+          $ref: '#/components/schemas/WeaponID'
+        attacker_ability:
+          $ref: '#/components/schemas/WeaponID'
+        attacker_kit_1:
+          $ref: '#/components/schemas/WeaponID'
+        attacker_kit_2:
+          $ref: '#/components/schemas/WeaponID'
         victim:
           $ref: '#/components/schemas/PlayerID'
         victim_weapon:
+          $ref: '#/components/schemas/WeaponID'
+        victim_weapon_2:
+          $ref: '#/components/schemas/WeaponID'
+        victim_weapon_3:
+          $ref: '#/components/schemas/WeaponID'
+        victim_ordnance:
+          $ref: '#/components/schemas/WeaponID'
+        victim_ability:
+          $ref: '#/components/schemas/WeaponID'
+        victim_kit_1:
+          $ref: '#/components/schemas/WeaponID'
+        victim_kit_2:
           $ref: '#/components/schemas/WeaponID'
         map:
           $ref: '#/components/schemas/MapID'
@@ -190,8 +292,78 @@ components:
       x-stoplight:
         id: p92aomkxku2po
       type: integer
+      description: ''
     MapID:
       title: MapID
       x-stoplight:
         id: zoazw8eoi7qwr
       type: integer
+  securitySchemes:
+    server_token:
+      name: API Key
+      type: apiKey
+      in: header
+      description: ''
+  parameters:
+    serverId:
+      name: serverId
+      in: path
+      required: true
+      schema:
+        type: string
+    playerId:
+      name: playerId
+      in: path
+      required: true
+      schema:
+        type: string
+  responses:
+    Server-report:
+      description: Example response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              id:
+                type: string
+    Player-server-report:
+      description: Example response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              player:
+                $ref: '#/components/schemas/Player'
+              server:
+                $ref: '#/components/schemas/Server'
+              total_kills:
+                type: integer
+              first_record:
+                type: string
+                format: date-time
+              last_record:
+                type: string
+                format: date-time
+              most_used_weapons:
+                type:
+                  - array
+                maxItems: 5
+                items:
+                  type: object
+                  additionalProperties: false
+              preferred_maps:
+                type: array
+                items:
+                  type: object
+          examples: {}
+    Player-report:
+      description: Example response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              player:
+                type: string
