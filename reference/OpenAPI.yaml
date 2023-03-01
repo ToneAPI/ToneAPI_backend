@@ -152,17 +152,10 @@ components:
       x-stoplight:
         id: be41fcacb2693
       type: object
-      examples:
-        - id: 142
-          firstName: Alice
-          lastName: Smith
-          email: alice.smith@gmail.com
-          dateOfBirth: '1997-10-31'
-          emailVerified: true
-          signUpDate: '2019-08-24'
+      examples: []
       properties:
         id:
-          $ref: '#/components/schemas/EntityUUID'
+          $ref: '#/components/schemas/EntityID'
           description: Unique identifier for the given user.
         name:
           type: string
@@ -175,7 +168,33 @@ components:
       type: object
       properties:
         id:
+          $ref: '#/components/schemas/WeaponID'
+        internal:
           type: string
+          example: mp_weapon_sniper
+        name:
+          type: string
+          example: Kraber
+        description:
+          type: string
+        image:
+          type: string
+          format: uri
+          example: 'https://static.wikia.nocookie.net/titanfall_gamepedia/images/8/8b/Icon_kraber.png'
+      required:
+        - id
+        - internal
+    Map:
+      title: Map
+      x-stoplight:
+        id: hoh2m6pr6gli7
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/MapID'
+        internal:
+          type: string
+          example: mp_angel_city
         name:
           type: string
         description:
@@ -185,31 +204,7 @@ components:
           format: uri
       required:
         - id
-    Map:
-      title: Map
-      x-stoplight:
-        id: hoh2m6pr6gli7
-      type: object
-      properties:
-        id:
-          type: string
-        name:
-          type: string
-        description:
-          type: string
-        image:
-          type: string
-          format: uri
-    Server:
-      title: Server
-      x-stoplight:
-        id: mtpy0cwg8avdj
-      type: object
-      properties:
-        id:
-          type: string
-        name:
-          type: string
+        - internal
     Kill:
       title: Kill
       x-stoplight:
@@ -221,14 +216,17 @@ components:
           readOnly: true
         server:
           type: string
+          example: fvnkhead's 7v7
         attacker:
-          $ref: '#/components/schemas/EntityUUID'
+          $ref: '#/components/schemas/EntityID'
+        attacker_weapon:
+          $ref: '#/components/schemas/WeaponID'
         victim:
-          $ref: '#/components/schemas/EntityUUID'
-        weapon:
-          type: string
+          $ref: '#/components/schemas/EntityID'
+        victim_weapon:
+          $ref: '#/components/schemas/WeaponID'
         map:
-          type: string
+          $ref: '#/components/schemas/MapID'
         distance:
           type: number
           example: 35.45
@@ -236,8 +234,22 @@ components:
           type: string
           format: date-time
           readOnly: true
-    EntityUUID:
-      title: EntityUUID
+      required:
+        - server
+        - attacker
+        - victim
+    EntityID:
+      title: EntityID
       x-stoplight:
         id: 9icavmq5bgsqp
+      type: integer
+    WeaponID:
+      title: WeaponID
+      x-stoplight:
+        id: p92aomkxku2po
+      type: integer
+    MapID:
+      title: MapID
+      x-stoplight:
+        id: zoazw8eoi7qwr
       type: integer
