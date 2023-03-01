@@ -147,8 +147,8 @@ paths:
       description: Create a new user.
 components:
   schemas:
-    Entity:
-      title: Entity
+    Player:
+      title: Player
       x-stoplight:
         id: be41fcacb2693
       type: object
@@ -162,13 +162,12 @@ components:
           signUpDate: '2019-08-24'
       properties:
         id:
-          type: string
+          $ref: '#/components/schemas/EntityUUID'
           description: Unique identifier for the given user.
         name:
           type: string
       required:
         - id
-        - name
     Weapon:
       title: Weapon
       x-stoplight:
@@ -184,3 +183,61 @@ components:
         image:
           type: string
           format: uri
+      required:
+        - id
+    Map:
+      title: Map
+      x-stoplight:
+        id: hoh2m6pr6gli7
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        image:
+          type: string
+          format: uri
+    Server:
+      title: Server
+      x-stoplight:
+        id: mtpy0cwg8avdj
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+    Kill:
+      title: Kill
+      x-stoplight:
+        id: a9q2tvsts3z32
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        server:
+          type: string
+        attacker:
+          $ref: '#/components/schemas/EntityUUID'
+        victim:
+          $ref: '#/components/schemas/EntityUUID'
+        weapon:
+          type: string
+        map:
+          type: string
+        distance:
+          type: number
+          example: 35.45
+        date:
+          type: string
+          format: date-time
+          readOnly: true
+    EntityUUID:
+      title: EntityUUID
+      x-stoplight:
+        id: 9icavmq5bgsqp
+      type: integer
