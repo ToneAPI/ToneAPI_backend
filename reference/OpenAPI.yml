@@ -307,6 +307,8 @@ components:
         name:
           type: string
           example: fvnknoots 7v7
+        description:
+          type: string
     Kill:
       title: Kill
       x-stoplight:
