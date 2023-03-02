@@ -32,6 +32,24 @@ paths:
                   $ref: '#/components/schemas/Weapon'
       operationId: get-weapon-list
       description: ''
+    put:
+      summary: ''
+      operationId: put-weapons
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WeaponID'
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WeaponID'
+      security:
+        - server_token: []
   /maps/:
     get:
       summary: List Maps
@@ -47,6 +65,30 @@ paths:
                 items:
                   $ref: '#/components/schemas/Map'
       operationId: get-map-list
+    put:
+      summary: ''
+      operationId: put-maps
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MapID'
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MapID'
+      security:
+        - server_token: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+              example: mp_angel_city
   /players:
     get:
       summary: List Players
@@ -91,6 +133,13 @@ paths:
                 items:
                   $ref: '#/components/schemas/Server'
       operationId: get-server-list
+    post:
+      summary: ''
+      operationId: post-servers
+      responses:
+        '200':
+          description: OK
+      description: Register a new server
   '/servers/{serverId}':
     parameters:
       - $ref: '#/components/parameters/serverId'
