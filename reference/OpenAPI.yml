@@ -327,6 +327,7 @@ components:
         server:
           type: string
           example: fvnkhead's 7v7
+          readOnly: true
         damage_source:
           $ref: '#/components/schemas/WeaponID'
         attacker:
