@@ -19,7 +19,8 @@ paths:
   /weapons/:
     get:
       summary: List Weapons
-      tags: [weapon]
+      tags:
+        - weapon
       responses:
         '200':
           description: OK
@@ -34,7 +35,8 @@ paths:
   /maps/:
     get:
       summary: List Maps
-      tags: [map]
+      tags:
+        - map
       responses:
         '200':
           description: OK
@@ -48,7 +50,8 @@ paths:
   /players:
     get:
       summary: List Players
-      tags: [player]
+      tags:
+        - player
       responses:
         '200':
           description: OK
@@ -64,7 +67,8 @@ paths:
       - $ref: '#/components/parameters/playerId'
     get:
       summary: Get Player report
-      tags: [player]
+      tags:
+        - player
       responses:
         '200':
           $ref: '#/components/responses/Player-report'
@@ -75,7 +79,8 @@ paths:
   /servers/:
     get:
       summary: Get Server list
-      tags: [server]
+      tags:
+        - server
       responses:
         '200':
           description: OK
@@ -91,7 +96,8 @@ paths:
       - $ref: '#/components/parameters/serverId'
     get:
       summary: Get Server report
-      tags: [server]
+      tags:
+        - server
       operationId: get-server-report
       responses:
         '200':
@@ -99,7 +105,9 @@ paths:
   '/server/{serverId}/players':
     get:
       summary: List Players for Server
-      tags: [server, player]
+      tags:
+        - server
+        - player
       responses:
         '200':
           description: OK
@@ -115,7 +123,8 @@ paths:
   '/servers/{serverId}/kills':
     post:
       summary: Post kills
-      tags: [server]
+      tags:
+        - server
       operationId: post-kills
       responses:
         '200':
@@ -133,12 +142,20 @@ paths:
       security:
         - server_token: []
       description: Allows a Northstar server to record kills on the database
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Kill'
+        description: ''
     parameters:
       - $ref: '#/components/parameters/serverId'
   '/servers/{serverId}/weapons':
     get:
       summary: Get Weapon report for server
-      tags: [server, weapon]
+      tags:
+        - server
+        - weapon
       responses:
         '200':
           description: OK
@@ -159,7 +176,9 @@ paths:
       - $ref: '#/components/parameters/serverId'
     get:
       summary: Get Player report for Server
-      tags: [server, player]
+      tags:
+        - server
+        - player
       responses:
         '200':
           $ref: '#/components/responses/Player-server-report'
