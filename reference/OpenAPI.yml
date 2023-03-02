@@ -265,9 +265,6 @@ components:
       properties:
         id:
           $ref: '#/components/schemas/WeaponID'
-        internal:
-          type: string
-          example: mp_weapon_sniper
         name:
           type: string
           example: Kraber
@@ -279,7 +276,6 @@ components:
           example: 'https://static.wikia.nocookie.net/titanfall_gamepedia/images/8/8b/Icon_kraber.png'
       required:
         - id
-        - internal
     Map:
       title: Map
       x-stoplight:
@@ -288,9 +284,6 @@ components:
       properties:
         id:
           $ref: '#/components/schemas/MapID'
-        internal:
-          type: string
-          example: mp_angel_city
         name:
           type: string
           example: Angel City
@@ -302,7 +295,6 @@ components:
           example: 'https://media.contentapi.ea.com/content/dam/eacom/en-us/common/articles-tf2-welcome-header.jpg.adapt.320w.jpg'
       required:
         - id
-        - internal
     Server:
       title: Server
       x-stoplight:
@@ -310,7 +302,7 @@ components:
       type: object
       properties:
         id:
-          type: string
+          type: integer
           example: '1'
         name:
           type: string
@@ -386,13 +378,12 @@ components:
       title: WeaponID
       x-stoplight:
         id: p92aomkxku2po
-      type: integer
-      description: ''
+      type: string
     MapID:
       title: MapID
       x-stoplight:
         id: zoazw8eoi7qwr
-      type: integer
+      type: string
     PrefferredServer:
       title: PrefferredServer
       x-stoplight:
