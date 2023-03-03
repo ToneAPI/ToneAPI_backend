@@ -320,57 +320,78 @@ components:
           readOnly: true
         server:
           type: string
-          example: fvnkhead's 7v7
           readOnly: true
-        damage_source:
-          $ref: '#/components/schemas/WeaponID'
-        attacker:
-          $ref: '#/components/schemas/PlayerID'
-        attacker_type:
+        tone_version:
           type: string
-        attacker_weapon:
-          $ref: '#/components/schemas/WeaponID'
-        attacker_weapon_2:
-          $ref: '#/components/schemas/WeaponID'
-        attacker_weapon_3:
-          $ref: '#/components/schemas/WeaponID'
-        attacker_ordnance:
-          $ref: '#/components/schemas/WeaponID'
-        attacker_ability:
-          $ref: '#/components/schemas/WeaponID'
-        attacker_kit_1:
-          $ref: '#/components/schemas/WeaponID'
-        attacker_kit_2:
-          $ref: '#/components/schemas/WeaponID'
-        victim:
-          $ref: '#/components/schemas/PlayerID'
-        victim_weapon:
-          $ref: '#/components/schemas/WeaponID'
-        victim_weapon_2:
-          $ref: '#/components/schemas/WeaponID'
-        victim_weapon_3:
-          $ref: '#/components/schemas/WeaponID'
-        victim_ordnance:
-          $ref: '#/components/schemas/WeaponID'
-        victim_ability:
-          $ref: '#/components/schemas/WeaponID'
-        victim_kit_1:
-          $ref: '#/components/schemas/WeaponID'
-        victim_kit_2:
-          $ref: '#/components/schemas/WeaponID'
+        match_id:
+          type: string
+        game_mode:
+          type: string
         map:
-          $ref: '#/components/schemas/MapID'
-        distance:
-          type: number
-          example: 35.45
-        date:
+          type: string
+        unix_time:
           type: string
           format: date-time
-          readOnly: true
+        game_time:
+          type: string
+          format: time
+        player_count:
+          type: integer
+        attacker_name:
+          type: string
+        attacker_id:
+          type: integer
+        attacker_current_weapon:
+          type: string
+        attacker_current_weapon_mods:
+          type: string
+        attacker_weapon_1:
+          type: string
+        attacker_weapon_1_mods:
+          type: string
+        attacker_weapon_2:
+          type: string
+        attacker_weapon_2_mods:
+          type: string
+        attacker_weapon_3:
+          type: string
+        attacker_weapon_3_mods:
+          type: string
+        attacker_offhand_weapon_1:
+          type: string
+        attacker_offhand_weapon_2:
+          type: string
+        victim_name:
+          type: string
+        victim_id:
+          type: integer
+        victim_current_weapon:
+          type: string
+        victim_current_weapon_mods:
+          type: string
+        victim_weapon_1:
+          type: string
+        victim_weapon_1_mods:
+          type: string
+        victim_weapon_2:
+          type: string
+        victim_weapon_2_mods:
+          type: string
+        victim_weapon_3:
+          type: string
+        victim_weapon_3_mods:
+          type: string
+        victim_offhand_weapon_1:
+          type: string
+        victim_offhand_weapon_2:
+          type: string
+        cause_of_death:
+          type: string
+        distance:
+          type: integer
       required:
-        - server
-        - attacker_type
-        - victim
+        - cause_of_death
+      description: ''
     PlayerID:
       title: PlayerId
       x-stoplight:
@@ -381,11 +402,13 @@ components:
       x-stoplight:
         id: p92aomkxku2po
       type: string
+      maxLength: 50
     MapID:
       title: MapID
       x-stoplight:
         id: zoazw8eoi7qwr
       type: string
+      maxLength: 50
     PrefferredServer:
       title: PrefferredServer
       x-stoplight:
