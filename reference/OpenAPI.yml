@@ -425,7 +425,7 @@ components:
       required:
         - cause_of_death
     PlayerID:
-      title: EntityID
+      title: PlayerId
       x-stoplight:
         id: 9icavmq5bgsqp
       type: integer
