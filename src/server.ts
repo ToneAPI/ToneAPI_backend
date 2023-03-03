@@ -65,7 +65,6 @@ router.post(
     'cause_of_death and victim_id are mandatory'
   ).notEmpty(),
   (req, res, next) => {
-    console.log(req.body)
     const server = 1 // set server ID here
     const {
       killstat_version,
