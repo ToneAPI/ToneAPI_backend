@@ -121,15 +121,19 @@ paths:
                 description:
                   type: string
                   description: The description of your server as it appears on Northstar
-                auth_endpoint:
-                  type: string
+                auth_port:
+                  type: integer
                   format: uri
-                  example: 'http://80.45.78.10:8081/verify'
+                  example: 8081
                   description: 'In most cases, this is the IP address of your server with the TCP port you forwarded'
+                  x-stoplight:
+                    id: r9pi7wq6mp6tm
+                  minimum: 0
+                  maximum: 65535
               required:
                 - name
                 - description
-                - auth_endpoint
+                - auth_port
         description: ''
       description: |-
         Register a server on Tone API.
