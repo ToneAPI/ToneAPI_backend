@@ -1,58 +1,60 @@
 import { Router } from 'express'
-import db, { CreateKillRecord, FindServer } from './db/db'
-import { body, validationResult } from 'express-validator'
-import { GetRequest } from './common'
+import expressBasicAuth from 'express-basic-auth'
+import { body, header, validationResult } from 'express-validator'
+import register from './register'
+import { CreateKillRecord, CheckServerToken } from '../db/db'
+
 const router = Router()
 
-const verificationString = 'I am a northstar server!'
-const masterServerURL = 'https://northstar.tf'
-//auth middleware, maybe some timeout ?
-router.post('/*', (req, res, next) => {
-  next()
-})
+router.use('/', register)
 
+//auth middleware
 router.post(
-  '/servers/register',
-  body(['name', 'description']).isString(),
-  body('auth_endpoint').isURL(),
-  async (req, res, next) => {
+  '/servers/:serverId/kill',
+  header('authorization')
+    .exists({ checkFalsy: true })
+    .withMessage('Missing Authorization Header')
+    .bail()
+    .contains('Basic')
+    .withMessage('Authorization Token is not Basic'),
+  (req, res, next) => {
     const errors = validationResult(req)
     if (!errors.isEmpty()) {
       console.log(JSON.stringify(errors))
-      return res.status(400).json({ errors: errors.array() })
+      return res.status(403).json({ errors: errors.array() })
     }
-    try {
-      //Check if server name isn't already in database
-      if (await FindServer(req.body.name)) {
-        return res
-          .status(403)
-          .json({ error: 'Server already exists in the database' })
-      }
-
-      //Check if server is in masterserver's list
-      const masterServerList = JSON.parse(
-        await GetRequest(masterServerURL + '/client/servers')
-      ) as Array<any>
-      if (!masterServerList.find((e) => e.name == req.body.name)) {
-        return res
-          .status(403)
-          .json({ error: 'Server not listed in masterserver' })
-      }
-
-      //Send request to verify server. Not very useful for now, but maybe a future method for auth ?
-      if ((await GetRequest(req.body.auth_endpoint)) != verificationString) {
-        //Maybe should set a blacklist here for local domain ?
-        return res.status(400).json({ error: "Couldn't verify gameserver" })
-      }
-    } catch (e) {
-      console.log(e)
-      return res.status(400).json({
-        error: "Server encountered an error, Couldn't verify gameserver"
-      })
-    }
-    //register server here
+    next()
+  },
+  //Huge mess to retrieve server id from expressBasicAuth. We probably should fix it.
+  (req, res, next) => {
+    if (!req) res.send(500)
+    return expressBasicAuth({
+      authorizeAsync: true,
+      authorizer: CheckServerToken.bind(req),
+      unauthorizedResponse: { error: 'invalid credentials' }
+    })(req as any, res, next)
   }
 )
+
+const serversCount: { [id: string]: number } = {}
+const serversTimeout: { [id: string]: NodeJS.Timeout } = {}
+
+//same rate limiting code as register. max 10 kills per server every 1 sec. should be enough.
+router.post('/servers/:serverId/kill', (req, res, next) => {
+  let serverId = req.body.serverId || 'undefined'
+  if (serversCount[serverId] > 2) {
+    return res.status(429).json({
+      error: 'too many requests. Are players really making that much kills ?'
+    })
+  }
+  clearTimeout(serversTimeout[serverId])
+  serversCount[serverId] =
+    serversCount[serverId] ?? (serversCount[serverId] + 1) | 1
+  serversTimeout[serverId] = setTimeout(() => {
+    serversCount[serverId] = 0
+  }, 1000)
+  next()
+})
 
 router.post(
   '/servers/:serverId/kill',
@@ -108,7 +110,7 @@ router.post(
     min: 0
   }),
   body(['cause_of_death', 'victim_id'], 'mandatory').exists().notEmpty(),
-  (req, res, next) => {
+  (req, res) => {
     const errors = validationResult(req)
     if (!errors.isEmpty()) {
       console.log(JSON.stringify(errors))
@@ -185,7 +187,7 @@ router.post(
       distance
     })
       .then((e) => {
-        res.send(200)
+        res.send(201)
       })
       .catch((e) => {
         res.send(500)

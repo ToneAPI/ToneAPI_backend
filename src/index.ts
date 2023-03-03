@@ -4,7 +4,7 @@ import express from 'express'
 import cors from 'cors'
 import client from './client'
 import { dbReady } from './db/db'
-import server from './server'
+import server from './server/server'
 
 const app = express()
 const port = 3001

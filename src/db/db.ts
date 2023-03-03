@@ -37,6 +37,38 @@ export async function FindServer({ name }: { name: string }) {
     .where('server.name', '=', name)
     .executeTakeFirst()
 }
+
+export async function CreateServer({
+  name,
+  description
+}: {
+  name: string
+  description: string
+}) {
+  return await db
+    .insertInto('server')
+    .values({ name, description })
+    .returning(['id', 'token'])
+    .executeTakeFirstOrThrow()
+}
+
+//tokens are stored in raw... maybe we should use something better in the future
+//Using callback for express-basic-auth
+export function CheckServerToken(
+  this: { body: any },
+  name: string,
+  password: string,
+  cb: (error: Error | null, success: boolean) => void
+) {
+  db.selectFrom('server')
+    .where('id', '=', Number(name))
+    .where('token', '=', password)
+    .executeTakeFirst()
+    .then((result) => {
+      if (!!result) this.body.serverId = name
+      cb(null, !!result)
+    })
+}
 /*
 async function demo() {
   const { id } = await db

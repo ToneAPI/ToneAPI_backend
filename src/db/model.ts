@@ -57,9 +57,10 @@ interface MapTable {
   image: string
 }
 interface ServerTable {
-  id: string
+  id: Generated<number>
   name: string
   description: string
+  token: Generated<string>
 }
 interface Database {
   kill: KillTable

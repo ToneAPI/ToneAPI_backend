@@ -30,7 +30,12 @@ export async function up(db: Kysely<any>): Promise<void> {
     .addColumn('id', 'serial', (col) => col.primaryKey())
     .addColumn('name', 'varchar', (col) => col.unique())
     .addColumn('description', 'varchar')
-    .addColumn('token', 'varchar')
+    .addColumn('token', 'varchar', (col) =>
+      col
+        .notNull()
+        .unique()
+        .defaultTo(sql`gen_random_uuid()`)
+    )
     .execute()
 
   await db.schema

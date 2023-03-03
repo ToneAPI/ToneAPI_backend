@@ -1,7 +1,7 @@
 import http from 'http'
 import https from 'https'
 
-export async function GetRequest(url: string) {
+export function GetRequest(url: string) {
   return new Promise<string>((resolve, reject) => {
     let handler = (resp: http.IncomingMessage) => {
       let data = ''
@@ -15,15 +15,17 @@ export async function GetRequest(url: string) {
       resp.on('end', () => {
         resolve(data)
       })
-      resp.on('error', (err) => {
+    }
+    let req
+    if (url.startsWith('https')) {
+      req = https.get(url, handler)
+    } else {
+      req = http.get(url, handler)
+    }
+    req
+      .on('error', (err) => {
         reject(err)
       })
-    }
-
-    if (url.startsWith('https')) {
-      https.get(url, handler)
-    } else {
-      http.get(url, handler)
-    }
+      .end()
   })
 }
