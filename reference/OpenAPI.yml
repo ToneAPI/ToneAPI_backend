@@ -5,7 +5,7 @@ info:
   title: OpenAPI
   version: '1.0'
 servers:
-  - url: 'http://localhost:3000/v1'
+  - url: 'http://localhost:3001/v1'
 tags:
   - name: player
     description: Everything about players
@@ -32,24 +32,6 @@ paths:
                   $ref: '#/components/schemas/Weapon'
       operationId: get-weapon-list
       description: ''
-    put:
-      summary: ''
-      operationId: put-weapons
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/WeaponID'
-        '201':
-          description: Created
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/WeaponID'
-      security:
-        - server_token: []
   /maps/:
     get:
       summary: List Maps
@@ -65,30 +47,6 @@ paths:
                 items:
                   $ref: '#/components/schemas/Map'
       operationId: get-map-list
-    put:
-      summary: ''
-      operationId: put-maps
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/MapID'
-        '201':
-          description: Created
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/MapID'
-      security:
-        - server_token: []
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: string
-              example: mp_angel_city
   /players:
     get:
       summary: List Players
@@ -133,13 +91,49 @@ paths:
                 items:
                   $ref: '#/components/schemas/Server'
       operationId: get-server-list
+  /servers/register:
     post:
       summary: ''
-      operationId: post-servers
+      operationId: post-servers-register
       responses:
-        '200':
-          description: OK
-      description: Register a new server
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  token:
+                    type: string
+        '403':
+          description: Forbidden
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: The name of your server as it appears on Northstar
+                description:
+                  type: string
+                  description: The description of your server as it appears on Northstar
+                auth_endpoint:
+                  type: string
+                  format: uri
+                  example: 'http://80.45.78.10:8081/verify'
+                  description: 'In most cases, this is the IP address of your server with the TCP port you forwarded'
+              required:
+                - name
+                - description
+                - auth_endpoint
+        description: ''
+      description: |-
+        Register a server on Tone API.
+        The server needs to be online on masterserver and reacheable by Tone.
   '/servers/{serverId}':
     parameters:
       - $ref: '#/components/parameters/serverId'
@@ -176,20 +170,15 @@ paths:
         - server
       operationId: post-kills
       responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  id:
-                    type: integer
+        '201':
+          description: Created
+        '400':
+          description: Bad Request
         '401':
           description: Unauthorized
       parameters: []
       security:
-        - server_token: []
+        - Auth_Token: []
       description: Allows a Northstar server to record kills on the database
       requestBody:
         content:
@@ -492,10 +481,9 @@ components:
         death_count:
           type: integer
   securitySchemes:
-    server_token:
-      name: API Key
-      type: apiKey
-      in: header
+    Auth_Token:
+      type: http
+      scheme: basic
       description: ''
   parameters:
     serverId:
