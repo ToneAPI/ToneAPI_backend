@@ -29,6 +29,14 @@ export async function CreateKillRecord(data: KillRecord) {
     .values({ ...data })
     .execute()
 }
+
+export async function FindServer({ name }: { name: string }) {
+  return await db
+    .selectFrom('server')
+    .select(['server.name', 'server.description'])
+    .where('server.name', '=', name)
+    .executeTakeFirst()
+}
 /*
 async function demo() {
   const { id } = await db
