@@ -497,9 +497,8 @@ components:
           type: integer
   securitySchemes:
     Auth_Token:
-      name: API Key
-      type: apiKey
-      in: query
+      type: http
+      scheme: basic
   parameters:
     serverId:
       name: serverId
