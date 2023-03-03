@@ -149,6 +149,17 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/Server-report'
+    post:
+      summary: ''
+      operationId: post-servers-serverId
+      responses:
+        '200':
+          description: OK
+        '403':
+          description: Forbidden
+      description: Used to test auth
+      security:
+        - Auth_Token: []
   '/server/{serverId}/players':
     get:
       summary: List Players for Server
@@ -486,9 +497,9 @@ components:
           type: integer
   securitySchemes:
     Auth_Token:
-      type: http
-      scheme: basic
-      description: ''
+      name: API Key
+      type: apiKey
+      in: query
   parameters:
     serverId:
       name: serverId
