@@ -10,6 +10,7 @@ const router = Router()
 
 const hostsCount: { [id: string]: number } = {}
 const hostsTimeout: { [id: string]: NodeJS.Timeout } = {}
+
 //Very simple rate limiting. max 2 registers per IP every 5 mins. Maybe 2 is a bit few ?
 router.post('/servers/register', (req, res, next) => {
   let ip =
@@ -31,12 +32,15 @@ router.post('/servers/register', (req, res, next) => {
 
 router.post(
   '/servers/register',
-  body(['name', 'description']).isString(),
-  body('auth_endpoint').isURL(),
+  body(['name', 'description']).isString().withMessage('must be strings'),
+  body('auth_port')
+    .toInt()
+    .isInt({ min: 1, max: 65535 })
+    .withMessage('must be between 1 and 65535'),
   async (req, res, next) => {
     const errors = validationResult(req)
+    console.log(req.body)
     if (!errors.isEmpty()) {
-      console.log(JSON.stringify(errors))
       return res.status(400).json({ errors: errors.array() })
     }
     try {
@@ -59,9 +63,15 @@ router.post(
 
       //Send request to verify server. Not very useful for now, but maybe a future method for auth ?
       //Maybe should set a blacklist here for local domain ?
-      if ((await GetRequest(req.body.auth_endpoint)) != verificationString) {
+      const endpoint =
+        'http://' +
+        (req.header('x-forwarded-for') || req.socket.remoteAddress) +
+        ':' +
+        req.body.auth_port +
+        '/verify'
+      if ((await GetRequest(endpoint)) != verificationString) {
         return res.status(400).json({
-          error: "Couldn't reach gameserver at " + req.body.auth_endpoint
+          error: "Couldn't reach gameserver at " + endpoint
         })
       }
 

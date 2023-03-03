@@ -1,4 +1,4 @@
-import { Router } from 'express'
+import { NextFunction, Router } from 'express'
 import expressBasicAuth from 'express-basic-auth'
 import { body, header, validationResult } from 'express-validator'
 import register from './register'
@@ -10,7 +10,7 @@ router.use('/', register)
 
 //auth middleware
 router.post(
-  '/servers/:serverId/kill',
+  '/servers/:serverId/*',
   header('authorization')
     .exists({ checkFalsy: true })
     .withMessage('Missing Authorization Header')
@@ -35,6 +35,10 @@ router.post(
     })(req as any, res, next)
   }
 )
+
+router.post('/servers/:serverId', (req, res) => {
+  res.send(200)
+})
 
 const serversCount: { [id: string]: number } = {}
 const serversTimeout: { [id: string]: NodeJS.Timeout } = {}
@@ -116,7 +120,6 @@ router.post(
       console.log(JSON.stringify(errors))
       return res.status(400).json({ errors: errors.array() })
     }
-    const server = 1 // set server ID here
     const {
       killstat_version,
       match_id,
@@ -153,7 +156,7 @@ router.post(
     } = req.body
     CreateKillRecord({
       killstat_version,
-      server,
+      server: req.body.serverId,
       match_id,
       game_mode,
       map,
