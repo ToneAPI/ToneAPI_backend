@@ -314,6 +314,42 @@ components:
       x-stoplight:
         id: a9q2tvsts3z32
       type: object
+      x-examples:
+        Example 1:
+          id: 0
+          server: string
+          tone_version: ks_3.0.0
+          match_id: 1cde15ee
+          game_mode: tdm
+          map: string
+          game_time: 385.417
+          player_count: 1
+          attacker_name: Legonzaur
+          attacker_id: 0
+          attacker_current_weapon: rspn101
+          attacker_current_weapon_mods: 0
+          attacker_weapon_1: rspn101
+          attacker_weapon_1_mods: 0
+          attacker_weapon_2: autopistol
+          attacker_weapon_2_mods: 0
+          attacker_weapon_3: defender
+          attacker_weapon_3_mods: 0
+          attacker_offhand_weapon_1: 0
+          attacker_offhand_weapon_2: 8
+          victim_name: Legonzaur
+          victim_id: 0
+          victim_current_weapon: rspn101
+          victim_current_weapon_mods: 0
+          victim_weapon_1: rspn101
+          victim_weapon_1_mods: 0
+          victim_weapon_2: autopistol
+          victim_weapon_2_mods: 0
+          victim_weapon_3: defender
+          victim_weapon_3_mods: 0
+          victim_offhand_weapon_1: 0
+          victim_offhand_weapon_2: 8
+          cause_of_death: frag_grenade
+          distance: 0
       properties:
         id:
           type: integer
@@ -329,9 +365,6 @@ components:
           type: string
         map:
           type: string
-        unix_time:
-          type: string
-          format: date-time
         game_time:
           type: string
           format: time
@@ -344,23 +377,23 @@ components:
         attacker_current_weapon:
           type: string
         attacker_current_weapon_mods:
-          type: string
+          type: integer
         attacker_weapon_1:
           type: string
         attacker_weapon_1_mods:
-          type: string
+          type: integer
         attacker_weapon_2:
           type: string
         attacker_weapon_2_mods:
-          type: string
+          type: integer
         attacker_weapon_3:
           type: string
         attacker_weapon_3_mods:
-          type: string
+          type: integer
         attacker_offhand_weapon_1:
-          type: string
+          type: integer
         attacker_offhand_weapon_2:
-          type: string
+          type: integer
         victim_name:
           type: string
         victim_id:
@@ -368,30 +401,29 @@ components:
         victim_current_weapon:
           type: string
         victim_current_weapon_mods:
-          type: string
+          type: integer
         victim_weapon_1:
           type: string
         victim_weapon_1_mods:
-          type: string
+          type: integer
         victim_weapon_2:
           type: string
         victim_weapon_2_mods:
-          type: string
+          type: integer
         victim_weapon_3:
           type: string
         victim_weapon_3_mods:
-          type: string
+          type: integer
         victim_offhand_weapon_1:
-          type: string
+          type: integer
         victim_offhand_weapon_2:
-          type: string
+          type: integer
         cause_of_death:
           type: string
         distance:
-          type: integer
+          type: number
       required:
         - cause_of_death
-      description: ''
     PlayerID:
       title: EntityID
       x-stoplight:
