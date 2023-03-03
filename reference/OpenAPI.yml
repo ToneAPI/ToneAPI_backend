@@ -318,6 +318,11 @@ components:
         id:
           type: integer
           readOnly: true
+        server:
+          type: string
+          readOnly: true
+        tone_version:
+          type: string
         match_id:
           type: string
         game_mode:
@@ -386,6 +391,7 @@ components:
           type: integer
       required:
         - cause_of_death
+      description: ''
     PlayerID:
       title: EntityID
       x-stoplight:
