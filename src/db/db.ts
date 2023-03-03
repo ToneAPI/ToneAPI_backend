@@ -4,9 +4,7 @@ import migrateToLatest from './migrations'
 import Database, { KillTable } from './model'
 
 const migration = migrateToLatest()
-// You'd create one of these when you start your app.
 const db = new Kysely<Database>({
-  // Use MysqlDialect for MySQL and SqliteDialect for SQLite.
   dialect: new PostgresDialect({
     pool: new Pool({
       host: process.env.POSTGRES_HOST,
@@ -25,7 +23,11 @@ interface RemoveFromKill {
 type KillRecord = Omit<KillTable, keyof RemoveFromKill>
 
 export async function CreateKillRecord(data: KillRecord) {
-  await db.insertInto('kill').values({ ...data })
+  //TODO : Handle server foreign key crashes
+  await db
+    .insertInto('kill')
+    .values({ ...data })
+    .execute()
 }
 /*
 async function demo() {

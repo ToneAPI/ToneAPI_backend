@@ -3,7 +3,7 @@ import { ColumnType, Generated } from 'kysely'
 export interface KillTable {
   id: Generated<number>
   server: number
-  tone_version: string
+  killstat_version: string
   match_id: string
   game_mode: string
   map: string
@@ -11,29 +11,29 @@ export interface KillTable {
   game_time: number
   player_count: number
   attacker_name: string
-  attacker_id: number
+  attacker_id: string
   attacker_current_weapon: string
-  attacker_current_weapon_mods: string
+  attacker_current_weapon_mods: number
   attacker_weapon_1: string
-  attacker_weapon_1_mods: string
+  attacker_weapon_1_mods: number
   attacker_weapon_2: string
-  attacker_weapon_2_mods: string
+  attacker_weapon_2_mods: number
   attacker_weapon_3: string
-  attacker_weapon_3_mods: string
-  attacker_offhand_weapon_1: string
-  attacker_offhand_weapon_2: string
+  attacker_weapon_3_mods: number
+  attacker_offhand_weapon_1: number
+  attacker_offhand_weapon_2: number
   victim_name: string
-  victim_id: number
+  victim_id: string
   victim_current_weapon: string
-  victim_current_weapon_mods: string
+  victim_current_weapon_mods: number
   victim_weapon_1: string
-  victim_weapon_1_mods: string
+  victim_weapon_1_mods: number
   victim_weapon_2: string
-  victim_weapon_2_mods: string
+  victim_weapon_2_mods: number
   victim_weapon_3: string
   victim_weapon_3_mods: string
-  victim_offhand_weapon_1: string
-  victim_offhand_weapon_2: string
+  victim_offhand_weapon_1: number
+  victim_offhand_weapon_2: number
   cause_of_death: string
   distance: number
 }

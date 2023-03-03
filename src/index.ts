@@ -5,8 +5,6 @@ import client from './client'
 import { dbReady } from './db/db'
 import server from './server'
 
-console.log('dotenv')
-
 const app = express()
 const port = 3001
 

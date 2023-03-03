@@ -8,43 +8,48 @@ router.post('/*', (req, res, next) => {
   next()
 })
 router.post(
-  '/servers/:serverId/kills',
-  body(
-    ['attacker_id', 'victim_id'],
-    'attacker and victim must be player UIDs'
-  ).isInt(),
+  '/servers/:serverId/kill',
+  body([
+    'attacker_current_weapon_mods',
+    'attacker_weapon_1_mods',
+    'attacker_weapon_2_mods',
+    'attacker_weapon_3_mods',
+    'attacker_offhand_weapon_1',
+    'attacker_offhand_weapon_2',
+    'distance',
+    'player_count',
+    'victim_current_weapon_mods',
+    'victim_weapon_1_mods',
+    'victim_weapon_2_mods',
+    'victim_weapon_3_mods',
+    'victim_offhand_weapon_1',
+    'victim_offhand_weapon_2'
+  ])
+    .toInt()
+    .isInt(),
+  body('game_time').toFloat().isFloat(),
   body(
     [
-      'tone_version',
+      'attacker_id',
+      'victim_id',
+      'killstat_version',
       'match_id',
       'game_mode',
       'map',
       'player_count',
       'attacker_name',
       'attacker_current_weapon',
-      'attacker_current_weapon_mods',
       'attacker_weapon_1',
-      'attacker_weapon_1_mods',
       'attacker_weapon_2',
-      'attacker_weapon_2_mods',
       'attacker_weapon_3',
-      'attacker_weapon_3_mods',
-      'attacker_offhand_weapon_1',
-      'attacker_offhand_weapon_2',
       'victim_name',
       'victim_current_weapon',
-      'victim_current_weapon_mods',
       'victim_weapon_1',
-      'victim_weapon_1_mods',
       'victim_weapon_2',
-      'victim_weapon_2_mods',
       'victim_weapon_3',
-      'victim_weapon_3_mods',
-      'victim_offhand_weapon_1',
-      'victim_offhand_weapon_2',
       'cause_of_death'
     ],
-    'values must be composed of a maximum of 50 valid ascii characters'
+    'string values must be composed of a maximum of 50 valid ascii characters'
   )
     .isString()
     .isLength({ max: 50 })
@@ -60,9 +65,10 @@ router.post(
     'cause_of_death and victim_id are mandatory'
   ).notEmpty(),
   (req, res, next) => {
+    console.log(req.body)
     const server = 1 // set server ID here
     const {
-      tone_version,
+      killstat_version,
       match_id,
       game_mode,
       map,
@@ -96,7 +102,7 @@ router.post(
       distance
     } = req.body
     CreateKillRecord({
-      tone_version,
+      killstat_version,
       server,
       match_id,
       game_mode,
@@ -131,6 +137,7 @@ router.post(
       distance
     })
     res.send(200)
+    return
   }
 )
 export default router
