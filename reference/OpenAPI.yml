@@ -372,7 +372,7 @@ components:
         - attacker_type
         - victim
     PlayerID:
-      title: EntityID
+      title: PlayerId
       x-stoplight:
         id: 9icavmq5bgsqp
       type: integer
