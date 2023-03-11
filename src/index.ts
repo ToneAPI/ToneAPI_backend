@@ -9,11 +9,6 @@ import server from './server/server'
 const app = express()
 const port = 3001
 
-app.use('/', (req, res, next) => {
-  console.log(JSON.stringify(req.body))
-  next()
-})
-
 app.use(express.json())
 
 app.use('/', (req, res, next) => {
