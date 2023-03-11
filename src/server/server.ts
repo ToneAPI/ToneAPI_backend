@@ -63,8 +63,7 @@ router.post('/servers/:serverId/kill', (req, res, next) => {
 router.post(
   '/servers/:serverId/kill',
   (req, res, next) => {
-    console.log('recieved a message')
-    console.log(JSON.stringify(req.body()))
+    console.log(JSON.stringify(req.body))
     next()
   },
   body([
@@ -122,7 +121,6 @@ router.post(
   (req, res) => {
     const errors = validationResult(req)
     if (!errors.isEmpty()) {
-      console.log('esdfsdfjhkldflkj')
       console.error(JSON.stringify(errors))
       return res.status(400).json({ errors: errors.array() })
     }
