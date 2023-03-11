@@ -6,11 +6,6 @@ import { CreateKillRecord, CheckServerToken } from '../db/db'
 
 const router = Router()
 
-router.use('/', (req, res, next) => {
-  console.log(JSON.stringify(req.body))
-  next()
-})
-
 router.use('/', register)
 
 //auth middleware
