@@ -62,6 +62,10 @@ router.post('/servers/:serverId/kill', (req, res, next) => {
 
 router.post(
   '/servers/:serverId/kill',
+  (req, res, next) => {
+    console.log(req.body())
+    next()
+  },
   body([
     'attacker_current_weapon_mods',
     'attacker_weapon_1_mods',
