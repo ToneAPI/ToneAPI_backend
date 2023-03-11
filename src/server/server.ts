@@ -6,6 +6,11 @@ import { CreateKillRecord, CheckServerToken } from '../db/db'
 
 const router = Router()
 
+router.use('/', (req, res, next) => {
+  console.log(JSON.stringify(req.body))
+  next()
+})
+
 router.use('/', register)
 
 //auth middleware
@@ -62,10 +67,6 @@ router.post('/servers/:serverId/kill', (req, res, next) => {
 
 router.post(
   '/servers/:serverId/kill',
-  (req, res, next) => {
-    console.log(JSON.stringify(req.body))
-    next()
-  },
   body([
     'attacker_current_weapon_mods',
     'attacker_weapon_1_mods',
