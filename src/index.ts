@@ -13,7 +13,7 @@ app.use(express.json())
 
 app.use('/', (req, res, next) => {
   console.log(JSON.stringify(req.body))
-  next()
+  res.send(200)
 })
 
 app.use(cors())
