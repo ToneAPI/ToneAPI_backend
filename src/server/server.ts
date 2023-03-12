@@ -76,11 +76,11 @@ router.post(
     'victim_offhand_weapon_1',
     'victim_offhand_weapon_2'
   ])
+    .optional()
     .toInt()
     .isInt()
     .withMessage('must be a valid int'),
   body(['distance', 'player_count'])
-    .optional()
     .toInt()
     .isInt()
     .withMessage('must be a valid int'),
@@ -194,6 +194,11 @@ router.post(
     })
       .then((e) => {
         res.send(201)
+        console.log(
+          `[${Date.now().toLocaleString()}] Kill submitted for server ${
+            req.body.serverId
+          }, ${attacker_name} killed ${victim_name}`
+        )
       })
       .catch((e) => {
         res.send(500)
