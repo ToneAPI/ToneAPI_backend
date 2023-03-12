@@ -12,7 +12,7 @@ const hostsCount: { [id: string]: number } = {}
 const hostsTimeout: { [id: string]: NodeJS.Timeout } = {}
 
 //Very simple rate limiting. max 2 registers per IP every 5 mins. Maybe 2 is a bit few ?
-router.post('/servers/register', (req, res, next) => {
+router.post('/register', (req, res, next) => {
   let ip =
     req.header('x-forwarded-for') || req.socket.remoteAddress || 'undefined'
   if (hostsCount[ip] > 2) {
@@ -31,7 +31,7 @@ router.post('/servers/register', (req, res, next) => {
 })
 
 router.post(
-  '/servers/register',
+  '/register',
   body(['name', 'description']).isString().withMessage('must be strings'),
   body('auth_port')
     .toInt()

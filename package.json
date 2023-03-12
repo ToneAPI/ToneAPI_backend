@@ -7,6 +7,7 @@
     "express-validator": "^6.15.0",
     "kysely": "^0.23.4",
     "pg": "^8.9.0",
+    "redis": "^4.6.5",
     "ts-node": "^10.9.1"
   },
   "devDependencies": {
@@ -29,7 +30,8 @@
   "main": "out/index.js",
   "scripts": {
     "build": "npx tsc",
-    "start": "node out/index.js",
+    "startServer": "node out/server.js",
+    "startClient": "node out/client.js",
     "test": "jest"
   }
 }

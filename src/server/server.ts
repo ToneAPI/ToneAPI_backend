@@ -10,7 +10,7 @@ router.use('/', register)
 
 //auth middleware
 router.post(
-  '/servers/:serverId/*',
+  '/:serverId/*',
   header('authorization')
     .exists({ checkFalsy: true })
     .withMessage('Missing Authorization Header')
@@ -37,7 +37,7 @@ router.post(
 )
 
 //Route to check auth
-router.post('/servers/:serverId', (req, res) => {
+router.post('/:serverId', (req, res) => {
   res.sendStatus(200)
 })
 
@@ -45,7 +45,7 @@ const serversCount: { [id: string]: number } = {}
 const serversTimeout: { [id: string]: NodeJS.Timeout } = {}
 
 //same rate limiting code as register. max 10 kills per server every 1 sec. should be enough.
-router.post('/servers/:serverId/kill', (req, res, next) => {
+router.post('/:serverId/kill', (req, res, next) => {
   let serverId = req.body.serverId || 'undefined'
   if (serversCount[serverId] > 2) {
     return res.status(429).json({
@@ -62,7 +62,7 @@ router.post('/servers/:serverId/kill', (req, res, next) => {
 })
 
 router.post(
-  '/servers/:serverId/kill',
+  '/:serverId/kill',
   body([
     'attacker_current_weapon_mods',
     'attacker_weapon_1_mods',

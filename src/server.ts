@@ -2,7 +2,6 @@ import * as dotenv from 'dotenv'
 dotenv.config()
 import express from 'express'
 import cors from 'cors'
-import client from './client'
 import { dbReady } from './db/db'
 import server from './server/server'
 
@@ -16,8 +15,7 @@ app.get('/', (req, res) => {
   res.send('Hello World!')
 })
 
-app.use('/v1/', server)
-app.use('/v1/', client)
+app.use('/v1/servers', server)
 
 dbReady().then((e) => {
   app.listen(port, '0.0.0.0', () => {

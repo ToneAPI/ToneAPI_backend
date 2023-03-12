@@ -1,21 +1,27 @@
-import { Router } from 'express'
-const router = Router()
-//timeout middleware ?
-router.get('/*', (req, res, next) => {
-  next()
+import * as dotenv from 'dotenv'
+dotenv.config()
+import express from 'express'
+import cors from 'cors'
+import client from './client/client'
+import { dbReady } from './db/db'
+import { cacheReady } from './cache/redis'
+
+const app = express()
+const port = 3001
+
+app.use(express.json())
+
+app.use(cors())
+app.get('/', (req, res) => {
+  res.send('Hello World!')
 })
 
-router.get('/weapons/', (req, res, next) => {})
+app.use('/v1/client', client)
 
-router.get('/maps/', (req, res, next) => {})
-
-router.get('/players', (req, res, next) => {})
-router.get('/players/:playerId', (req, res, next) => {})
-
-router.get('/servers/', (req, res, next) => {})
-router.get('/servers/:serverId/', (req, res, next) => {})
-router.get('/servers/:serverId/players', (req, res, next) => {})
-router.get('/servers/:serverId/players/:playerId', (req, res, next) => {})
-
-router.get('/servers/:serverId/weapons', (req, res, next) => {})
-export default router
+dbReady().then((e) => {
+  cacheReady().then((e) => {
+    app.listen(port, '0.0.0.0', () => {
+      console.log(`Example app listening on port ${port}`)
+    })
+  })
+})
