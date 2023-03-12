@@ -11,11 +11,6 @@ const port = 3001
 
 app.use(express.json())
 
-app.use('/', (req, res, next) => {
-  console.log(JSON.stringify(req.body))
-  res.send(200)
-})
-
 app.use(cors())
 app.get('/', (req, res) => {
   res.send('Hello World!')
