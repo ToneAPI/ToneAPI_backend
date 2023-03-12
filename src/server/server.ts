@@ -27,7 +27,7 @@ router.post(
   },
   //Huge mess to retrieve server id from expressBasicAuth. We probably should fix it.
   (req, res, next) => {
-    if (!req) res.send(500)
+    if (!req) res.sendStatus(500)
     return expressBasicAuth({
       authorizeAsync: true,
       authorizer: CheckServerToken.bind(req),
@@ -36,8 +36,9 @@ router.post(
   }
 )
 
+//Route to check auth
 router.post('/servers/:serverId', (req, res) => {
-  res.send(200)
+  res.sendStatus(200)
 })
 
 const serversCount: { [id: string]: number } = {}
@@ -193,7 +194,7 @@ router.post(
       distance
     })
       .then((e) => {
-        res.send(201)
+        res.sendStatus(201)
         console.log(
           `[${Date.now().toLocaleString()}] Kill submitted for server ${
             req.body.serverId
@@ -201,7 +202,7 @@ router.post(
         )
       })
       .catch((e) => {
-        res.send(500)
+        res.sendStatus(500)
       })
   }
 )
