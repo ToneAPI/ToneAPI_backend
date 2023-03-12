@@ -69,8 +69,6 @@ router.post(
     'attacker_weapon_3_mods',
     'attacker_offhand_weapon_1',
     'attacker_offhand_weapon_2',
-    'distance',
-    'player_count',
     'victim_current_weapon_mods',
     'victim_weapon_1_mods',
     'victim_weapon_2_mods',
@@ -78,6 +76,11 @@ router.post(
     'victim_offhand_weapon_1',
     'victim_offhand_weapon_2'
   ])
+    .toInt()
+    .isInt()
+    .withMessage('must be a valid int'),
+  body(['distance', 'player_count'])
+    .optional()
     .toInt()
     .isInt()
     .withMessage('must be a valid int'),
