@@ -32,7 +32,7 @@
     "build": "npx tsc",
     "startServer": "node out/serverMain.js",
     "startClient": "node out/clientMain.js",
-    "documentation": "widdershins reference/OpenAPI.yml -o reference/openapi.md --language_tabs javascript:JavaScript:request.",
+    "documentation": "widdershins reference/OpenAPI.yml -o docs/openapi.md --language_tabs javascript:JavaScript:request.",
     "test": "jest"
   }
 }
