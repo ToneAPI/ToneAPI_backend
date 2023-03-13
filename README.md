@@ -10,6 +10,6 @@ The serverside and clientside part are two different executables. You may need a
 
 # Documentation
 
-An OpenAPI file is located in `resources/OpenAPI.yml`
+An OpenAPI file is located in `reference/OpenAPI.yml`
 
 Alternatively, you can find it converted to markdown at [https://legonzaur.github.io/ToneAPI_backend/openapi](https://legonzaur.github.io/ToneAPI_backend/openapi)
