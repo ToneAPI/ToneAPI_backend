@@ -767,6 +767,37 @@ paths:
         '404':
           description: Not Found
       operationId: get-player-on-server
+  '/client/servers/{serverId}/players/{playerId}/weapons':
+    parameters:
+      - name: playerId
+        in: path
+        required: true
+        schema:
+          type: integer
+      - name: serverId
+        in: path
+        required: true
+        schema:
+          type: integer
+    get:
+      summary: Get Player report for Server
+      tags:
+        - client
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  '[weaponID]':
+                    $ref: '#/components/schemas/PrefferedWeapon'
+                    x-stoplight:
+                      id: 8gibksi8tvjm4
+        '404':
+          description: Not Found
+      operationId: get-player-on-server
   '/servers/{serverId}':
     parameters:
       - $ref: '#/components/parameters/serverId'
@@ -782,7 +813,7 @@ paths:
       security:
         - Auth_Token: []
       tags:
-        - "server"
+        - server
   /servers/register:
     post:
       summary: ''
