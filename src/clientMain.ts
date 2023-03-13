@@ -8,7 +8,7 @@ import { cacheReady } from './cache/redis'
 import processAll from './client/process'
 
 const app = express()
-const port = 3001
+const port = 3000
 
 app.use(express.json())
 

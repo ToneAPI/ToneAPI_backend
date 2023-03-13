@@ -30,8 +30,8 @@
   "main": "out/index.js",
   "scripts": {
     "build": "npx tsc",
-    "startServer": "node out/server.js",
-    "startClient": "node out/client.js",
+    "startServer": "node out/serverMain.js",
+    "startClient": "node out/clientMain.js",
     "test": "jest"
   }
 }
