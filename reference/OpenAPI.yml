@@ -47,36 +47,7 @@ paths:
                 items:
                   $ref: '#/components/schemas/Map'
       operationId: get-map-list
-  /players:
-    get:
-      summary: List Players
-      tags:
-        - player
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Player'
-      operationId: get-player-list
-  '/players/{playerId}':
-    parameters:
-      - $ref: '#/components/parameters/playerId'
-    get:
-      summary: Get Player report
-      tags:
-        - player
-      responses:
-        '200':
-          $ref: '#/components/responses/Player-report'
-        '404':
-          description: User Not Found
-      operationId: get-player-report
-      description: Retrieve the information of the player with the matching id
-  /servers/:
+  /client/servers/:
     get:
       summary: Get Server list
       tags:
@@ -91,6 +62,677 @@ paths:
                 items:
                   $ref: '#/components/schemas/Server'
       operationId: get-server-list
+    parameters: []
+  '/client/server/{serverId}/players':
+    get:
+      summary: List Players for Server
+      tags:
+        - server
+        - player
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  '[id]':
+                    type: object
+                    x-stoplight:
+                      id: i0tm5lw98u34e
+                    properties:
+                      kills:
+                        type: integer
+                        x-stoplight:
+                          id: qclba81i7vkc7
+                      deaths:
+                        type: integer
+                        x-stoplight:
+                          id: hjd0pspfmfxi9
+              examples:
+                Example 1:
+                  value:
+                    '2250487322':
+                      kills: '16'
+                      deaths: '3'
+                    '2264540539':
+                      kills: '0'
+                      deaths: '3'
+                    '2275398718':
+                      kills: '28'
+                      deaths: '36'
+                    '2279483655':
+                      kills: '124'
+                      deaths: '80'
+                    '2293751643':
+                      kills: '88'
+                      deaths: '122'
+                    '2317053736':
+                      kills: '3'
+                      deaths: '6'
+                    '2365696799':
+                      kills: '69'
+                      deaths: '64'
+                    '2369053412':
+                      kills: '1'
+                      deaths: '4'
+                    '2372259449':
+                      kills: '2'
+                      deaths: '8'
+                    '2383354003':
+                      kills: '8'
+                      deaths: '8'
+                    '2394254742':
+                      kills: '31'
+                      deaths: '19'
+                    '2420152141':
+                      kills: '52'
+                      deaths: '34'
+                    '2434511212':
+                      kills: '2'
+                      deaths: '9'
+                    '2459505766':
+                      kills: '31'
+                      deaths: '17'
+                    '2480498234':
+                      kills: '60'
+                      deaths: '26'
+                    '2547349226':
+                      kills: '2'
+                      deaths: '1'
+                    '2651468854':
+                      kills: '37'
+                      deaths: '27'
+                    '2789001756':
+                      kills: '1'
+                      deaths: '3'
+                    '2793671940':
+                      kills: '1'
+                      deaths: '10'
+                    '2808303632':
+                      kills: '9'
+                      deaths: '14'
+                    '1004339478890':
+                      kills: '209'
+                      deaths: '75'
+                    '1009631167271':
+                      kills: '152'
+                      deaths: '79'
+                    '1010859553275':
+                      kills: '152'
+                      deaths: '95'
+                    '1013394101159':
+                      kills: '146'
+                      deaths: '157'
+                    '1008532828425':
+                      kills: '120'
+                      deaths: '160'
+                    '1005930844007':
+                      kills: '116'
+                      deaths: '71'
+                    '1008777336129':
+                      kills: '113'
+                      deaths: '62'
+                    '1006452683408':
+                      kills: '89'
+                      deaths: '118'
+                    '1009306948106':
+                      kills: '79'
+                      deaths: '77'
+                    '1001539583158':
+                      kills: '77'
+                      deaths: '54'
+                    '1008553404453':
+                      kills: '74'
+                      deaths: '41'
+                    '1000785195758':
+                      kills: '71'
+                      deaths: '97'
+                    '1012146561597':
+                      kills: '70'
+                      deaths: '67'
+                    '1008048039568':
+                      kills: '69'
+                      deaths: '43'
+                    '1006792160784':
+                      kills: '64'
+                      deaths: '84'
+                    '1000243552229':
+                      kills: '64'
+                      deaths: '82'
+                    '1002847919723':
+                      kills: '63'
+                      deaths: '42'
+                    '1006547511738':
+                      kills: '59'
+                      deaths: '29'
+                    '1008296544768':
+                      kills: '56'
+                      deaths: '63'
+                    '1010475004425':
+                      kills: '53'
+                      deaths: '28'
+                    '1009683708233':
+                      kills: '53'
+                      deaths: '127'
+                    '1007916824452':
+                      kills: '52'
+                      deaths: '38'
+                    '1005789878582':
+                      kills: '50'
+                      deaths: '41'
+                    '1000208553932':
+                      kills: '48'
+                      deaths: '40'
+                    '1011886375716':
+                      kills: '47'
+                      deaths: '27'
+                    '1010766135749':
+                      kills: '45'
+                      deaths: '56'
+                    '1009353300588':
+                      kills: '44'
+                      deaths: '18'
+                    '1000563596599':
+                      kills: '44'
+                      deaths: '47'
+                    '1008076070452':
+                      kills: '42'
+                      deaths: '33'
+                    '1000170397365':
+                      kills: '41'
+                      deaths: '33'
+                    '1007384912695':
+                      kills: '41'
+                      deaths: '55'
+                    '1009289344839':
+                      kills: '40'
+                      deaths: '91'
+                    '1002547370637':
+                      kills: '40'
+                      deaths: '21'
+                    '1008848730302':
+                      kills: '40'
+                      deaths: '78'
+                    '1002965199684':
+                      kills: '39'
+                      deaths: '40'
+                    '1008704914497':
+                      kills: '38'
+                      deaths: '21'
+                    '1000680732650':
+                      kills: '38'
+                      deaths: '21'
+                    '1009020277340':
+                      kills: '37'
+                      deaths: '43'
+                    '1009001081875':
+                      kills: '37'
+                      deaths: '57'
+                    '1002862920668':
+                      kills: '34'
+                      deaths: '26'
+                    '1007927614255':
+                      kills: '34'
+                      deaths: '61'
+                    '1007344081350':
+                      kills: '32'
+                      deaths: '54'
+                    '1000689836348':
+                      kills: '30'
+                      deaths: '24'
+                    '1002365588355':
+                      kills: '28'
+                      deaths: '32'
+                    '1000599975674':
+                      kills: '28'
+                      deaths: '18'
+                    '1009981913274':
+                      kills: '26'
+                      deaths: '16'
+                    '1003950824662':
+                      kills: '26'
+                      deaths: '13'
+                    '1000474582791':
+                      kills: '26'
+                      deaths: '32'
+                    '1007213425353':
+                      kills: '26'
+                      deaths: '44'
+                    '1009295548275':
+                      kills: '25'
+                      deaths: '41'
+                    '1007246486495':
+                      kills: '23'
+                      deaths: '26'
+                    '1012332759108':
+                      kills: '22'
+                      deaths: '21'
+                    '1004355057125':
+                      kills: '21'
+                      deaths: '54'
+                    '1010246320749':
+                      kills: '21'
+                      deaths: '23'
+                    '1009763674601':
+                      kills: '19'
+                      deaths: '21'
+                    '1000991748686':
+                      kills: '19'
+                      deaths: '14'
+                    '1003495333189':
+                      kills: '19'
+                      deaths: '32'
+                    '1012863344924':
+                      kills: '19'
+                      deaths: '28'
+                    '1005030069502':
+                      kills: '18'
+                      deaths: '24'
+                    '1011188414213':
+                      kills: '17'
+                      deaths: '13'
+                    '1006943687079':
+                      kills: '17'
+                      deaths: '28'
+                    '1000314539111':
+                      kills: '17'
+                      deaths: '13'
+                    '1007803613856':
+                      kills: '12'
+                      deaths: '19'
+                    '1006068335533':
+                      kills: '12'
+                      deaths: '16'
+                    '1009495187105':
+                      kills: '10'
+                      deaths: '6'
+                    '1009388895366':
+                      kills: '9'
+                      deaths: '41'
+                    '1007511112791':
+                      kills: '8'
+                      deaths: '11'
+                    '1004230608953':
+                      kills: '7'
+                      deaths: '6'
+                    '1009058558981':
+                      kills: '7'
+                      deaths: '8'
+                    '1009752496386':
+                      kills: '7'
+                      deaths: '35'
+                    '1007983554545':
+                      kills: '7'
+                      deaths: '4'
+                    '1012165044680':
+                      kills: '6'
+                      deaths: '4'
+                    '1011679847131':
+                      kills: '6'
+                      deaths: '11'
+                    '1009810188385':
+                      kills: '6'
+                      deaths: '6'
+                    '1003340724325':
+                      kills: '5'
+                      deaths: '2'
+                    '1000250176837':
+                      kills: '4'
+                      deaths: '4'
+                    '1006902817643':
+                      kills: '4'
+                      deaths: '8'
+                    '1000436348239':
+                      kills: '4'
+                      deaths: '3'
+                    '1011584031432':
+                      kills: '4'
+                      deaths: '6'
+                    '1013302746779':
+                      kills: '4'
+                      deaths: '10'
+                    '1002319733641':
+                      kills: '3'
+                      deaths: '8'
+                    '1008766563524':
+                      kills: '3'
+                      deaths: '5'
+                    '1010590824824':
+                      kills: '3'
+                      deaths: '6'
+                    '1014450712715':
+                      kills: '3'
+                      deaths: '15'
+                    '1011819105616':
+                      kills: '3'
+                      deaths: '11'
+                    '1013339742185':
+                      kills: '3'
+                      deaths: '11'
+                    '1007720444069':
+                      kills: '3'
+                      deaths: '6'
+                    '1010050271094':
+                      kills: '3'
+                      deaths: '9'
+                    '1008220179508':
+                      kills: '3'
+                      deaths: '17'
+                    '1008335546916':
+                      kills: '3'
+                      deaths: '7'
+                    '1008176168711':
+                      kills: '3'
+                      deaths: '10'
+                    '1007793002161':
+                      kills: '3'
+                      deaths: '14'
+                    '1009137965834':
+                      kills: '2'
+                      deaths: '9'
+                    '1012089978411':
+                      kills: '2'
+                      deaths: '10'
+                    '1003566577430':
+                      kills: '2'
+                      deaths: '9'
+                    '1006446444857':
+                      kills: '2'
+                      deaths: '1'
+                    '1009129948330':
+                      kills: '2'
+                      deaths: '2'
+                    '1009320303734':
+                      kills: '2'
+                      deaths: '4'
+                    '1011425349538':
+                      kills: '2'
+                      deaths: '7'
+                    '1000082780513':
+                      kills: '2'
+                      deaths: '28'
+                    '1009059593350':
+                      kills: '2'
+                      deaths: '12'
+                    '1008930859124':
+                      kills: '2'
+                      deaths: '3'
+                    '1011062416507':
+                      kills: '2'
+                      deaths: '15'
+                    '1008322047749':
+                      kills: '1'
+                      deaths: '5'
+                    '1010909176351':
+                      kills: '1'
+                      deaths: '3'
+                    '1009015699732':
+                      kills: '1'
+                      deaths: '9'
+                    '1010938099750':
+                      kills: '1'
+                      deaths: '10'
+                    '1009920857596':
+                      kills: '1'
+                      deaths: '3'
+                    '1001248580325':
+                      kills: '1'
+                      deaths: '2'
+                    '1003395331672':
+                      kills: '1'
+                      deaths: '0'
+                    '1008850794164':
+                      kills: '1'
+                      deaths: '1'
+                    '1002970526901':
+                      kills: '1'
+                      deaths: '10'
+                    '1009585427210':
+                      kills: '0'
+                      deaths: '7'
+                    '1010044829720':
+                      kills: '0'
+                      deaths: '2'
+                    '1010302326976':
+                      kills: '0'
+                      deaths: '2'
+                    '1011336094869':
+                      kills: '0'
+                      deaths: '1'
+                    '1010890839674':
+                      kills: '0'
+                      deaths: '2'
+                    '1003009344333':
+                      kills: '0'
+                      deaths: '2'
+                    '1010690831586':
+                      kills: '0'
+                      deaths: '1'
+                    '1012016676172':
+                      kills: '0'
+                      deaths: '3'
+                    '1010958615370':
+                      kills: '0'
+                      deaths: '1'
+                    '1010804831845':
+                      kills: '0'
+                      deaths: '4'
+                    '1014036958511':
+                      kills: '0'
+                      deaths: '5'
+                    '1013377950364':
+                      kills: '0'
+                      deaths: '3'
+                    '1003516913859':
+                      kills: '0'
+                      deaths: '2'
+                    '1005317405570':
+                      kills: '0'
+                      deaths: '1'
+                    '1010373048502':
+                      kills: '0'
+                      deaths: '1'
+                    '1000319933061':
+                      kills: '0'
+                      deaths: '2'
+                    '1013284789566':
+                      kills: '0'
+                      deaths: '4'
+                    '1000180555075':
+                      kills: '0'
+                      deaths: '5'
+                    '1004519819956':
+                      kills: '0'
+                      deaths: '1'
+                    '1008082281599':
+                      kills: '0'
+                      deaths: '2'
+                    '1009413737635':
+                      kills: '0'
+                      deaths: '1'
+                    '1003853474628':
+                      kills: '0'
+                      deaths: '4'
+                    '1013146253403':
+                      kills: '0'
+                      deaths: '5'
+                    '1010845289697':
+                      kills: '0'
+                      deaths: '4'
+                    '1007170712677':
+                      kills: '0'
+                      deaths: '3'
+                    '1011747811565':
+                      kills: '0'
+                      deaths: '3'
+                    '1008770977823':
+                      kills: '0'
+                      deaths: '1'
+                    '1006338144987':
+                      kills: '0'
+                      deaths: '1'
+      operationId: get-player-list-for-server
+    parameters:
+      - name: serverId
+        in: path
+        required: true
+        schema:
+          type: string
+  '/client/servers/{serverId}/weapons':
+    get:
+      summary: Get Weapon report for server
+      tags:
+        - server
+        - weapon
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  doubletake:
+                    type: string
+                  arc_launcher:
+                    type: string
+                  mastiff:
+                    type: string
+                  softball:
+                    type: string
+                  wingman:
+                    type: string
+                  invalid:
+                    type: string
+                  grenade_sonar:
+                    type: string
+                  semipistol:
+                    type: string
+                  grenade_electric_smoke:
+                    type: string
+                  sniper:
+                    type: string
+                  shotgun_pistol:
+                    type: string
+                  shotgun:
+                    type: string
+                  frag_grenade:
+                    type: string
+                  smr:
+                    type: string
+                  fall:
+                    type: string
+                  epg:
+                    type: string
+                  human_execution:
+                    type: string
+                  pilot_emptyhanded:
+                    type: string
+                  defender:
+                    type: string
+                  thermite_grenade:
+                    type: string
+                  satchel:
+                    type: string
+                  wingman_n:
+                    type: string
+                x-examples:
+                  Example 1:
+                    doubletake: '119'
+                    arc_launcher: '1'
+                    mastiff: '359'
+                    softball: '137'
+                    wingman: '87'
+                    invalid: '20'
+                    grenade_sonar: '30'
+                    semipistol: '177'
+                    grenade_electric_smoke: '12'
+                    sniper: '1104'
+                    shotgun_pistol: '94'
+                    shotgun: '66'
+                    frag_grenade: '1'
+                    smr: '27'
+                    fall: '1'
+                    epg: '265'
+                    human_execution: '4'
+                    pilot_emptyhanded: '65'
+                    defender: '62'
+                    thermite_grenade: '150'
+                    satchel: '64'
+                    wingman_n: '620'
+              examples:
+                Example 1:
+                  value:
+                    doubletake: '119'
+                    arc_launcher: '1'
+                    mastiff: '359'
+                    softball: '137'
+                    wingman: '87'
+                    invalid: '20'
+                    grenade_sonar: '30'
+                    semipistol: '177'
+                    grenade_electric_smoke: '12'
+                    sniper: '1104'
+                    shotgun_pistol: '94'
+                    shotgun: '66'
+                    frag_grenade: '1'
+                    smr: '27'
+                    fall: '1'
+                    epg: '265'
+                    human_execution: '4'
+                    pilot_emptyhanded: '65'
+                    defender: '62'
+                    thermite_grenade: '150'
+                    satchel: '64'
+                    wingman_n: '620'
+      operationId: get-weapons-report-for-server
+      parameters: []
+      x-internal: false
+    parameters:
+      - name: serverId
+        in: path
+        required: true
+        schema:
+          type: string
+  '/client/servers/{serverId}/players/{playerId}':
+    parameters:
+      - name: playerId
+        in: path
+        required: true
+        schema:
+          type: integer
+      - name: serverId
+        in: path
+        required: true
+        schema:
+          type: integer
+    get:
+      summary: Get Player report for Server
+      tags:
+        - server
+        - player
+      responses:
+        '200':
+          $ref: '#/components/responses/Player-server-report'
+        '404':
+          description: Not Found
+      operationId: get-player-on-server
+  '/servers/{serverId}':
+    parameters:
+      - $ref: '#/components/parameters/serverId'
+    post:
+      summary: ''
+      operationId: post-servers-serverId
+      responses:
+        '200':
+          description: OK
+        '403':
+          description: Forbidden
+      description: Used to test auth
+      security:
+        - Auth_Token: []
   /servers/register:
     post:
       summary: ''
@@ -138,46 +780,7 @@ paths:
       description: |-
         Register a server on Tone API.
         The server needs to be online on masterserver and reacheable by Tone.
-  '/servers/{serverId}':
-    parameters:
-      - $ref: '#/components/parameters/serverId'
-    get:
-      summary: Get Server report
-      tags:
-        - server
-      operationId: get-server-report
-      responses:
-        '200':
-          $ref: '#/components/responses/Server-report'
-    post:
-      summary: ''
-      operationId: post-servers-serverId
-      responses:
-        '200':
-          description: OK
-        '403':
-          description: Forbidden
-      description: Used to test auth
-      security:
-        - Auth_Token: []
-  '/server/{serverId}/players':
-    get:
-      summary: List Players for Server
-      tags:
-        - server
-        - player
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/TopPlayers'
-      operationId: get-player-list-for-server
-    parameters:
-      - $ref: '#/components/parameters/serverId'
+      x-internal: true
   '/servers/{serverId}/kills':
     post:
       summary: Post kills
@@ -203,41 +806,6 @@ paths:
         description: ''
     parameters:
       - $ref: '#/components/parameters/serverId'
-  '/servers/{serverId}/weapons':
-    get:
-      summary: Get Weapon report for server
-      tags:
-        - server
-        - weapon
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/PrefferedWeapon'
-      operationId: get-weapons-report-for-server
-      parameters: []
-      x-internal: false
-    parameters:
-      - $ref: '#/components/parameters/serverId'
-  '/servers/{serverId}/players/{playerId}':
-    parameters:
-      - $ref: '#/components/parameters/playerId'
-      - $ref: '#/components/parameters/serverId'
-    get:
-      summary: Get Player report for Server
-      tags:
-        - server
-        - player
-      responses:
-        '200':
-          $ref: '#/components/responses/Player-server-report'
-        '404':
-          description: Not Found
-      operationId: get-player-on-server
 components:
   schemas:
     Player:
