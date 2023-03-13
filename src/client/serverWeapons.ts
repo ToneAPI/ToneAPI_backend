@@ -2,38 +2,77 @@ import { RequestHandler } from 'express'
 import { param } from 'express-validator'
 import { validateErrors } from '../common'
 import cache from '../cache/redis'
+import { sql } from 'kysely'
 import db from '../db/db'
 
-const { count, max } = db.fn
+const { count, max, avg } = db.fn
 
 const middlewares: RequestHandler[] = [
-  param('serverId').exists().toInt().isInt(),
+  param(['serverId']).exists().toInt().isInt(),
   validateErrors,
   async (req, res) => {
     const server = Number(req.params.serverId)
-    await processWeapons(server)
-    const data = await cache.HGETALL(`servers:${server}:weapons`)
-    delete data.last_entry
+    await processServerWeapons(server)
+    const data = await getServerWeapons(server)
     res.status(200).send(data)
   }
 ]
 
-async function processWeapons(server: number) {
+export async function getServerWeapons(server: number) {
+  const killsData = await cache.HGETALL(`servers:${server}:weapons:kills`)
+  const avg_distance = await cache.HGETALL(
+    `servers:${server}:weapons:avg_kill_distance`
+  )
+  const max_distance = await cache.HGETALL(
+    `servers:${server}:weapons:max_kill_distance`
+  )
+  const data: {
+    [x: string]: {
+      kills: string
+      avg_kill_distance: string
+      max_kill_distance: string
+    }
+  } = {}
+  Object.keys(killsData).forEach((key) => {
+    data[key] = {
+      kills: killsData[key],
+      avg_kill_distance: avg_distance[key],
+      max_kill_distance: max_distance[key]
+    }
+  })
+  return data
+}
+
+async function processServerWeapons(server: number) {
   let last_entry =
     Number(await cache.HGET(`servers:${server}:weapons`, 'last_entry')) || 0
   const newData = await db
-    .selectFrom(['kill'])
+    .with('killdata', () =>
+      db
+        .selectFrom('kill')
+        .select([
+          count('kill.id').as('num_kills'),
+          'kill.cause_of_death',
+          max('distance').as('max_kill_distance'),
+          avg('distance').as('avg_kill_distance')
+        ])
+        .where('kill.id', '>', last_entry)
+        .where('kill.server', '=', server)
+        .whereRef('attacker_id', '!=', 'victim_id')
+        .groupBy('cause_of_death')
+    )
+    .selectFrom('killdata')
     .select([
-      count<number>('kill.id').as('num_kills'),
-      'kill.cause_of_death',
+      sql<number>`coalesce(killdata.num_kills, 0)`.as('kills'),
+      'killdata.cause_of_death',
+      'killdata.avg_kill_distance',
+      'killdata.max_kill_distance',
       db
         .selectFrom('kill')
         .select(max('kill.id').as('last_entry'))
         .as('last_entry')
     ])
-    .where('server', '=', server)
-    .where('kill.id', '>', last_entry)
-    .groupBy('cause_of_death')
+    .orderBy('kills', 'desc')
     .execute()
   //if no new kills
   if (newData.length == 0) {
@@ -43,12 +82,61 @@ async function processWeapons(server: number) {
     (acc, current) => (current.last_entry > acc ? current.last_entry : acc),
     0
   )
-  const promises: Promise<number>[] = []
-  newData.forEach(({ num_kills, cause_of_death }) => {
-    promises.push(
-      cache.HINCRBY(`servers:${server}:weapons`, cause_of_death, num_kills)
-    )
-  })
+  const promises: Promise<any>[] = []
+  newData.forEach(
+    ({ cause_of_death, kills, avg_kill_distance, max_kill_distance }) => {
+      promises.push(
+        (async () => {
+          const oldKills =
+            Number(
+              await cache.HGET(
+                `servers:${server}:weapons:kills`,
+                cause_of_death
+              )
+            ) || 0
+          const oldaverage =
+            Number(
+              await cache.HGET(
+                `servers:${server}:weapons:avg_kill_distance`,
+                cause_of_death
+              )
+            ) | 0
+          const totalkills = oldKills + kills
+          const newAverage =
+            (oldKills / totalkills) * oldaverage +
+            (kills / totalkills) * Number(avg_kill_distance)
+
+          const oldMaxDistance =
+            Number(
+              await cache.HGET(
+                `servers:${server}:weapons:max_kill_distance`,
+                cause_of_death
+              )
+            ) | 0
+
+          promises.push(
+            cache.HINCRBY(
+              `servers:${server}:weapons:kills`,
+              cause_of_death,
+              kills
+            ),
+            cache.HSET(
+              `servers:${server}:weapons:avg_kill_distance`,
+              cause_of_death,
+              newAverage | 0
+            ),
+            cache.HSET(
+              `servers:${server}:weapons:max_kill_distance`,
+              cause_of_death,
+              oldMaxDistance < max_kill_distance
+                ? max_kill_distance
+                : oldMaxDistance
+            )
+          )
+        })()
+      )
+    }
+  )
   promises.push(
     cache.HSET(`servers:${server}:weapons`, 'last_entry', newData[0].last_entry)
   )
