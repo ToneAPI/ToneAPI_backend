@@ -6,12 +6,19 @@ import { processPlayerWeapons } from './routes/playerWeapons'
 import { processPlayerReport } from './routes/player'
 
 async function processAll() {
+  console.log('Starting data calculation...')
+  const timeStart = new Date()
   const servers = await db.selectFrom('server').selectAll().execute()
   const promises: Promise<any>[] = []
   servers.forEach((e) => {
     promises.push(processServer(e.id))
   })
   await Promise.all(promises)
+  console.log(
+    'Data calculation finished. Took + ' +
+      Math.abs(new Date().getTime() - timeStart.getTime()) / 1000 +
+      ' seconds'
+  )
   setTimeout(processAll, 60000)
 }
 
