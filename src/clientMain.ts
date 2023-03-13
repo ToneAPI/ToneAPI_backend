@@ -23,7 +23,7 @@ dbReady().then((e) => {
   cacheReady().then((e) => {
     processAll().then((e) => {
       app.listen(port, '0.0.0.0', () => {
-        console.log(`Example app listening on port ${port}`)
+        console.log(`Tone client api listening on port ${port}`)
       })
     })
   })

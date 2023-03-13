@@ -19,6 +19,6 @@ app.use('/', server)
 
 dbReady().then((e) => {
   app.listen(port, '0.0.0.0', () => {
-    console.log(`Example app listening on port ${port}`)
+    console.log(`Tone server api listening on port ${port}`)
   })
 })
