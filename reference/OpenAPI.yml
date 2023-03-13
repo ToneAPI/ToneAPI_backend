@@ -47,36 +47,7 @@ paths:
                 items:
                   $ref: '#/components/schemas/Map'
       operationId: get-map-list
-  /players:
-    get:
-      summary: List Players
-      tags:
-        - player
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Player'
-      operationId: get-player-list
-  '/players/{playerId}':
-    parameters:
-      - $ref: '#/components/parameters/playerId'
-    get:
-      summary: Get Player report
-      tags:
-        - player
-      responses:
-        '200':
-          $ref: '#/components/responses/Player-report'
-        '404':
-          description: User Not Found
-      operationId: get-player-report
-      description: Retrieve the information of the player with the matching id
-  /servers/:
+  /client/servers/:
     get:
       summary: Get Server list
       tags:
@@ -91,6 +62,182 @@ paths:
                 items:
                   $ref: '#/components/schemas/Server'
       operationId: get-server-list
+    parameters: []
+  '/client/server/{serverId}/players':
+    get:
+      summary: List Players for Server
+      tags:
+        - server
+        - player
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TopPlayers'
+      operationId: get-player-list-for-server
+    parameters:
+      - name: serverId
+        in: path
+        required: true
+        schema:
+          type: string
+  '/client/servers/{serverId}/weapons':
+    get:
+      summary: Get Weapon report for server
+      tags:
+        - server
+        - weapon
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  doubletake:
+                    type: string
+                  arc_launcher:
+                    type: string
+                  mastiff:
+                    type: string
+                  softball:
+                    type: string
+                  wingman:
+                    type: string
+                  invalid:
+                    type: string
+                  grenade_sonar:
+                    type: string
+                  semipistol:
+                    type: string
+                  grenade_electric_smoke:
+                    type: string
+                  sniper:
+                    type: string
+                  shotgun_pistol:
+                    type: string
+                  shotgun:
+                    type: string
+                  frag_grenade:
+                    type: string
+                  smr:
+                    type: string
+                  fall:
+                    type: string
+                  epg:
+                    type: string
+                  human_execution:
+                    type: string
+                  pilot_emptyhanded:
+                    type: string
+                  defender:
+                    type: string
+                  thermite_grenade:
+                    type: string
+                  satchel:
+                    type: string
+                  wingman_n:
+                    type: string
+                x-examples:
+                  Example 1:
+                    doubletake: '119'
+                    arc_launcher: '1'
+                    mastiff: '359'
+                    softball: '137'
+                    wingman: '87'
+                    invalid: '20'
+                    grenade_sonar: '30'
+                    semipistol: '177'
+                    grenade_electric_smoke: '12'
+                    sniper: '1104'
+                    shotgun_pistol: '94'
+                    shotgun: '66'
+                    frag_grenade: '1'
+                    smr: '27'
+                    fall: '1'
+                    epg: '265'
+                    human_execution: '4'
+                    pilot_emptyhanded: '65'
+                    defender: '62'
+                    thermite_grenade: '150'
+                    satchel: '64'
+                    wingman_n: '620'
+              examples:
+                Example 1:
+                  value:
+                    doubletake: '119'
+                    arc_launcher: '1'
+                    mastiff: '359'
+                    softball: '137'
+                    wingman: '87'
+                    invalid: '20'
+                    grenade_sonar: '30'
+                    semipistol: '177'
+                    grenade_electric_smoke: '12'
+                    sniper: '1104'
+                    shotgun_pistol: '94'
+                    shotgun: '66'
+                    frag_grenade: '1'
+                    smr: '27'
+                    fall: '1'
+                    epg: '265'
+                    human_execution: '4'
+                    pilot_emptyhanded: '65'
+                    defender: '62'
+                    thermite_grenade: '150'
+                    satchel: '64'
+                    wingman_n: '620'
+      operationId: get-weapons-report-for-server
+      parameters: []
+      x-internal: false
+    parameters:
+      - name: serverId
+        in: path
+        required: true
+        schema:
+          type: string
+  '/client/servers/{serverId}/players/{playerId}':
+    parameters:
+      - name: playerId
+        in: path
+        required: true
+        schema:
+          type: integer
+      - name: serverId
+        in: path
+        required: true
+        schema:
+          type: integer
+    get:
+      summary: Get Player report for Server
+      tags:
+        - server
+        - player
+      responses:
+        '200':
+          $ref: '#/components/responses/Player-server-report'
+        '404':
+          description: Not Found
+      operationId: get-player-on-server
+  '/servers/{serverId}':
+    parameters:
+      - $ref: '#/components/parameters/serverId'
+    post:
+      summary: ''
+      operationId: post-servers-serverId
+      responses:
+        '200':
+          description: OK
+        '403':
+          description: Forbidden
+      description: Used to test auth
+      security:
+        - Auth_Token: []
   /servers/register:
     post:
       summary: ''
@@ -138,46 +285,7 @@ paths:
       description: |-
         Register a server on Tone API.
         The server needs to be online on masterserver and reacheable by Tone.
-  '/servers/{serverId}':
-    parameters:
-      - $ref: '#/components/parameters/serverId'
-    get:
-      summary: Get Server report
-      tags:
-        - server
-      operationId: get-server-report
-      responses:
-        '200':
-          $ref: '#/components/responses/Server-report'
-    post:
-      summary: ''
-      operationId: post-servers-serverId
-      responses:
-        '200':
-          description: OK
-        '403':
-          description: Forbidden
-      description: Used to test auth
-      security:
-        - Auth_Token: []
-  '/server/{serverId}/players':
-    get:
-      summary: List Players for Server
-      tags:
-        - server
-        - player
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/TopPlayers'
-      operationId: get-player-list-for-server
-    parameters:
-      - $ref: '#/components/parameters/serverId'
+      x-internal: true
   '/servers/{serverId}/kills':
     post:
       summary: Post kills
@@ -203,41 +311,6 @@ paths:
         description: ''
     parameters:
       - $ref: '#/components/parameters/serverId'
-  '/servers/{serverId}/weapons':
-    get:
-      summary: Get Weapon report for server
-      tags:
-        - server
-        - weapon
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/PrefferedWeapon'
-      operationId: get-weapons-report-for-server
-      parameters: []
-      x-internal: false
-    parameters:
-      - $ref: '#/components/parameters/serverId'
-  '/servers/{serverId}/players/{playerId}':
-    parameters:
-      - $ref: '#/components/parameters/playerId'
-      - $ref: '#/components/parameters/serverId'
-    get:
-      summary: Get Player report for Server
-      tags:
-        - server
-        - player
-      responses:
-        '200':
-          $ref: '#/components/responses/Player-server-report'
-        '404':
-          description: Not Found
-      operationId: get-player-on-server
 components:
   schemas:
     Player:
