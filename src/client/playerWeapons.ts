@@ -113,59 +113,63 @@ async function processPlayerWeapons(server: number, player: number) {
     (acc, current) => (current.last_entry > acc ? current.last_entry : acc),
     0
   )
-  const promises: Promise<number>[] = []
+  const promises: Promise<any>[] = []
   newData.forEach(
     async ({ weapon, kills, deaths, avg_kill_distance, max_kill_distance }) => {
-      const oldKills =
-        Number(
-          await cache.HGET(
-            `servers:${server}:players:${player}:weapons:kills`,
-            weapon
-          )
-        ) || 0
-      const oldaverage =
-        Number(
-          await cache.HGET(
-            `servers:${server}:players:${player}:weapons:avg_kill_distance`,
-            weapon
-          )
-        ) | 0
-      const totalkills = oldKills + kills
-      const newAverage =
-        (oldKills / totalkills) * oldaverage +
-        (kills / totalkills) * Number(avg_kill_distance)
-
-      const oldMaxDistance =
-        Number(
-          await cache.HGET(
-            `servers:${server}:players:${player}:weapons:max_kill_distance`,
-            weapon
-          )
-        ) | 0
-
       promises.push(
-        cache.HINCRBY(
-          `servers:${server}:players:${player}:weapons:deaths`,
-          weapon,
-          deaths
-        ),
-        cache.HINCRBY(
-          `servers:${server}:players:${player}:weapons:kills`,
-          weapon,
-          kills
-        ),
-        cache.HSET(
-          `servers:${server}:players:${player}:weapons:avg_kill_distance`,
-          weapon,
-          newAverage | 0
-        ),
-        cache.HSET(
-          `servers:${server}:players:${player}:weapons:max_kill_distance`,
-          weapon,
-          oldMaxDistance < max_kill_distance
-            ? max_kill_distance
-            : oldMaxDistance
-        )
+        (async () => {
+          const oldKills =
+            Number(
+              await cache.HGET(
+                `servers:${server}:players:${player}:weapons:kills`,
+                weapon
+              )
+            ) || 0
+          const oldaverage =
+            Number(
+              await cache.HGET(
+                `servers:${server}:players:${player}:weapons:avg_kill_distance`,
+                weapon
+              )
+            ) | 0
+          const totalkills = oldKills + kills
+          const newAverage =
+            (oldKills / totalkills) * oldaverage +
+            (kills / totalkills) * Number(avg_kill_distance)
+
+          const oldMaxDistance =
+            Number(
+              await cache.HGET(
+                `servers:${server}:players:${player}:weapons:max_kill_distance`,
+                weapon
+              )
+            ) | 0
+
+          promises.push(
+            cache.HINCRBY(
+              `servers:${server}:players:${player}:weapons:deaths`,
+              weapon,
+              deaths
+            ),
+            cache.HINCRBY(
+              `servers:${server}:players:${player}:weapons:kills`,
+              weapon,
+              kills
+            ),
+            cache.HSET(
+              `servers:${server}:players:${player}:weapons:avg_kill_distance`,
+              weapon,
+              newAverage | 0
+            ),
+            cache.HSET(
+              `servers:${server}:players:${player}:weapons:max_kill_distance`,
+              weapon,
+              oldMaxDistance < max_kill_distance
+                ? max_kill_distance
+                : oldMaxDistance
+            )
+          )
+        })()
       )
     }
   )
