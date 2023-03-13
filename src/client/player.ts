@@ -4,6 +4,7 @@ import { validateErrors } from '../common'
 import cache from '../cache/redis'
 import { sql } from 'kysely'
 import db from '../db/db'
+import { getPlayerWeapons } from './playerWeapons'
 
 const { count, max, min, avg } = db.fn
 
@@ -15,7 +16,8 @@ const middlewares: RequestHandler[] = [
     const player = Number(req.params.playerId)
     await processPlayerReport(server, player)
     const data = await getPlayerReport(server, player)
-    res.status(200).send(data)
+    const weapons = await getPlayerWeapons(server, player)
+    res.status(200).send({ ...data, weapons })
   }
 ]
 
