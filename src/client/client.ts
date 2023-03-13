@@ -1,6 +1,7 @@
 import { Router } from 'express'
-import weapons from './weapons'
-import player from './player'
+import serverWeapons from './serverWeapons'
+import playerWeapons from './playerWeapons'
+import serverPlayers from './serverPlayers'
 const router = Router()
 //timeout middleware ?
 router.get('/*', (req, res, next) => {
@@ -16,8 +17,8 @@ router.get('/players/:playerId', (req, res, next) => {})
 
 router.get('/servers/', (req, res, next) => {})
 router.get('/servers/:serverId/', (req, res, next) => {})
-router.get('/servers/:serverId/players', (req, res, next) => {})
-router.get('/servers/:serverId/player/:playerId', player)
+router.get('/servers/:serverId/players', serverPlayers)
+router.get('/servers/:serverId/player/:playerId', playerWeapons)
 
-router.use('/servers/:serverId/weapons', weapons)
+router.use('/servers/:serverId/weapons', serverWeapons)
 export default router

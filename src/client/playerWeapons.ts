@@ -14,20 +14,24 @@ const middlewares: RequestHandler[] = [
     const server = Number(req.params.serverId)
     const player = Number(req.params.playerId)
     await processPlayerWeapons(server, player)
-    const killsData = await cache.HGETALL(
-      `servers:${server}:players:${player}:weapons:kills`
-    )
-    const deathData = await cache.HGETALL(
-      `servers:${server}:players:${player}:weapons:deaths`
-    )
-    const data: { [x: string]: { kills: string; deaths: string } } = {}
-    Object.keys(killsData).forEach((key) => {
-      data[key] = { kills: killsData[key], deaths: deathData[key] }
-    })
-
+    const data = await getPlayerWeapons(server, player)
     res.status(200).send(data)
   }
 ]
+
+async function getPlayerWeapons(server: number, player: number) {
+  const killsData = await cache.HGETALL(
+    `servers:${server}:players:${player}:weapons:kills`
+  )
+  const deathData = await cache.HGETALL(
+    `servers:${server}:players:${player}:weapons:deaths`
+  )
+  const data: { [x: string]: { kills: string; deaths: string } } = {}
+  Object.keys(killsData).forEach((key) => {
+    data[key] = { kills: killsData[key], deaths: deathData[key] }
+  })
+  return data
+}
 
 async function processPlayerWeapons(server: number, player: number) {
   let last_entry =
