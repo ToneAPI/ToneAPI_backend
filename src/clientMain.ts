@@ -14,10 +14,10 @@ app.use(express.json())
 
 app.use(cors())
 app.get('/', (req, res) => {
-  res.send('Hello World!')
+  res.send('Tone client API online')
 })
 
-app.use('/v1/client', client)
+app.use('/', client)
 
 dbReady().then((e) => {
   cacheReady().then((e) => {
