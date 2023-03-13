@@ -5,7 +5,7 @@ import cache from '../cache/redis'
 import { sql } from 'kysely'
 import db from '../db/db'
 
-const { count, max } = db.fn
+const { count, max, avg } = db.fn
 
 const middlewares: RequestHandler[] = [
   param(['serverId', 'playerId']).exists().toInt().isInt(),
@@ -19,16 +19,34 @@ const middlewares: RequestHandler[] = [
   }
 ]
 
-async function getPlayerWeapons(server: number, player: number) {
+export async function getPlayerWeapons(server: number, player: number) {
   const killsData = await cache.HGETALL(
     `servers:${server}:players:${player}:weapons:kills`
   )
   const deathData = await cache.HGETALL(
     `servers:${server}:players:${player}:weapons:deaths`
   )
-  const data: { [x: string]: { kills: string; deaths: string } } = {}
+  const avg_distance = await cache.HGETALL(
+    `servers:${server}:players:${player}:weapons:avg_kill_distance`
+  )
+  const max_distance = await cache.HGETALL(
+    `servers:${server}:players:${player}:weapons:max_kill_distance`
+  )
+  const data: {
+    [x: string]: {
+      kills: string
+      deaths: string
+      avg_kill_distance: string
+      max_kill_distance: string
+    }
+  } = {}
   Object.keys(killsData).forEach((key) => {
-    data[key] = { kills: killsData[key], deaths: deathData[key] }
+    data[key] = {
+      kills: killsData[key],
+      deaths: deathData[key],
+      avg_kill_distance: avg_distance[key],
+      max_kill_distance: max_distance[key]
+    }
   })
   return data
 }
@@ -45,7 +63,12 @@ async function processPlayerWeapons(server: number, player: number) {
     .with('killdata', () =>
       db
         .selectFrom('kill')
-        .select([count('kill.id').as('num_kills'), 'kill.cause_of_death'])
+        .select([
+          count('kill.id').as('num_kills'),
+          'kill.cause_of_death',
+          max('distance').as('max_kill_distance'),
+          avg('distance').as('avg_kill_distance')
+        ])
         .where('attacker_id', '=', player.toString())
         .where('kill.id', '>', last_entry)
         .where('kill.server', '=', server)
@@ -68,6 +91,8 @@ async function processPlayerWeapons(server: number, player: number) {
       sql<string>`COALESCE(killdata.cause_of_death, deathdata.cause_of_death)`.as(
         'weapon'
       ),
+      'killdata.avg_kill_distance',
+      'killdata.max_kill_distance',
       db
         .selectFrom('kill')
         .select(max('kill.id').as('last_entry'))
@@ -88,22 +113,62 @@ async function processPlayerWeapons(server: number, player: number) {
     (acc, current) => (current.last_entry > acc ? current.last_entry : acc),
     0
   )
-  console.log(newData)
   const promises: Promise<number>[] = []
-  newData.forEach(({ weapon, kills, deaths }) => {
-    promises.push(
-      cache.HINCRBY(
-        `servers:${server}:players:${player}:weapons:deaths`,
-        weapon,
-        deaths
-      ),
-      cache.HINCRBY(
-        `servers:${server}:players:${player}:weapons:kills`,
-        weapon,
-        kills
+  newData.forEach(
+    async ({ weapon, kills, deaths, avg_kill_distance, max_kill_distance }) => {
+      const oldKills =
+        Number(
+          await cache.HGET(
+            `servers:${server}:players:${player}:weapons:kills`,
+            weapon
+          )
+        ) || 0
+      const oldaverage =
+        Number(
+          await cache.HGET(
+            `servers:${server}:players:${player}:weapons:avg_kill_distance`,
+            weapon
+          )
+        ) | 0
+      const totalkills = oldKills + kills
+      const newAverage =
+        (oldKills / totalkills) * oldaverage +
+        (kills / totalkills) * Number(avg_kill_distance)
+
+      const oldMaxDistance =
+        Number(
+          await cache.HGET(
+            `servers:${server}:players:${player}:weapons:max_kill_distance`,
+            weapon
+          )
+        ) | 0
+
+      promises.push(
+        cache.HINCRBY(
+          `servers:${server}:players:${player}:weapons:deaths`,
+          weapon,
+          deaths
+        ),
+        cache.HINCRBY(
+          `servers:${server}:players:${player}:weapons:kills`,
+          weapon,
+          kills
+        ),
+        cache.HSET(
+          `servers:${server}:players:${player}:weapons:avg_kill_distance`,
+          weapon,
+          newAverage | 0
+        ),
+        cache.HSET(
+          `servers:${server}:players:${player}:weapons:max_kill_distance`,
+          weapon,
+          oldMaxDistance < max_kill_distance
+            ? max_kill_distance
+            : oldMaxDistance
+        )
       )
-    )
-  })
+    }
+  )
   promises.push(
     cache.HSET(
       `servers:${server}:players:${player}:weapons`,
