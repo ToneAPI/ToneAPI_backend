@@ -89,24 +89,29 @@ export async function processPlayerReport(server: number, player: number) {
     return
   }
 
-  const promises: Promise<number>[] = []
+  const promises: Promise<any>[] = []
   Object.entries(newData[0]).forEach(([key, value]) => {
-    if (key == 'last_seen' || key == 'first_seen') {
-      promises.push(
-        cache.HSET(
-          `servers:${server}:players:${player}`,
-          key.toString(),
-          new Date(value || '').getTime()
-        )
-      )
-      return
-    }
     promises.push(
-      cache.HSET(
-        `servers:${server}:players:${player}`,
-        key.toString(),
-        (value || '').toString()
-      )
+      (async () => {
+        if (key == 'last_seen' || key == 'first_seen') {
+          value = new Date(value || '').getTime()
+        }
+        if (key == 'first_seen') {
+          cache.HSETNX(
+            `servers:${server}:players:${player}`,
+            key.toString(),
+            (value || '').toString()
+          )
+          return
+        }
+        promises.push(
+          cache.HSET(
+            `servers:${server}:players:${player}`,
+            key.toString(),
+            (value || '').toString()
+          )
+        )
+      })()
     )
   })
   await Promise.all(promises)
