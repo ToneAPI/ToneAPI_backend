@@ -3,6 +3,7 @@ import expressBasicAuth from 'express-basic-auth'
 import { body, header, validationResult } from 'express-validator'
 import register from './register'
 import { CreateKillRecord, CheckServerToken } from '../db/db'
+import { validateErrors } from '../common'
 
 const router = Router()
 
@@ -17,14 +18,7 @@ router.post(
     .bail()
     .contains('Basic')
     .withMessage('Authorization Token is not Basic'),
-  (req, res, next) => {
-    const errors = validationResult(req)
-    if (!errors.isEmpty()) {
-      console.log(JSON.stringify(errors))
-      return res.status(403).json({ errors: errors.array() })
-    }
-    next()
-  },
+  validateErrors,
   //Huge mess to retrieve server id from expressBasicAuth. We probably should fix it.
   (req, res, next) => {
     if (!req) res.sendStatus(500)
@@ -118,12 +112,8 @@ router.post(
     min: 0
   }),
   body(['cause_of_death', 'victim_id'], 'mandatory').exists().notEmpty(),
+  validateErrors,
   (req, res) => {
-    const errors = validationResult(req)
-    if (!errors.isEmpty()) {
-      console.error(JSON.stringify(errors))
-      return res.status(400).json({ errors: errors.array() })
-    }
     const {
       killstat_version,
       match_id,

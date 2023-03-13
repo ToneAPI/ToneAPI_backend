@@ -1,32 +1,24 @@
-import { Router } from 'express'
-import { param, validationResult } from 'express-validator'
+import { RequestHandler } from 'express'
+import { param } from 'express-validator'
+import { validateErrors } from '../common'
 import cache from '../cache/redis'
 import db from '../db/db'
-const router = Router()
+
 const { count, max } = db.fn
 
-router.get(
-  '/servers/:serverId/weapons',
+const middlewares: RequestHandler[] = [
   param('serverId').exists().toInt().isInt(),
+  validateErrors,
   async (req, res) => {
-    const errors = validationResult(req)
-    if (!errors.isEmpty()) {
-      console.error(JSON.stringify(errors))
-      return res.status(400).json({ errors: errors.array() })
-    }
-    if (!req.params) {
-      res.sendStatus(500)
-      return
-    }
     const server = Number(req.params.serverId)
-    await processTopWeapons(server)
+    await processWeapons(server)
     const data = await cache.HGETALL(`servers:${server}:weapons`)
     delete data.last_entry
     res.status(200).send(data)
   }
-)
+]
 
-async function processTopWeapons(server: number) {
+async function processWeapons(server: number) {
   let last_entry =
     Number(await cache.HGET(`servers:${server}:weapons`, 'last_entry')) || 0
   const newData = await db
@@ -34,7 +26,10 @@ async function processTopWeapons(server: number) {
     .select([
       count<number>('kill.id').as('num_kills'),
       'kill.cause_of_death',
-      max('kill.id').as('last_entry')
+      db
+        .selectFrom('kill')
+        .select(max('kill.id').as('last_entry'))
+        .as('last_entry')
     ])
     .where('server', '=', server)
     .where('kill.id', '>', last_entry)
@@ -60,4 +55,4 @@ async function processTopWeapons(server: number) {
   await Promise.all(promises)
 }
 
-export default router
+export default middlewares

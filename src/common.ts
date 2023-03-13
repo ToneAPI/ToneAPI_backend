@@ -1,3 +1,5 @@
+import { RequestHandler } from 'express'
+import { Result, validationResult } from 'express-validator'
 import http from 'http'
 import https from 'https'
 
@@ -28,4 +30,13 @@ export function GetRequest(url: string) {
       })
       .end()
   })
+}
+
+export const validateErrors: RequestHandler = (req, res, next) => {
+  const errors = validationResult(req)
+  if (!errors.isEmpty()) {
+    console.error(JSON.stringify(errors))
+    return res.status(400).json({ errors: errors.array() })
+  }
+  next()
 }

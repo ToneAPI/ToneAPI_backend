@@ -9,7 +9,7 @@
       "request": "launch",
       "name": "Launch Server API",
       "skipFiles": ["<node_internals>/**"],
-      "program": "${workspaceFolder}/src/server.ts",
+      "program": "${workspaceFolder}/src/serverMain.ts",
       "preLaunchTask": "tsc: build - tsconfig.json",
       "outFiles": ["${workspaceFolder}/out/**/*.js"]
     },
@@ -18,7 +18,7 @@
       "request": "launch",
       "name": "Launch Client API",
       "skipFiles": ["<node_internals>/**"],
-      "program": "${workspaceFolder}/src/client.ts",
+      "program": "${workspaceFolder}/src/clientMain.ts",
       "preLaunchTask": "tsc: build - tsconfig.json",
       "outFiles": ["${workspaceFolder}/out/**/*.js"]
     }

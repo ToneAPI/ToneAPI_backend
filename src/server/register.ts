@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import { GetRequest } from '../common'
+import { GetRequest, validateErrors } from '../common'
 import { FindServer, CreateServer } from '../db/db'
 import { body, validationResult } from 'express-validator'
 
@@ -37,12 +37,8 @@ router.post(
     .toInt()
     .isInt({ min: 1, max: 65535 })
     .withMessage('must be between 1 and 65535'),
-  async (req, res, next) => {
-    const errors = validationResult(req)
-    console.log(req.body)
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() })
-    }
+  validateErrors,
+  async (req, res) => {
     try {
       //Check if server name isn't already in database
       if (!!(await FindServer({ name: req.body.name }))) {
