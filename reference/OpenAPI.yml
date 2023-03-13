@@ -5,7 +5,7 @@ info:
   title: OpenAPI
   version: '1.0'
 servers:
-  - url: 'http://127.0.0.1:3001/v1'
+  - url: 'https://tone.sleepycat.date/v1'
 tags:
   - name: player
     description: Everything about players
@@ -53,7 +53,7 @@ paths:
     get:
       summary: Get Server list
       tags:
-        - server
+        - client
       responses:
         '200':
           description: OK
@@ -69,8 +69,7 @@ paths:
     get:
       summary: List Players for Server
       tags:
-        - server
-        - player
+        - client
       responses:
         '200':
           description: OK
@@ -604,8 +603,7 @@ paths:
     get:
       summary: Get Weapon report for server
       tags:
-        - server
-        - weapon
+        - client
       responses:
         '200':
           description: OK
@@ -762,8 +760,7 @@ paths:
     get:
       summary: Get Player report for Server
       tags:
-        - server
-        - player
+        - client
       responses:
         '200':
           $ref: '#/components/responses/Player-server-report'
@@ -784,6 +781,8 @@ paths:
       description: Used to test auth
       security:
         - Auth_Token: []
+      tags:
+        - "server"
   /servers/register:
     post:
       summary: ''
