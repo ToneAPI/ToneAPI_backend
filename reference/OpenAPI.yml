@@ -861,6 +861,7 @@ paths:
       description: |-
         Register a server on Tone API.
         The server needs to be online on masterserver and reacheable by Tone.
+        THIS IS CURRENTLY DISABLED. WAIT FOR SAFE I/O
       x-internal: true
   '/servers/{serverId}/kills':
     post:
