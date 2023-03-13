@@ -32,6 +32,7 @@ paths:
                   $ref: '#/components/schemas/Weapon'
       operationId: get-weapon-list
       description: ''
+      x-internal: true
   /maps/:
     get:
       summary: List Maps
@@ -47,6 +48,7 @@ paths:
                 items:
                   $ref: '#/components/schemas/Map'
       operationId: get-map-list
+      x-internal: true
   /client/servers/:
     get:
       summary: Get Server list
@@ -63,7 +65,7 @@ paths:
                   $ref: '#/components/schemas/Server'
       operationId: get-server-list
     parameters: []
-  '/client/server/{serverId}/players':
+  '/client/servers/{serverId}/players':
     get:
       summary: List Players for Server
       tags:
@@ -90,6 +92,24 @@ paths:
                         type: integer
                         x-stoplight:
                           id: hjd0pspfmfxi9
+                      last_seen:
+                        type: string
+                        x-stoplight:
+                          id: 2t122mb6uvsdr
+                        format: date-time
+                      first_seen:
+                        type: string
+                        x-stoplight:
+                          id: xlhtx3nbfvbl0
+                        format: date-time
+                      max_kill_distance:
+                        type: number
+                        x-stoplight:
+                          id: 2zvmxjuuk4m04
+                      avg_kill_distance:
+                        type: number
+                        x-stoplight:
+                          id: 6x852k2av6biq
               examples:
                 Example 1:
                   value:
@@ -593,51 +613,6 @@ paths:
             application/json:
               schema:
                 type: object
-                properties:
-                  doubletake:
-                    type: string
-                  arc_launcher:
-                    type: string
-                  mastiff:
-                    type: string
-                  softball:
-                    type: string
-                  wingman:
-                    type: string
-                  invalid:
-                    type: string
-                  grenade_sonar:
-                    type: string
-                  semipistol:
-                    type: string
-                  grenade_electric_smoke:
-                    type: string
-                  sniper:
-                    type: string
-                  shotgun_pistol:
-                    type: string
-                  shotgun:
-                    type: string
-                  frag_grenade:
-                    type: string
-                  smr:
-                    type: string
-                  fall:
-                    type: string
-                  epg:
-                    type: string
-                  human_execution:
-                    type: string
-                  pilot_emptyhanded:
-                    type: string
-                  defender:
-                    type: string
-                  thermite_grenade:
-                    type: string
-                  satchel:
-                    type: string
-                  wingman_n:
-                    type: string
                 x-examples:
                   Example 1:
                     doubletake: '119'
@@ -662,31 +637,107 @@ paths:
                     thermite_grenade: '150'
                     satchel: '64'
                     wingman_n: '620'
+                properties:
+                  '[weaponID]':
+                    x-stoplight:
+                      id: errxxb306byhf
+                    type: object
+                    properties:
+                      kills:
+                        type: integer
+                        x-stoplight:
+                          id: tbll8rypmptlm
+                      avg_kill_distance:
+                        type: number
+                        x-stoplight:
+                          id: njeuvklvfz71x
+                      max_kill_distance:
+                        type: number
+                        x-stoplight:
+                          id: j5w0u047enoaj
               examples:
                 Example 1:
                   value:
-                    doubletake: '119'
-                    arc_launcher: '1'
-                    mastiff: '359'
-                    softball: '137'
-                    wingman: '87'
-                    invalid: '20'
-                    grenade_sonar: '30'
-                    semipistol: '177'
-                    grenade_electric_smoke: '12'
-                    sniper: '1104'
-                    shotgun_pistol: '94'
-                    shotgun: '66'
-                    frag_grenade: '1'
-                    smr: '27'
-                    fall: '1'
-                    epg: '265'
-                    human_execution: '4'
-                    pilot_emptyhanded: '65'
-                    defender: '62'
-                    thermite_grenade: '150'
-                    satchel: '64'
-                    wingman_n: '620'
+                    sniper:
+                      kills: '1180'
+                      avg_kill_distance: '806'
+                      max_kill_distance: '3454'
+                    wingman_n:
+                      kills: '831'
+                      avg_kill_distance: '608'
+                      max_kill_distance: '2834'
+                    mastiff:
+                      kills: '425'
+                      avg_kill_distance: '318'
+                      max_kill_distance: '1570'
+                    epg:
+                      kills: '386'
+                      avg_kill_distance: '468'
+                      max_kill_distance: '3023'
+                    semipistol:
+                      kills: '196'
+                      avg_kill_distance: '370'
+                      max_kill_distance: '1104'
+                    thermite_grenade:
+                      kills: '142'
+                      avg_kill_distance: '469'
+                      max_kill_distance: '1472'
+                    softball:
+                      kills: '139'
+                      avg_kill_distance: '435'
+                      max_kill_distance: '1303'
+                    doubletake:
+                      kills: '136'
+                      avg_kill_distance: '852'
+                      max_kill_distance: '2618'
+                    shotgun_pistol:
+                      kills: '135'
+                      avg_kill_distance: '439'
+                      max_kill_distance: '1419'
+                    wingman:
+                      kills: '98'
+                      avg_kill_distance: '473'
+                      max_kill_distance: '1854'
+                    shotgun:
+                      kills: '87'
+                      avg_kill_distance: '311'
+                      max_kill_distance: '745'
+                    pilot_emptyhanded:
+                      kills: '65'
+                      avg_kill_distance: '44'
+                      max_kill_distance: '115'
+                    defender:
+                      kills: '62'
+                      avg_kill_distance: '1070'
+                      max_kill_distance: '3835'
+                    satchel:
+                      kills: '54'
+                      avg_kill_distance: '503'
+                      max_kill_distance: '1047'
+                    grenade_sonar:
+                      kills: '43'
+                      avg_kill_distance: '491'
+                      max_kill_distance: '1205'
+                    smr:
+                      kills: '27'
+                      avg_kill_distance: '490'
+                      max_kill_distance: '1405'
+                    grenade_electric_smoke:
+                      kills: '8'
+                      avg_kill_distance: '527'
+                      max_kill_distance: '987'
+                    human_execution:
+                      kills: '4'
+                      avg_kill_distance: '45'
+                      max_kill_distance: '71'
+                    fall:
+                      kills: '1'
+                      avg_kill_distance: '876'
+                      max_kill_distance: '876'
+                    arc_launcher:
+                      kills: '1'
+                      avg_kill_distance: '454'
+                      max_kill_distance: '454'
       operationId: get-weapons-report-for-server
       parameters: []
       x-internal: false
@@ -879,8 +930,6 @@ components:
         name:
           type: string
           example: fvnknoots 7v7
-        description:
-          type: string
     Kill:
       title: Kill
       x-stoplight:
@@ -1033,12 +1082,22 @@ components:
         id: b52mxxdsbv1wx
       type: object
       properties:
-        weapon:
-          $ref: '#/components/schemas/Weapon'
-        killCount:
+        kills:
           type: integer
-        deathCount:
+          x-stoplight:
+            id: thiudrlmaghe0
+        deaths:
           type: integer
+          x-stoplight:
+            id: ptc32dgqrnh6c
+        max_kill_distance:
+          type: integer
+          x-stoplight:
+            id: v2ppgf9ogdayj
+        avg_kill_distance:
+          type: integer
+          x-stoplight:
+            id: yjxzjb8ap9cpi
     PrefferedMap:
       title: PrefferedMap
       x-stoplight:
@@ -1118,71 +1177,73 @@ components:
           schema:
             type: object
             properties:
-              player:
-                $ref: '#/components/schemas/Player'
-              server:
-                $ref: '#/components/schemas/Server'
-              total_kills:
+              kills:
                 type: integer
                 description: Number of kills of the user in this server
-              total_deaths:
+                x-stoplight:
+                  id: 7e1sj7qgzklj1
+              deaths:
                 type: integer
                 description: Number of deaths of the user in this server
-              first_record:
+                x-stoplight:
+                  id: 4d4oy7nv32o0q
+              first_time_seen:
                 type: string
                 format: date-time
-              last_record:
+                x-stoplight:
+                  id: e8yjr6c67n1nc
+              last_time_seen:
                 type: string
                 format: date-time
-              most_used_weapons:
-                type: array
-                maxItems: 5
-                items:
-                  $ref: '#/components/schemas/PrefferedWeapon'
-              preferred_maps:
-                type: array
-                maxItems: 5
-                items:
-                  $ref: '#/components/schemas/PrefferedMap'
-              furthest_kill_distance:
+                x-stoplight:
+                  id: xgrbrju5f2lyc
+              max_kill_distance:
                 type: number
-              average_kill_distance:
+                x-stoplight:
+                  id: qqqfcfqcy028d
+              avg_kill_distance:
                 type: number
+                x-stoplight:
+                  id: rxhly8blndl4v
+              weapons:
+                type: object
+                x-stoplight:
+                  id: t92oo7w7hu9kf
+                properties:
+                  '[weaponId]':
+                    $ref: '#/components/schemas/PrefferedWeapon'
+                    x-stoplight:
+                      id: oxpzriozk4s16
           examples:
             Example 1:
               value:
-                player:
-                  id: 0
-                  name: Legonzaur
-                  opt-out: false
-                  hide_TOS: false
-                server:
-                  id: '1'
-                  name: fvnknoots 7v7
-                total_kills: 9865
-                total_deaths: 9954
-                first_record: '2019-08-24T14:15:22Z'
-                last_record: '2019-08-24T14:15:22Z'
-                most_used_weapons:
-                  - weapon:
-                      id: 0
-                      internal: mp_weapon_sniper
-                      name: Kraber
-                      description: string
-                      image: 'https://static.wikia.nocookie.net/titanfall_gamepedia/images/8/8b/Icon_kraber.png'
-                    killCount: 0
-                    deathCount: 0
-                preferred_maps:
-                  - map:
-                      id: 0
-                      internal: mp_angel_city
-                      name: Angel City
-                      description: string
-                      image: 'https://media.contentapi.ea.com/content/dam/eacom/en-us/common/articles-tf2-welcome-header.jpg.adapt.320w.jpg'
-                    killCount: 0
-                    deathCount: 0
-                furthest_kill_distance: 0
-                average_kill_distance: 0
+                last_seen: 'Mon Mar 13 2023 13:42:15 GMT+0100 (heure normale d’Europe centrale)'
+                max_kill_distance: '1160'
+                avg_kill_distance: '400.5000000000000000'
+                first_seen: 'Mon Mar 13 2023 13:30:13 GMT+0100 (heure normale d’Europe centrale)'
+                deaths: '21'
+                kills: '22'
+                weapons:
+                  epg:
+                    kills: '21'
+                    deaths: '8'
+                    avg_kill_distance: '395'
+                    max_kill_distance: '1160'
+                  thermite_grenade:
+                    kills: '1'
+                    deaths: '0'
+                    avg_kill_distance: '505'
+                    max_kill_distance: '505'
+                  mastiff:
+                    kills: '0'
+                    deaths: '5'
+                    avg_kill_distance: '0'
+                    max_kill_distance: '0'
+                  wingman_n:
+                    kills: '0'
+                    deaths: '8'
+                    avg_kill_distance: '0'
+                    max_kill_distance: '0'
     Player-report:
       description: OK
       content:
