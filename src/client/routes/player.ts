@@ -1,9 +1,9 @@
 import { RequestHandler } from 'express'
 import { param } from 'express-validator'
-import { validateErrors } from '../common'
-import cache from '../cache/redis'
+import { validateErrors } from '../../common'
+import cache from '../../cache/redis'
 import { sql } from 'kysely'
-import db from '../db/db'
+import db from '../../db/db'
 import { getPlayerWeapons } from './playerWeapons'
 
 const { count, max, min, avg } = db.fn
@@ -14,7 +14,7 @@ const middlewares: RequestHandler[] = [
   async (req, res) => {
     const server = Number(req.params.serverId)
     const player = Number(req.params.playerId)
-    await processPlayerReport(server, player)
+    //await processPlayerReport(server, player)
     const data = await getPlayerReport(server, player)
     const weapons = await getPlayerWeapons(server, player)
     res.status(200).send({ ...data, weapons })
@@ -27,7 +27,7 @@ async function getPlayerReport(server: number, player: number) {
   return data
 }
 
-async function processPlayerReport(server: number, player: number) {
+export async function processPlayerReport(server: number, player: number) {
   let last_entry =
     Number(
       await cache.HGET(`servers:${server}:players:${player}`, 'last_entry')
@@ -85,7 +85,6 @@ async function processPlayerReport(server: number, player: number) {
     .orderBy('kills', 'desc')
     .execute()
   //if no new kills
-  console.log(newData)
   if (newData.length == 0) {
     return
   }
@@ -96,7 +95,7 @@ async function processPlayerReport(server: number, player: number) {
       cache.HSET(
         `servers:${server}:players:${player}`,
         key.toString(),
-        value.toString()
+        (value || '').toString()
       )
     )
   })

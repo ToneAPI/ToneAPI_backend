@@ -14,6 +14,9 @@ const db = new Kysely<Database>({
     })
   }),
   log(event) {
+    if (process.env.ENVIRONMENT != 'production') {
+      return
+    }
     if (event.level === 'query') {
       console.log(event.query.sql)
       console.log(event.query.parameters)

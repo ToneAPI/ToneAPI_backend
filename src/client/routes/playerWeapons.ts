@@ -1,9 +1,9 @@
 import { RequestHandler } from 'express'
 import { param } from 'express-validator'
-import { validateErrors } from '../common'
-import cache from '../cache/redis'
+import { validateErrors } from '../../common'
+import cache from '../../cache/redis'
 import { sql } from 'kysely'
-import db from '../db/db'
+import db from '../../db/db'
 
 const { count, max, avg } = db.fn
 
@@ -13,7 +13,7 @@ const middlewares: RequestHandler[] = [
   async (req, res) => {
     const server = Number(req.params.serverId)
     const player = Number(req.params.playerId)
-    await processPlayerWeapons(server, player)
+    //await processPlayerWeapons(server, player)
     const data = await getPlayerWeapons(server, player)
     res.status(200).send(data)
   }
@@ -51,7 +51,7 @@ export async function getPlayerWeapons(server: number, player: number) {
   return data
 }
 
-async function processPlayerWeapons(server: number, player: number) {
+export async function processPlayerWeapons(server: number, player: number) {
   let last_entry =
     Number(
       await cache.HGET(

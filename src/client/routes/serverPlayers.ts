@@ -1,9 +1,9 @@
 import { RequestHandler } from 'express'
 import { param } from 'express-validator'
-import { validateErrors } from '../common'
-import cache from '../cache/redis'
+import { validateErrors } from '../../common'
+import cache from '../../cache/redis'
 import { sql } from 'kysely'
-import db from '../db/db'
+import db from '../../db/db'
 
 const { count, max } = db.fn
 
@@ -12,7 +12,7 @@ const middlewares: RequestHandler[] = [
   validateErrors,
   async (req, res) => {
     const server = Number(req.params.serverId)
-    await processServerPlayers(server)
+    //await processServerPlayers(server)
     let data = await getServerPlayers(server)
     res.status(200).send(data)
   }
@@ -40,7 +40,7 @@ async function getServerPlayers(server: number) {
   return data
 }
 
-async function processServerPlayers(server: number) {
+export async function processServerPlayers(server: number) {
   let last_entry =
     Number(await cache.GET(`servers:${server}:players:last_entry`)) || 0
   const newData = await db
