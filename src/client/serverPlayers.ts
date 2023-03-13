@@ -52,6 +52,7 @@ async function processServerPlayers(server: number) {
         .select(max('kill.id').as('last_entry'))
         .as('last_entry')
     ])
+    .where('kill.id', '>', last_entry)
     .groupBy('attacker_id')
     .execute()
   //if no new kills
