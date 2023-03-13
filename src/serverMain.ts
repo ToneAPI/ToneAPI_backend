@@ -12,10 +12,10 @@ app.use(express.json())
 
 app.use(cors())
 app.get('/', (req, res) => {
-  res.send('Hello World!')
+  res.send('Tone server API online')
 })
 
-app.use('/v1/servers', server)
+app.use('/', server)
 
 dbReady().then((e) => {
   app.listen(port, '0.0.0.0', () => {
