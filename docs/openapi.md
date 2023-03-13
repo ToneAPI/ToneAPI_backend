@@ -1382,7 +1382,7 @@ const headers = {
   'Accept':'application/json'
 };
 
-fetch('https://tone.sleepycat.date/v1/client/servers/{serverId}/players/{playerId}',
+fetch('https://tone.sleepycat.date/v1/client/servers/{serverId}/players/{playerId}/weapons',
 {
   method: 'GET',
 
@@ -1396,7 +1396,7 @@ fetch('https://tone.sleepycat.date/v1/client/servers/{serverId}/players/{playerI
 
 ```
 
-`GET /client/servers/{serverId}/players/{playerId}`
+`GET /client/servers/{serverId}/players/{playerId}/weapons`
 
 *Get Player report for Server*
 
@@ -1409,41 +1409,15 @@ fetch('https://tone.sleepycat.date/v1/client/servers/{serverId}/players/{playerI
 
 > Example responses
 
-> OK
+> 200 Response
 
 ```json
 {
-  "last_seen": "Mon Mar 13 2023 13:42:15 GMT+0100 (heure normale d’Europe centrale)",
-  "max_kill_distance": "1160",
-  "avg_kill_distance": "400.5000000000000000",
-  "first_seen": "Mon Mar 13 2023 13:30:13 GMT+0100 (heure normale d’Europe centrale)",
-  "deaths": "21",
-  "kills": "22",
-  "weapons": {
-    "epg": {
-      "kills": "21",
-      "deaths": "8",
-      "avg_kill_distance": "395",
-      "max_kill_distance": "1160"
-    },
-    "thermite_grenade": {
-      "kills": "1",
-      "deaths": "0",
-      "avg_kill_distance": "505",
-      "max_kill_distance": "505"
-    },
-    "mastiff": {
-      "kills": "0",
-      "deaths": "5",
-      "avg_kill_distance": "0",
-      "max_kill_distance": "0"
-    },
-    "wingman_n": {
-      "kills": "0",
-      "deaths": "8",
-      "avg_kill_distance": "0",
-      "max_kill_distance": "0"
-    }
+  "[weaponID]": {
+    "kills": 0,
+    "deaths": 0,
+    "max_kill_distance": 0,
+    "avg_kill_distance": 0
   }
 }
 ```
@@ -1461,18 +1435,11 @@ Status Code **200**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» kills|integer|false|none|Number of kills of the user in this server|
-|» deaths|integer|false|none|Number of deaths of the user in this server|
-|» first_time_seen|string(date-time)|false|none|none|
-|» last_time_seen|string(date-time)|false|none|none|
-|» max_kill_distance|number|false|none|none|
-|» avg_kill_distance|number|false|none|none|
-|» weapons|object|false|none|none|
-|»» [weaponId]|[PrefferedWeapon](#schemaprefferedweapon)|false|none|none|
-|»»» kills|integer|false|none|none|
-|»»» deaths|integer|false|none|none|
-|»»» max_kill_distance|integer|false|none|none|
-|»»» avg_kill_distance|integer|false|none|none|
+|» [weaponID]|[PrefferedWeapon](#schemaprefferedweapon)|false|none|none|
+|»» kills|integer|false|none|none|
+|»» deaths|integer|false|none|none|
+|»» max_kill_distance|integer|false|none|none|
+|»» avg_kill_distance|integer|false|none|none|
 
 <aside class="success">
 This operation does not require authentication
