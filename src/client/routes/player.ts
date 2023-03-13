@@ -91,6 +91,16 @@ export async function processPlayerReport(server: number, player: number) {
 
   const promises: Promise<number>[] = []
   Object.entries(newData[0]).forEach(([key, value]) => {
+    if (key == 'last_seen' || key == 'first_seen') {
+      promises.push(
+        cache.HSET(
+          `servers:${server}:players:${player}`,
+          key.toString(),
+          new Date(value || '').getTime()
+        )
+      )
+      return
+    }
     promises.push(
       cache.HSET(
         `servers:${server}:players:${player}`,
