@@ -4,8 +4,9 @@ import { validateErrors } from '../../common'
 import cache from '../../cache/redis'
 import { sql } from 'kysely'
 import db from '../../db/db'
-import { getPlayerWeapons } from './playerWeapons'
+//import { getPlayerWeapons } from './serverPlayerWeapons'
 
+//TODO : NOT WORKING AS OF NOW
 const { count, max, min, avg } = db.fn
 
 const middlewares: RequestHandler[] = [
@@ -16,8 +17,9 @@ const middlewares: RequestHandler[] = [
     const player = Number(req.params.playerId)
     //await processPlayerReport(server, player)
     const data = await getPlayerReport(server, player)
-    const weapons = await getPlayerWeapons(server, player)
-    res.status(200).send({ ...data, weapons })
+    //const weapons = await getPlayerWeapons(server, player)
+    res.status(200).send(data)
+    //res.status(200).send({ ...data, weapons })
   }
 ]
 

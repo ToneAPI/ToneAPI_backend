@@ -2,7 +2,6 @@ import { RequestHandler } from 'express'
 import { param } from 'express-validator'
 import { validateErrors } from '../../common'
 import cache from '../../cache/redis'
-import { sql } from 'kysely'
 import db from '../../db/db'
 
 const { count, max } = db.fn
