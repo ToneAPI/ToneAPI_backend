@@ -4,7 +4,8 @@
 import db from '../../db/db'
 import cache from '../../cache/redis'
 import { getPlayerReport, getPlayerSet } from '../../cache/cacheUtils'
-const { count, max, avg, sum } = db.fn
+import { sql } from 'kysely'
+const { count, max, avg } = db.fn
 
 /**
  * Populates the set of players (just a list with player IDS)
@@ -82,6 +83,9 @@ export async function processPlayerReport(
   let query = db
     .selectFrom('kill')
     .select([
+      sql<string>`percentile_disc(0) WITHIN GROUP (ORDER BY attacker_name) FILTER (where attacker_id = ${player})`.as(
+        'username'
+      ),
       count<number>('id')
         .filterWhere('attacker_id', '=', player)
         .filterWhereRef('attacker_id', '!=', 'victim_id')
@@ -113,16 +117,20 @@ export async function processPlayerReport(
     return
   }
   const promises: Promise<any>[] = []
-  newData.forEach(({ kills, avg_kill_distance, max_kill_distance, deaths }) => {
-    promises.push(
-      processAvg(cacheLocation, 'avg_kill_distance', {
-        newkills: kills || 0,
-        newavg: avg_kill_distance || 0
-      }).then((e) => cache.HINCRBY(cacheLocation, 'kills', kills || 0)),
-      cache.HINCRBY(cacheLocation, 'deaths', deaths || 0),
-      processMax(cacheLocation, 'max_kill_distance', max_kill_distance)
-    )
-  })
+  newData.forEach(
+    ({ kills, avg_kill_distance, max_kill_distance, deaths, username }) => {
+      if (!username) return
+      promises.push(
+        processAvg(cacheLocation, 'avg_kill_distance', {
+          newkills: kills || 0,
+          newavg: avg_kill_distance || 0
+        }).then((e) => cache.HINCRBY(cacheLocation, 'kills', kills || 0)),
+        cache.HINCRBY(cacheLocation, 'deaths', deaths || 0),
+        cache.HSET(cacheLocation, 'username', username),
+        processMax(cacheLocation, 'max_kill_distance', max_kill_distance)
+      )
+    }
+  )
 
   promises.push(cache.HSET(cacheLocation, 'last_entry', newData[0].last_entry))
   await Promise.all(promises)
