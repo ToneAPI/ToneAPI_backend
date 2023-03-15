@@ -5,7 +5,6 @@ import cors from 'cors'
 import client from './client/client'
 import { dbReady } from './db/db'
 import { cacheReady } from './cache/redis'
-import processAll from './client/process'
 
 const app = express()
 const port = 3000
@@ -21,10 +20,8 @@ app.use('/', client)
 
 dbReady().then((e) => {
   cacheReady().then((e) => {
-    processAll().then((e) => {
-      app.listen(port, '0.0.0.0', () => {
-        console.log(`Tone client api listening on port ${port}`)
-      })
+    app.listen(port, '0.0.0.0', () => {
+      console.log(`Tone client api listening on port ${port}`)
     })
   })
 })
