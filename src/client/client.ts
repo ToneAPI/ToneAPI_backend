@@ -54,6 +54,7 @@ router.get(
       Number(req.query.server) || undefined,
       req.query.weapon?.toString()
     )
+    /*
     if (!req.query.weapon) {
       const weapons = await getWeaponList(
         req.query.server?.toString(),
@@ -66,7 +67,7 @@ router.get(
         Number(req.query.server) || undefined,
         req.params.playerId
       )) as any
-    }
+    }*/
     res.status(200).send(data)
   }
 )
