@@ -10,7 +10,8 @@ const db = new Kysely<Database>({
       host: process.env.POSTGRES_HOST,
       database: process.env.POSTGRES_DATABASE,
       user: process.env.POSTGRES_USER,
-      password: process.env.POSTGRES_PASSWORD
+      password: process.env.POSTGRES_PASSWORD,
+      max: 30
     })
   }),
   log(event) {

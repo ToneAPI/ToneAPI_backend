@@ -2,7 +2,8 @@ import { RequestHandler } from 'express'
 import { param } from 'express-validator'
 import { validateErrors } from '../../common'
 import cache from '../../cache/redis'
-import { sql } from 'kysely'
+import { getWeaponList, getPlayerReport } from '../../cache/cacheUtils'
+import { DataTypeNode, sql } from 'kysely'
 import db from '../../db/db'
 //import { getPlayerWeapons } from './serverPlayerWeapons'
 
@@ -13,21 +14,19 @@ const middlewares: RequestHandler[] = [
   param(['serverId', 'playerId']).exists().toInt().isInt(),
   validateErrors,
   async (req, res) => {
-    const server = Number(req.params.serverId)
-    const player = Number(req.params.playerId)
     //await processPlayerReport(server, player)
-    const data = await getPlayerReport(server, player)
-    //const weapons = await getPlayerWeapons(server, player)
+    const data = await getPlayerReport(
+      req.params.playerId,
+      Number(req.params.serverId)
+    )
+    const weapons = await getWeaponList(
+      req.params.serverId,
+      req.params.playerId
+    )
+    data.weapons = weapons
     res.status(200).send(data)
-    //res.status(200).send({ ...data, weapons })
   }
 ]
-
-async function getPlayerReport(server: number, player: number) {
-  const data = await cache.HGETALL(`servers:${server}:players:${player}`)
-  delete data.last_entry
-  return data
-}
 
 export async function processPlayerReport(server: number, player: number) {
   let last_entry =

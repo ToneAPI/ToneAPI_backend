@@ -16,7 +16,7 @@ const { count, max, avg } = db.fn
  * @param player optional player filter
  * @returns
  */
-export async function populateWeaponSet(server?: number, player?: number) {
+export async function populateWeaponSet(server?: number, player?: string) {
   const serverPrefix = server ? `servers:${server}:` : ''
   const playerPrefix = player ? `players:${player}:` : ''
   const cacheLocation = serverPrefix + playerPrefix + `weapons`
@@ -37,8 +37,8 @@ export async function populateWeaponSet(server?: number, player?: number) {
   }
   if (player) {
     query = query
-      .where('attacker_id', '=', player.toString())
-      .orWhere('victim_id', '=', player.toString())
+      .where('attacker_id', '=', player)
+      .orWhere('victim_id', '=', player)
   }
   const newData = await query.execute()
   if (newData.length == 0) {
@@ -71,7 +71,7 @@ export async function populateWeaponSet(server?: number, player?: number) {
 export async function processWeaponReport(
   weapon: string,
   server?: number,
-  player?: number
+  player?: string
 ) {
   if (weapon == 'last_entry' || weapon == 'processedList') {
     console.error('Weapon cannot be ' + weapon)
@@ -93,15 +93,17 @@ export async function processWeaponReport(
         .as('last_entry')
     ])
     .where('cause_of_death', '=', weapon)
+    .whereRef('attacker_id', '!=', 'victim_id')
     .where('kill.id', '>', last_entry)
     .groupBy('cause_of_death')
   if (server) {
     query = query.where('server', '=', server)
   }
   if (player) {
-    query = query.where('attacker_id', '=', player.toString())
+    query = query.where('attacker_id', '=', player)
   }
   const newData = await query.execute()
+
   if (newData.length == 0) {
     return
   }
@@ -137,7 +139,9 @@ async function processMax(
   key: 'max_kill_distance',
   newmax: number
 ) {
-  const oldMax = Number(await cache.HGET(cacheLocation, key)) | 0
+  const oldMax = Number(await cache.HGET(cacheLocation, key)) || -1
+  newmax = newmax || 0
+  if (!oldMax || !newmax) console.log(oldMax, newmax)
   if (oldMax < newmax) await cache.HSET(cacheLocation, key, newmax)
 }
 
@@ -153,10 +157,11 @@ async function processMax(
  * @param player optional player filter
  * @returns
  */
-export async function processWeaponList(server?: number, player?: number) {
+export async function processWeaponList(server?: number, player?: string) {
   const serverPrefix = server ? `servers:${server}:` : ''
   const playerPrefix = player ? `players:${player}:` : ''
-  const weapons = await cache.SMEMBERS('weapons')
+  const cacheLocation = serverPrefix + playerPrefix + `weapons`
+  const weapons = await cache.SMEMBERS(cacheLocation)
   const promises: Promise<any>[] = []
   const data: {
     [weaponId: string]: {
@@ -174,8 +179,5 @@ export async function processWeaponList(server?: number, player?: number) {
     )
   })
   await Promise.all(promises)
-  return await cache.SET(
-    serverPrefix + playerPrefix + `weapons:processedList`,
-    JSON.stringify(data)
-  )
+  return await cache.SET(cacheLocation + `:processedList`, JSON.stringify(data))
 }
