@@ -1,7 +1,7 @@
 import { Router } from 'express'
 import { param, query } from 'express-validator'
 import { validateErrors } from '../common'
-import serverList from './routes/serverList'
+import db from '../db/db'
 import {
   getWeaponList,
   getWeaponReport,
@@ -88,7 +88,14 @@ router.get(
 
 //router.get('/maps/', (req, res, next) => {})
 
-router.get('/servers/', serverList)
+router.get('/servers/', async (req, res) => {
+  const data = await db.selectFrom('server').selectAll().execute()
+  res.status(200).send(
+    data.map((e) => {
+      return { name: e.name, id: e.id, description: e.description }
+    })
+  )
+})
 //router.get('/servers/:serverId/', (req, res, next) => {})
 
 export default router

@@ -1,7 +1,4 @@
 import db from '../db/db'
-import cache from '../cache/redis'
-import { processServerPlayers } from './routes/serverPlayers'
-/*import { processPlayerWeapons } from './routes/serverPlayerWeapons'*/
 import {
   processWeaponReport,
   populateWeaponSet,
