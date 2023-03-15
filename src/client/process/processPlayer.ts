@@ -22,6 +22,8 @@ export async function populatePlayerSet(server?: number, weapon?: string) {
   const weaponPrefix = weapon ? `weapons:${weapon}:` : ''
   const cacheLocation = serverPrefix + weaponPrefix + `players`
   const last_entry = Number(await cache.GET(cacheLocation + ':last_entry')) || 0
+
+  //processKills
   let query = db
     .selectFrom('kill')
     .select([
@@ -39,7 +41,7 @@ export async function populatePlayerSet(server?: number, weapon?: string) {
   if (weapon) {
     query = query.where('cause_of_death', '=', weapon)
   }
-  const newData = await query.execute()
+  let newData = await query.execute()
   if (newData.length == 0) {
     return
   }
@@ -51,7 +53,36 @@ export async function populatePlayerSet(server?: number, weapon?: string) {
     }
     promises.push(cache.SADD(cacheLocation, attacker_id))
   })
-  promises.push(cache.SET(cacheLocation + ':last_entry', newData[0].last_entry))
+
+  //processDeaths
+  let query2 = db
+    .selectFrom('kill')
+    .select([
+      sql<string>`DISTINCT(victim_id)`.as('victim_id'),
+      db
+        .selectFrom('kill')
+        .select(max('kill.id').as('last_entry'))
+        .as('last_entry')
+    ])
+    .where('kill.id', '>', last_entry)
+  if (server) {
+    query2 = query2.where('server', '=', server)
+  }
+  if (weapon) {
+    query2 = query2.where('cause_of_death', '=', weapon)
+  }
+  const newData2 = await query2.execute()
+  newData2.forEach(({ victim_id }) => {
+    if (victim_id == 'last_entry' || victim_id == 'processedList') {
+      console.error('victim_id cannot be ' + victim_id)
+      return
+    }
+    promises.push(cache.SADD(cacheLocation, victim_id))
+  })
+  newData = await query.execute()
+  promises.push(
+    cache.SET(cacheLocation + ':last_entry', newData2[0].last_entry)
+  )
   await Promise.all(promises)
 }
 
@@ -119,14 +150,26 @@ export async function processPlayerReport(
   const promises: Promise<any>[] = []
   newData.forEach(
     ({ kills, avg_kill_distance, max_kill_distance, deaths, username }) => {
-      if (!username) return
+      promises.push(
+        (async () => {
+          if (!username) {
+            await cache.HSET(
+              cacheLocation,
+              'username',
+              (await cache.HGET(`players:` + player, 'username')) || ''
+            )
+          } else {
+            await cache.HSET(cacheLocation, 'username', username)
+          }
+        })()
+      )
       promises.push(
         processAvg(cacheLocation, 'avg_kill_distance', {
           newkills: kills || 0,
           newavg: avg_kill_distance || 0
         }).then((e) => cache.HINCRBY(cacheLocation, 'kills', kills || 0)),
         cache.HINCRBY(cacheLocation, 'deaths', deaths || 0),
-        cache.HSET(cacheLocation, 'username', username),
+
         processMax(cacheLocation, 'max_kill_distance', max_kill_distance)
       )
     }
