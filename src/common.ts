@@ -35,7 +35,7 @@ export function GetRequest(url: string) {
 export const validateErrors: RequestHandler = (req, res, next) => {
   const errors = validationResult(req)
   if (!errors.isEmpty()) {
-    console.error(JSON.stringify(errors))
+    console.error(JSON.stringify(errors), 'body', req.body, 'query', req.params)
     return res.status(400).json({ errors: errors.array() })
   }
   next()
