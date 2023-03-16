@@ -22,6 +22,7 @@ router.post(
   //Huge mess to retrieve server id from expressBasicAuth. We probably should fix it.
   (req, res, next) => {
     if (!req) res.sendStatus(500)
+    console.log('authentification try with', req.headers['authorization'])
     return expressBasicAuth({
       authorizeAsync: true,
       authorizer: CheckServerToken.bind(req),
