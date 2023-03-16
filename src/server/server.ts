@@ -1,6 +1,6 @@
 import { NextFunction, Router } from 'express'
 import expressBasicAuth from 'express-basic-auth'
-import { body, header, validationResult } from 'express-validator'
+import { body, header, query } from 'express-validator'
 import register from './register'
 import { CreateKillRecord, CheckServerToken } from '../db/db'
 import { validateErrors } from '../common'
@@ -58,6 +58,7 @@ router.post('/:serverId/kill', (req, res, next) => {
 
 router.post(
   '/:serverId/kill',
+  query('serverId').exists().toInt().isInt(),
   body([
     'attacker_current_weapon_mods',
     'attacker_weapon_1_mods',
@@ -149,9 +150,13 @@ router.post(
       cause_of_death,
       distance
     } = req.body
+    if (!req.query.serverId) {
+      res.status(500).send('serverId cannot be undefined')
+      return
+    }
     CreateKillRecord({
       killstat_version,
-      server: req.body.serverId,
+      server: Number(req.query.serverId),
       match_id,
       game_mode,
       map,
