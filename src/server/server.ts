@@ -11,7 +11,7 @@ router.use('/', register)
 
 //auth middleware
 router.post(
-  '/:serverId',
+  '/:serverId*',
   header('authorization')
     .exists({ checkFalsy: true })
     .withMessage('Missing Authorization Header')
