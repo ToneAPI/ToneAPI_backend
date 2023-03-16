@@ -41,7 +41,7 @@ const serversTimeout: { [id: string]: NodeJS.Timeout } = {}
 
 //same rate limiting code as register. max 10 kills per server every 1 sec. should be enough.
 router.post('/:serverId/kill', (req, res, next) => {
-  let serverId = req.body.serverId || 'undefined'
+  let serverId = Number(req.query.serverId)
   if (serversCount[serverId] > 2) {
     return res.status(429).json({
       error: 'too many requests. Are players really making that much kills ?'
@@ -58,7 +58,6 @@ router.post('/:serverId/kill', (req, res, next) => {
 
 router.post(
   '/:serverId/kill',
-  query('serverId').exists().toInt().isInt(),
   body([
     'attacker_current_weapon_mods',
     'attacker_weapon_1_mods',
@@ -193,7 +192,7 @@ router.post(
         res.sendStatus(201)
         console.log(
           `[${Date.now().toLocaleString()}] Kill submitted for server ${
-            req.body.serverId
+            req.query.serverId
           }, ${attacker_name} killed ${victim_name}`
         )
       })

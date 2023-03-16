@@ -75,7 +75,6 @@ export function CheckServerToken(
     .where('token', '=', password)
     .executeTakeFirst()
     .then((result) => {
-      if (!!result) this.body.serverId = name
       cb(null, !!result)
     })
 }
