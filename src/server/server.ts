@@ -72,7 +72,7 @@ router.post(
     'victim_offhand_weapon_1',
     'victim_offhand_weapon_2'
   ])
-    .optional({ checkFalsy: true })
+    .default(0)
     .toInt()
     .isInt()
     .withMessage('must be a valid int'),
