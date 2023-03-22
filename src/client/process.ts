@@ -49,7 +49,7 @@ async function processAll() {
   if (process.env.ENVIRONMENT == 'production') {
     return
   }
-  setTimeout(processAll, 60000)
+  setTimeout(processAll, 3600000)
 }
 
 /**
