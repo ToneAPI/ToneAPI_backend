@@ -72,7 +72,7 @@ router.post(
     'victim_offhand_weapon_1',
     'victim_offhand_weapon_2'
   ])
-    .default(0)
+    .customSanitizer((value) => value || 0)
     .toInt()
     .isInt()
     .withMessage('must be a valid int'),
