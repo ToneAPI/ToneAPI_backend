@@ -11,7 +11,7 @@ export async function getWeaponReport(
   server?: number,
   player?: string
 ) {
-  const serverPrefix = server ? `servers:${server}:` : ''
+  const serverPrefix = server?.toString() ? `servers:${server}:` : ''
   const playerPrefix = player ? `players:${player}:` : ''
   const cacheLocation = serverPrefix + playerPrefix + `weapons:` + weapon
   const data = await cache.HGETALL(cacheLocation)
@@ -20,7 +20,7 @@ export async function getWeaponReport(
 }
 
 export function getWeaponSet(server?: number, player?: string) {
-  const serverPrefix = server ? `servers:${server}:` : ''
+  const serverPrefix = server?.toString() ? `servers:${server}:` : ''
   const playerPrefix = player ? `players:${player}:` : ''
   const cacheLocation = serverPrefix + playerPrefix + `weapons`
   return cache.SMEMBERS(cacheLocation)
@@ -33,7 +33,7 @@ export function getWeaponSet(server?: number, player?: string) {
  * @returns string
  */
 export async function getWeaponList(server?: string, player?: string) {
-  const serverPrefix = server ? `servers:${server}:` : ''
+  const serverPrefix = server?.toString() ? `servers:${server}:` : ''
   const playerPrefix = player ? `players:${player}:` : ''
   return JSON.parse(
     (await cache.GET(serverPrefix + playerPrefix + `weapons:processedList`)) ||
@@ -53,7 +53,7 @@ export async function getPlayerReport(
   server?: number,
   weapon?: string
 ) {
-  const serverPrefix = server ? `servers:${server}:` : ''
+  const serverPrefix = server?.toString() ? `servers:${server}:` : ''
   const weaponPrefix = weapon ? `weapons:${weapon}:` : ''
   const cacheLocation = serverPrefix + weaponPrefix + `players:` + player
   const data = await cache.HGETALL(cacheLocation)
@@ -68,7 +68,7 @@ export async function getPlayerReport(
  * @returns string
  */
 export async function getPlayerList(server?: number, weapon?: string) {
-  const serverPrefix = server ? `servers:${server}:` : ''
+  const serverPrefix = server?.toString() ? `servers:${server}:` : ''
   const weaponPrefix = weapon ? `weapons:${weapon}:` : ''
   return JSON.parse(
     (await cache.GET(serverPrefix + weaponPrefix + `players:processedList`)) ||
@@ -77,7 +77,7 @@ export async function getPlayerList(server?: number, weapon?: string) {
 }
 
 export function getPlayerSet(server?: number, weapon?: string) {
-  const serverPrefix = server ? `servers:${server}:` : ''
+  const serverPrefix = server?.toString() ? `servers:${server}:` : ''
   const weaponPrefix = weapon ? `weapons:${weapon}:` : ''
   const cacheLocation = serverPrefix + weaponPrefix + `players`
   return cache.SMEMBERS(cacheLocation)
