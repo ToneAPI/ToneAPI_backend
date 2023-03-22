@@ -71,8 +71,21 @@ router.post(
     'victim_weapon_3_mods',
     'victim_offhand_weapon_1',
     'victim_offhand_weapon_2'
+  ]).default(0),
+  body([
+    'attacker_current_weapon_mods',
+    'attacker_weapon_1_mods',
+    'attacker_weapon_2_mods',
+    'attacker_weapon_3_mods',
+    'attacker_offhand_weapon_1',
+    'attacker_offhand_weapon_2',
+    'victim_current_weapon_mods',
+    'victim_weapon_1_mods',
+    'victim_weapon_2_mods',
+    'victim_weapon_3_mods',
+    'victim_offhand_weapon_1',
+    'victim_offhand_weapon_2'
   ])
-    .customSanitizer((value) => value || 0)
     .toInt()
     .isInt()
     .withMessage('must be a valid int'),
