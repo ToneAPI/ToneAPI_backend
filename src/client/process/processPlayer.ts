@@ -18,7 +18,9 @@ const { count, max, avg } = db.fn
  * @returns
  */
 export async function populatePlayerSet(server?: number, weapon?: string) {
-  const serverPrefix = server?.toString() ? `servers:${server}:` : ''
+  const serverPrefix = !isNaN(Number(server?.toString()))
+    ? `servers:${server}:`
+    : ''
   const weaponPrefix = weapon ? `weapons:${weapon}:` : ''
   const cacheLocation = serverPrefix + weaponPrefix + `players`
   const last_entry = Number(await cache.GET(cacheLocation + ':last_entry')) || 0
