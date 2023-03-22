@@ -22,7 +22,7 @@ router.get(
   async (req, res) => {
     const data = await getWeaponReport(
       req.params.weaponId,
-      Number(req.query.server) || undefined,
+      Number(req.query.server),
       req.query.player?.toString()
     )
     res.status(200).send(data)
@@ -51,7 +51,7 @@ router.get(
   async (req, res) => {
     const data = await getPlayerReport(
       req.params.playerId,
-      Number(req.query.server) || undefined,
+      Number(req.query.server),
       req.query.weapon?.toString()
     )
     /*
@@ -79,7 +79,7 @@ router.get(
   validateErrors,
   async (req, res) => {
     const data = await getPlayerList(
-      Number(req.query.server) || undefined,
+      Number(req.query.server),
       req.query.weapon?.toString()
     )
     res.status(200).send(data)
