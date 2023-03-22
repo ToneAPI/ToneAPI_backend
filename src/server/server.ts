@@ -71,7 +71,12 @@ router.post(
     'victim_weapon_3_mods',
     'victim_offhand_weapon_1',
     'victim_offhand_weapon_2'
-  ]).default(0),
+  ]).customSanitizer((value) => {
+    if (isNaN(value) || !value) {
+      value = 0
+    }
+    return value
+  }),
   body([
     'attacker_current_weapon_mods',
     'attacker_weapon_1_mods',
