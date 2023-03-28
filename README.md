@@ -9,6 +9,7 @@ To install, you must have a [postgresql](https://www.postgresql.org/) and [redis
 The serverside and clientside parts are two different executables. You may need a reverse proxy like [nginx](https://www.nginx.com/) or use two different ports.
 
 # Documentation
+**DISCLAIMER: DOCUMENTATION ISNT UP TO DATE. WILL UPDATE SOON**
 
 An OpenAPI file is located in `reference/OpenAPI.yml`
 
