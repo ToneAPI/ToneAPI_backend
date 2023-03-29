@@ -65,7 +65,7 @@ export async function CreateServer({
 //tokens are stored in raw... maybe we should use something better in the future
 //Using callback for express-basic-auth
 export function CheckServerToken(
-  this: { body: any },
+  this: { params: any, body: any },
   name: string,
   password: string,
   cb: (error: Error | null, success: boolean) => void
@@ -75,7 +75,8 @@ export function CheckServerToken(
     .where('token', '=', password)
     .executeTakeFirst()
     .then((result) => {
-      cb(null, !!result)
+      if (name != this.params.serverId) return cb(null, false)
+      return cb(null, !!result)
     })
 }
 /*
