@@ -1,15 +1,8 @@
 import db from '../db/db'
-import {
-  processWeaponReport,
-  populateWeaponSet,
-  processWeaponList
-} from './process/processWeapon'
-import {
-  populatePlayerSet,
-  processPlayerList,
-  processPlayerReport
-} from './process/processPlayer'
-import { getWeaponSet, getPlayerSet } from '../cache/cacheUtils'
+const { count, max, sum } = db.fn
+import client from '../cache/redis'
+import { createWeaponJson } from './process/processWeapon'
+import { createPlayerJson } from './process/processPlayer'
 
 /**
  * Starts the process of populating the REDIS database globally
@@ -18,33 +11,12 @@ import { getWeaponSet, getPlayerSet } from '../cache/cacheUtils'
 async function processAll() {
   console.log('Starting data calculation...')
   const timeStart = new Date()
-  // Iterate through all servers
-  const servers = await db.selectFrom('server').selectAll().execute()
-  await populateAllSets()
-  const promises: Promise<any>[] = []
-  servers.forEach((server) => {
-    promises.push(processServer(server.id))
-  })
-  //Iterate through all weapons
-  const weapons = await getWeaponSet()
-  weapons.forEach((weapon) => {
-    promises.push(processWeapon(weapon))
-  })
-  //Iterate through all players
 
-  const players = await getPlayerSet()
-  players.forEach((player) => {
-    promises.push(processPlayer(player))
-  })
-
-  await Promise.all(promises)
-  //Generate lists now that we have all data
-  await processAllLists()
-
+  await Promise.all([processGlobalStats(), processServerStats()])
   console.log(
     'Data calculation finished. Took + ' +
-      Math.abs(new Date().getTime() - timeStart.getTime()) / 1000 +
-      ' seconds'
+    Math.abs(new Date().getTime() - timeStart.getTime()) / 1000 +
+    ' seconds'
   )
   if (process.env.ENVIRONMENT == 'production') {
     return
@@ -52,157 +24,204 @@ async function processAll() {
   setTimeout(processAll, 3600000)
 }
 
-/**
- * Populte redis of server lists and reports
- * @param server
- */
-async function processServer(server: number) {
-  /*const promises: Promise<any>[] = []
-  //TODO TO REMOVE OR RENAME
-  await processServerPlayers(server)
-
-  //Iterate through all weapons present on this server
-  await populateWeaponSet(server)
-  const weapons = await cache.SMEMBERS(`servers:${server}:weapons`)
-  weapons.forEach((weapon) => {
-    promises.push(processWeaponReport(weapon, server))
-  })
-
-  //Iterate through all players present on this server (and do more stuff on those players)
-  const players = await cache.SMEMBERS(`servers:${server}:players`)
-  players.forEach((player) => {
-    promises.push(processPlayer({ server, player }))
-  })
-  await Promise.all(promises)
-  await processWeaponList(server)*/
-}
-
-/**
- * Populate redis of player lists and reports
- * @param param0
- */
-async function processPlayer(player: string) {
-  const promises: Promise<any>[] = []
-  //iterate through all servers
-  const servers = await db.selectFrom('server').selectAll().execute()
-  servers.forEach((server) => {
-    promises.push(
-      processPlayerReport(player, server.id),
-      //Iterate through all players on servers
-      getWeaponSet(server.id, player).then((weapons) => {
-        weapons.forEach((weapon) => {
-          promises.push(processPlayerReport(player, server.id, weapon))
-        })
+async function processGlobalStats() {
+  let promises: Promise<any>[] = []
+  //Global kills
+  promises.push(db.selectFrom('kill')
+    .select([count('id').as('kills'), max('distance').as('max_distance'), sum('distance').as('total_distance')])
+    .execute().then(data => {
+      let transaction = client.multi()
+      data.forEach(({ kills, max_distance, total_distance }) => {
+        transaction = processGlobalData({ kills, max_distance, total_distance }, transaction)
       })
-    )
-  })
-  //iterate through all weapons outside of servers
-  const weapons = await getWeaponSet(undefined, player)
-  weapons.forEach((weapon) => {
-    promises.push(processPlayerReport(player, undefined, weapon))
-  })
-  //global weapon data
-  promises.push(processPlayerReport(player))
-  await Promise.all(promises)
-}
+      return transaction.exec()
+    }))
 
-async function processWeapon(weapon: string) {
-  const promises: Promise<any>[] = []
-  //iterate through all servers
-  const servers = await db.selectFrom('server').selectAll().execute()
-  servers.forEach((server) => {
-    promises.push(
-      processWeaponReport(weapon, server.id),
-      //Iterate through all players on servers
-      getPlayerSet(server.id, weapon).then((players) => {
-        players.forEach((player) => {
-          promises.push(processWeaponReport(weapon, server.id, player))
-        })
+  //Global weapon kill
+  promises.push(db.selectFrom('kill')
+    .select([count('id').as('kills'), max('distance').as('max_distance'), sum('distance').as('total_distance'), 'cause_of_death'])
+    .groupBy('cause_of_death').execute().then(async (data) => {
+      let transaction = client.multi()
+      data.forEach(({ kills, max_distance, total_distance, cause_of_death }) => {
+        transaction = processWeaponData({ kills, max_distance, total_distance, cause_of_death }, transaction)
       })
-    )
-  })
-  //iterate through all players outside of servers
-  const players = await getPlayerSet(undefined, weapon)
-  players.forEach((player) => {
-    promises.push(processWeaponReport(weapon, undefined, player))
-  })
-  //global weapon data
-  promises.push(processWeaponReport(weapon))
-  await Promise.all(promises)
-}
+      await transaction.exec()
+    }))
 
-async function populateAllSets() {
-  const servers = await db.selectFrom('server').selectAll().execute()
-  await Promise.all([populatePlayerSet(), populateWeaponSet()])
-  await (async () => {
-    const promises: Promise<any>[] = []
-    await getWeaponSet().then((weaponSet) => {
-      weaponSet.forEach((weapon: string) => {
-        promises.push(populatePlayerSet(undefined, weapon))
+  //Player weapon kills
+  promises.push(db.selectFrom('kill')
+    .select([count('id').as('kills'), max('distance').as('max_distance'), sum('distance').as('total_distance'), 'cause_of_death', 'attacker_id'])
+    .groupBy(['cause_of_death', 'attacker_id']).execute().then(async (data) => {
+      let transaction = client.multi()
+      data.forEach(({ kills, max_distance, total_distance, cause_of_death, attacker_id }) => {
+        transaction = processWeaponData({ kills, max_distance, total_distance, cause_of_death, attacker_id }, transaction)
       })
-    })
-
-    await getPlayerSet().then((playerSet) => {
-      playerSet.forEach((player) => {
-        promises.push(populateWeaponSet(undefined, player))
+      await transaction.exec()
+    }))
+  //Player weapon deaths
+  promises.push(db.selectFrom('kill').select([count('id').as('deaths'), 'victim_id', 'cause_of_death'])
+    .groupBy(['victim_id', 'cause_of_death']).execute().then(data => {
+      let transaction = client.multi()
+      data.forEach(({ deaths, victim_id, cause_of_death }) => {
+        transaction = transaction.HSET(`weapons:${cause_of_death}:players:${victim_id}`, "deaths", deaths.toString())
       })
-    })
-    return Promise.all(promises)
-  })()
+      return transaction.exec()
+    }))
 
-  await (async () => {
-    const promises: Promise<any>[] = servers.map((server) =>
-      (async () => {
-        await Promise.all([
-          populatePlayerSet(server.id),
-          populateWeaponSet(server.id)
-        ])
-        const promises: Promise<any>[] = []
-        await getWeaponSet(server.id).then((weaponSet) => {
-          weaponSet.forEach((weapon: string) => {
-            promises.push(populatePlayerSet(server.id, weapon))
-          })
-        })
-        await getPlayerSet(server.id).then((playerSet) => {
-          playerSet.forEach((player) => {
-            promises.push(populateWeaponSet(server.id, player))
-          })
-        })
-        return Promise.all(promises)
-      })()
-    )
-    await Promise.all(promises)
-  })()
-}
-
-async function processAllLists() {
-  const promises: Promise<any>[] = []
-  promises.push(processPlayerList(), processWeaponList())
-  promises.push(
-    ...(await getPlayerSet()).map((player) =>
-      processWeaponList(undefined, player)
-    ),
-    ...(await (
-      await getWeaponSet()
-    ).map((weapon) => processPlayerList(undefined, weapon)))
-  )
-  const servers = await db.selectFrom('server').selectAll().execute()
-  promises.push(
-    ...servers.map(async ({ id }) => {
-      const promises: Promise<any>[] = []
-      promises.push(
-        processWeaponList(id),
-        processPlayerList(id),
-        ...(await getPlayerSet()).map((player) =>
-          processWeaponList(id, player)
-        ),
-        ...(await (
-          await getWeaponSet()
-        ).map((weapon) => processPlayerList(id, weapon)))
-      )
-      await Promise.all(promises)
+  //Global player kills
+  promises.push(db.selectFrom('kill')
+    .select([count('id').as('kills'), max('distance').as('max_distance'), sum('distance').as('total_distance'), 'attacker_id'])
+    .groupBy('attacker_id').execute().then(data => {
+      let transaction = client.multi()
+      data.forEach(({ kills, max_distance, total_distance, attacker_id }) => {
+        processPlayerData({ kills, max_distance, total_distance, attacker_id }, transaction)
+      })
+      return transaction.exec()
     })
   )
+  //Global player deaths
+  promises.push(db.selectFrom('kill').select([count('id').as('deaths'), 'victim_id'])
+    .groupBy('victim_id').execute().then(data => {
+      let transaction = client.multi()
+      data.forEach(({ deaths, victim_id }) => {
+        transaction = transaction.HSET('players:' + victim_id, "deaths", deaths.toString())
+      })
+      return transaction.exec()
+    }))
+
+  await Promise.all(promises)
+  promises = [];
+  promises.push(createWeaponJson());
+  promises.push(createPlayerJson());
+  (await client.sMembers('players')).forEach((player: string) => {
+    promises.push(createWeaponJson(undefined, player))
+  });
+  (await client.sMembers('weapons')).forEach((weapon: string) => {
+    promises.push(createPlayerJson(undefined, weapon))
+  });
   await Promise.all(promises)
 }
+
+async function processServerStats() {
+  let promises: Promise<any>[] = []
+  //Server global kills
+  promises.push(db.selectFrom('kill')
+    .select([count('id').as('kills'), max('distance').as('max_distance'), sum('distance').as('total_distance'), 'server'])
+    .groupBy(['server']).execute().then(data => {
+      let transaction = client.multi()
+      data.forEach(({ kills, max_distance, total_distance, server }) => {
+        transaction = processGlobalData({ kills, max_distance, total_distance, server }, transaction)
+      })
+      return transaction.exec()
+    }))
+  //Server weapon kills
+  promises.push(db.selectFrom('kill')
+    .select([count('id').as('kills'), max('distance').as('max_distance'), sum('distance').as('total_distance'), 'cause_of_death', 'server'])
+    .groupBy(['cause_of_death', 'server']).execute().then(data => {
+      let transaction = client.multi()
+      data.forEach(({ kills, max_distance, total_distance, cause_of_death, server }) => {
+        transaction = processWeaponData({ kills, max_distance, total_distance, cause_of_death, server }, transaction)
+      })
+      return transaction.exec()
+    }))
+
+  //Server Player weapon kills
+  promises.push(db.selectFrom('kill')
+    .select([count('id').as('kills'), max('distance').as('max_distance'), sum('distance').as('total_distance'), 'cause_of_death', 'attacker_id', 'server'])
+    .groupBy(['cause_of_death', 'attacker_id', 'server']).execute().then(data => {
+      let transaction = client.multi()
+      data.forEach(({ kills, max_distance, total_distance, cause_of_death, attacker_id, server }) => {
+        transaction = processWeaponData({ kills, max_distance, total_distance, cause_of_death, attacker_id, server }, transaction)
+      })
+      return transaction.exec()
+    }))
+  //Server Player weapon deaths
+  promises.push(db.selectFrom('kill').select([count('id').as('deaths'), 'victim_id', 'cause_of_death', 'server'])
+    .groupBy(['victim_id', 'cause_of_death', 'server']).execute().then(data => {
+      let transaction = client.multi()
+      data.forEach(({ deaths, victim_id, cause_of_death, server }) => {
+        transaction = transaction.HSET(`servers:${server}:weapons:${cause_of_death}:players:${victim_id}`, "deaths", deaths.toString())
+      })
+      return transaction.exec()
+    }))
+
+  //server player kills
+  promises.push(db.selectFrom('kill')
+    .select([count('id').as('kills'), max('distance').as('max_distance'), sum('distance').as('total_distance'), 'attacker_id', 'server'])
+    .groupBy(['attacker_id', 'server']).execute().then(data => {
+      let transaction = client.multi()
+      data.forEach(({ kills, max_distance, total_distance, attacker_id, server }) => {
+        transaction = processPlayerData({ kills, max_distance, total_distance, attacker_id, server }, transaction)
+      })
+      return transaction.exec()
+    })
+  )
+
+  //server player deaths
+  promises.push(db.selectFrom('kill').select([count('id').as('deaths'), 'victim_id', 'server'])
+    .groupBy(['victim_id', 'server']).execute().then(data => {
+      let transaction = client.multi()
+      data.forEach(({ deaths, victim_id, server }) => {
+        transaction = transaction.HSET('servers:' + server + ':players:' + victim_id, "deaths", deaths.toString())
+      })
+      return transaction.exec()
+    }))
+
+  await Promise.all(promises)
+  promises = [];
+  ((await client.sMembers('servers')).forEach((server: string) => {
+    if (isNaN(Number(server))) return
+    promises.push(createWeaponJson(Number(server)));
+    promises.push(createPlayerJson(Number(server)));
+    promises.push(client.sMembers('servers:' + server + ':players').then(data => {
+      data.forEach((player: string) => {
+        promises.push(createWeaponJson(Number(server), player))
+      })
+    }))
+    promises.push(client.sMembers('servers:' + server + 'weapons').then(data => {
+      data.forEach((weapon: string) => {
+        promises.push(createPlayerJson(Number(server), weapon))
+      })
+    }))
+  }));
+
+  await Promise.all(promises)
+}
+
+function processGlobalData({ kills, max_distance, total_distance, server }: { kills: string | number | bigint, max_distance: number, total_distance: string | number | bigint, server?: number }, transaction: any) {
+  const serverPrefix = server ? `servers:${server}:` : ''
+  const cacheLocation = serverPrefix + 'global'
+  transaction = transaction.HSET(cacheLocation, "total_distance", total_distance.toString())
+  transaction = transaction.HSET(cacheLocation, "max_distance", max_distance.toString())
+  transaction = transaction.HSET(cacheLocation, "kills", kills.toString())
+  if (server) {
+    transaction = transaction.SADD('servers', server.toString())
+  }
+
+  return transaction
+}
+
+function processWeaponData({ kills, max_distance, total_distance, cause_of_death, attacker_id, server }: { kills: string | number | bigint, max_distance: number, total_distance: string | number | bigint, cause_of_death: string, attacker_id?: string, server?: number }, transaction: any) {
+  const serverPrefix = server ? `servers:${server}:` : ''
+  const playerPrefix = attacker_id ? `players:${attacker_id}:` : ''
+  const cacheLocation = serverPrefix + playerPrefix + `weapons:` + cause_of_death
+  transaction = transaction.HSET(cacheLocation, "total_distance", total_distance.toString())
+  transaction = transaction.HSET(cacheLocation, "max_distance", max_distance.toString())
+  transaction = transaction.HSET(cacheLocation, "kills", kills.toString())
+  transaction = transaction.SADD(serverPrefix + playerPrefix + `weapons`, cause_of_death.toString())
+  return transaction
+}
+
+function processPlayerData({ kills, max_distance, total_distance, attacker_id, cause_of_death, server }: { kills: string | number | bigint, max_distance: number, total_distance: string | number | bigint, attacker_id: string, server?: number, cause_of_death?: string }, transaction: any) {
+  const serverPrefix = server ? `servers:${server}:` : ''
+  const weaponPrefix = cause_of_death ? `weapons:${cause_of_death}:` : ''
+  const cacheLocation = serverPrefix + weaponPrefix + `players:` + attacker_id
+
+  transaction = transaction.HSET(cacheLocation, "total_distance", total_distance.toString())
+  transaction = transaction.HSET(cacheLocation, "max_distance", max_distance.toString())
+  transaction = transaction.HSET(cacheLocation, "kills", kills.toString())
+  transaction = transaction.SADD(serverPrefix + weaponPrefix + `players`, attacker_id.toString())
+  return transaction
+}
+
 export default processAll
