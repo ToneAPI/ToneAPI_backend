@@ -4,8 +4,9 @@ import { dbReady } from './db/db'
 import { cacheReady } from './cache/redis'
 import processAll from './client/process'
 
-dbReady().then((e) => {
-  cacheReady().then((e) => {
-    processAll()
-  })
-})
+async function startup() {
+  await dbReady()
+  await cacheReady()
+  await processAll()
+}
+export default startup()
