@@ -8,7 +8,6 @@ let listenServer
 
 beforeAll(async () => {
   listenServer = await serverMain;
-  await db.deleteFrom('kill').where('attacker_id', '=', '0').orWhere('attacker_id', '=', '1').execute()
 })
 
 describe('server', () => {
@@ -125,6 +124,9 @@ describe('server', () => {
 })
 
 afterAll((done) => {
-  listenServer.close()
-  db.destroy().then(() => { done() })
+  listenServer.close(() => {
+    db.deleteFrom('kill').where('attacker_id', '=', '0').orWhere('attacker_id', '=', '1').execute().then(() => {
+      db.destroy().then(() => { done() })
+    })
+  })
 })
