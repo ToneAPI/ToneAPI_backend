@@ -18,10 +18,14 @@ app.get('/', (req, res) => {
 
 app.use('/', client)
 
-dbReady().then((e) => {
-  cacheReady().then((e) => {
-    app.listen(port, '0.0.0.0', () => {
-      console.log(`Tone client api listening on port ${port}`)
+export default
+  new Promise((resolve, reject) => {
+    dbReady().then((e) => {
+      cacheReady().then((e) => {
+        const listenServer = app.listen(port, '0.0.0.0', () => {
+          console.log(`Tone client api listening on port ${port}`)
+          resolve(listenServer)
+        })
+      })
     })
   })
-})

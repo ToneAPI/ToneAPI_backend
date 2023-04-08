@@ -2,7 +2,7 @@ import * as dotenv from 'dotenv'
 dotenv.config()
 import express from 'express'
 import cors from 'cors'
-import { dbReady } from './db/db'
+import db, { dbReady } from './db/db'
 import server from './server/server'
 
 const app = express()
@@ -17,8 +17,15 @@ app.get('/', (req, res) => {
 
 app.use('/', server)
 
-dbReady().then((e) => {
-  app.listen(port, '0.0.0.0', () => {
-    console.log(`Tone server api listening on port ${port}`)
+export default new Promise((resolve, reject) => {
+  dbReady().then((e) => {
+    const listenServer = app.listen(port, '0.0.0.0', () => {
+      console.log(`Tone server api listening on port ${port}`)
+      resolve(listenServer)
+    })
   })
+})
+
+app.on('close', () => {
+
 })

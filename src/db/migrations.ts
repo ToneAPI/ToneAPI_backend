@@ -9,7 +9,6 @@ import * as path from "path";
 import { Pool } from "pg";
 import Database from "./model";
 
-console.log(process.env.POSTGRES_HOST);
 async function migrateToLatest() {
   const db = new Kysely<Database>({
     dialect: new PostgresDialect({

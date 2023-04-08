@@ -271,7 +271,7 @@ paths:
       description: Used to test auth
       security:
         - Auth_Token: []
-  '/servers/{serverId}/kills':
+  '/servers/{serverId}/kill':
     post:
       summary: Post kills
       operationId: post-kills

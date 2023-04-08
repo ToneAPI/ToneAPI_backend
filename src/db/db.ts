@@ -1,8 +1,9 @@
+import * as dotenv from 'dotenv'
+dotenv.config()
 import { InsertObject, Kysely, PostgresDialect } from 'kysely'
 import { Pool } from 'pg'
 import migrateToLatest from './migrations'
 import Database, { KillTable } from './model'
-
 const migration = migrateToLatest()
 const db = new Kysely<Database>({
   dialect: new PostgresDialect({

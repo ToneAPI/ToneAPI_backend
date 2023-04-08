@@ -21,6 +21,15 @@
       "program": "${workspaceFolder}/src/clientMain.ts",
       "preLaunchTask": "tsc: build - tsconfig.json",
       "outFiles": ["${workspaceFolder}/out/**/*.js"]
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Launch Process API",
+      "skipFiles": ["<node_internals>/**"],
+      "program": "${workspaceFolder}/src/processMain.ts",
+      "preLaunchTask": "tsc: build - tsconfig.json",
+      "outFiles": ["${workspaceFolder}/out/**/*.js"]
     }
   ]
 }
