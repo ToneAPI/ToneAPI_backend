@@ -2,7 +2,7 @@ import db from '../db/db'
 const { count, max, sum } = db.fn
 import client from '../cache/redis'
 
-const genPrefix = {
+export const genPrefix = {
   global: ({ server }: { server?: number }) => {
     return (server ? `servers.${server}.` : '') + 'data'
   },
@@ -59,6 +59,7 @@ async function processGlobalStats() {
       let transaction = client.multi()
       await Promise.all(data.map(async ({ kills, max_distance, total_distance, cause_of_death }) => {
         const prefix = genPrefix.weapon({ cause_of_death })
+        if (!await client.json.type('kills', prefix)) await client.json.set('kills', prefix, { players: {} })
         await processData(prefix, { kills, max_distance, total_distance }, transaction)
       }))
       return transaction.exec()
@@ -70,6 +71,7 @@ async function processGlobalStats() {
       let transaction = client.multi()
       await Promise.all(data.map(async ({ kills, max_distance, total_distance, attacker_id }) => {
         const prefix = genPrefix.player({ attacker_id })
+        if (!await client.json.type('kills', prefix)) await client.json.set('kills', prefix, { weapons: {} })
         await processData(prefix, { kills, max_distance, total_distance }, transaction)
       }))
       return transaction.exec()
@@ -127,6 +129,7 @@ async function processServerStats() {
       let transaction = client.multi()
       await Promise.all(data.map(async ({ kills, max_distance, total_distance, cause_of_death, server }) => {
         const prefix = genPrefix.weapon({ cause_of_death, server })
+        if (!await client.json.type('kills', prefix)) await client.json.set('kills', prefix, { players: {} })
         await processData(prefix, { kills, max_distance, total_distance }, transaction)
       }))
       return transaction.exec()
@@ -137,6 +140,7 @@ async function processServerStats() {
       let transaction = client.multi()
       await Promise.all(data.map(async ({ kills, max_distance, total_distance, attacker_id, server }) => {
         const prefix = genPrefix.player({ attacker_id, server })
+        if (!await client.json.type('kills', prefix)) await client.json.set('kills', prefix, { weapons: {} })
         await processData(prefix, { kills, max_distance, total_distance }, transaction)
       }))
       return transaction.exec()

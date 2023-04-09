@@ -124,9 +124,10 @@ describe('server', () => {
 })
 
 afterAll((done) => {
-  listenServer.close(() => {
-    db.deleteFrom('kill').where('attacker_id', '=', '0').orWhere('attacker_id', '=', '1').execute().then(() => {
-      db.destroy().then(() => { done() })
+  db.deleteFrom('kill').where('attacker_id', '=', '0').orWhere('attacker_id', '=', '1').execute().then(() => {
+    listenServer.close(async () => {
+      await db.destroy()
+      done()
     })
   })
 })

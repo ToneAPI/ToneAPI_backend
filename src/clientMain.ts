@@ -3,8 +3,8 @@ dotenv.config()
 import express from 'express'
 import cors from 'cors'
 import client from './client/client'
-import { dbReady } from './db/db'
-import { cacheReady } from './cache/redis'
+import db, { dbReady } from './db/db'
+import cache, { cacheReady } from './cache/redis'
 
 const app = express()
 const port = 3000

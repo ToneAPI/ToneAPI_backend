@@ -2,12 +2,7 @@ import { Router } from 'express'
 import { param, query } from 'express-validator'
 import { validateErrors } from '../common'
 import db from '../db/db'
-import {
-  getWeaponList,
-  getWeaponReport,
-  getPlayerReport,
-  getPlayerList
-} from '../cache/cacheUtils'
+import client from '../cache/redis'
 const router = Router()
 //timeout middleware ?
 router.get('/*', (req, res, next) => {
@@ -20,12 +15,12 @@ router.get(
   query(['player', 'server']).optional().toInt().isInt(),
   validateErrors,
   async (req, res) => {
-    const data = await getWeaponReport(
-      req.params.weaponId,
-      Number(req.query.server),
-      req.query.player?.toString()
-    )
-    res.status(200).send(data)
+    let path = ''
+    if (req.query.server) path = path + `servers.${req.query.server}.`
+    if (req.query.player) path = path + `players.${req.query.player}.`
+    path = path + `weapons.${req.params.weaponId}`
+    if (await client.json.type('kills', path)) return res.status(200).send(await client.json.get('kills', { path }))
+    res.status(404).send()
   }
 )
 
@@ -34,11 +29,15 @@ router.get(
   query(['player', 'server']).optional().toInt().isInt(),
   validateErrors,
   async (req, res) => {
-    const data = await getWeaponList(
-      req.query.server?.toString(),
-      req.query.player?.toString()
-    )
-    res.status(200).send(data)
+    let path = ''
+    if (req.query.server) path = path + `servers.${req.query.server}.`
+    if (req.query.player) path = path + `players.${req.query.player}.`
+    path = path + `weapons`
+    if (await client.json.type('kills', path)) {
+      const data = await client.json.get('kills', { path: `weapons` }) as { [key: number]: any }
+      return res.status(200).send(Object.fromEntries(Object.entries(data).map(([key, value]) => { return [key, { total_distance: value.total_distance, max_distance: value.max_distance, kills: value.kills, deaths: value.deaths }] })))
+    }
+    res.status(404).send()
   }
 )
 
@@ -49,26 +48,12 @@ router.get(
   query('weapon').optional().isString(),
   validateErrors,
   async (req, res) => {
-    const data = await getPlayerReport(
-      req.params.playerId,
-      Number(req.query.server),
-      req.query.weapon?.toString()
-    )
-    /*
-    if (!req.query.weapon) {
-      const weapons = await getWeaponList(
-        req.query.server?.toString(),
-        req.params.playerId
-      )
-      data.weapons = weapons
-    } else {
-      data.weapons = (await getWeaponReport(
-        req.query.weapon.toString(),
-        Number(req.query.server) || undefined,
-        req.params.playerId
-      )) as any
-    }*/
-    res.status(200).send(data)
+    let path = ''
+    if (req.query.server) path = path + `servers.${req.query.server}.`
+    if (req.query.weapon) path = path + `weapons.${req.query.weapon}.`
+    path = path + `players.${req.params.playerId}`
+    if (await client.json.type('kills', path)) return res.status(200).send(await client.json.get('kills', { path }))
+    res.status(404).send()
   }
 )
 
@@ -78,23 +63,23 @@ router.get(
   query('weapon').optional().isString(),
   validateErrors,
   async (req, res) => {
-    const data = await getPlayerList(
-      Number(req.query.server),
-      req.query.weapon?.toString()
-    )
-    res.status(200).send(data)
+    let path = ''
+    if (req.query.server) path = path + `servers.${req.query.server}.`
+    if (req.query.weapon) path = path + `weapons.${req.query.weapon}.`
+    path = path + `players`
+    if (await client.json.type('kills', path)) {
+      const data = await client.json.get('kills', { path: `players` }) as { [key: number]: any }
+      return res.status(200).send(Object.fromEntries(Object.entries(data).map(([key, value]) => { return [key, { total_distance: value.total_distance, max_distance: value.max_distance, kills: value.kills, deaths: value.deaths }] })))
+    }
+    res.status(404).send()
   }
 )
 
 //router.get('/maps/', (req, res, next) => {})
 
 router.get('/servers/', async (req, res) => {
-  const data = await db.selectFrom('server').selectAll().execute()
-  res.status(200).send(
-    data.map((e) => {
-      return { name: e.name, id: e.id, description: e.description }
-    })
-  )
+  const data = await client.json.get('kills', { path: `servers` }) as { [key: number]: any }
+  return res.status(200).send(Object.fromEntries(Object.entries(data).map(([key, value]) => { return [key, value.data] })))
 })
 //router.get('/servers/:serverId/', (req, res, next) => {})
 

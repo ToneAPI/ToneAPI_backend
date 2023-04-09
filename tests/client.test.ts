@@ -1,6 +1,8 @@
 import { afterAll, beforeAll, describe, expect, test } from '@jest/globals'
 import clientMain from '../src/clientMain'
 import * as dotenv from 'dotenv'
+import db from '../src/db/db'
+import cache from '../src/cache/redis'
 dotenv.config()
 
 let listenServer
@@ -13,10 +15,10 @@ describe('client', () => {
     test('server list', async () => {
         const request = await fetch("http://127.0.0.1:3000/servers")
         const data = await request.json()
-        expect(data.length).toBeGreaterThan(0)
-        expect(data[0]).toHaveProperty('name')
-        expect(data[0]).toHaveProperty('id')
-        expect(data[0]).toHaveProperty('description')
+        const first = Object.entries(data)[0]
+        expect(first).toHaveProperty('name')
+        expect(first).toHaveProperty('id')
+        expect(first).toHaveProperty('description')
     })
 
     test('player list', async () => {
@@ -75,7 +77,9 @@ describe('client', () => {
 })
 
 afterAll((done) => {
-    listenServer.close(() => {
+    listenServer.close(async () => {
+        await db.destroy()
+        await cache.quit()
         done()
     })
 })

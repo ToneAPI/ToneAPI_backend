@@ -1,11 +1,15 @@
-import { afterAll, beforeAll, describe, expect, test } from '@jest/globals'
+import { afterAll, beforeAll, describe, expect, jest, test } from '@jest/globals'
 import clientMain from '../src/clientMain'
 import serverMain from '../src/serverMain'
 import listenKills from "../src/process/onKill"
 import * as dotenv from 'dotenv'
+import db from '../src/db/db'
+import cache from '../src/cache/redis'
 dotenv.config()
 
-let listenServerClient
+let listenClient
+let listenServer
+let pgClient
 
 const data = {
     attacker_weapon_1_mods: 0,
@@ -44,9 +48,20 @@ const data = {
     attacker_name: 'TestAttacker'
 }
 
+function waitFor(time: number) {
+    return new Promise((resolve, reject) => {
+        setTimeout(resolve, time)
+    })
+}
+
+jest.setTimeout(15000)
+
 beforeAll(async () => {
-    listenServerClient = await clientMain;
-    listenServerClient = await serverMain;
+    jest.setTimeout(15000)
+    listenClient = await clientMain;
+    listenServer = await serverMain;
+    pgClient = await listenKills()
+    const yea = waitFor(10000)
     const response = await fetch(`http://127.0.0.1:3001/${process.env.SERVERAUTH_ID}/kill`, {
         method: "POST", // *GET, POST, PUT, DELETE, etc.
         credentials: "same-origin", // include, *same-origin, omit
@@ -57,6 +72,7 @@ beforeAll(async () => {
         body: JSON.stringify(data), // body data type must match "Content-Type" header
     });
     expect(response.status).toBe(201)
+    await yea
 })
 
 describe('realtime', () => {
@@ -85,12 +101,19 @@ describe('realtime', () => {
     })
 
     test('update player', async () => {
-        const request = await fetch("http://127.0.0.1:3000/players")
-        const data = await request.json()
-        const player = data["1"]
-        expect(player).toHaveProperty('max_distance')
-        expect(player).toHaveProperty('total_distance')
-        expect(player).toHaveProperty('kills')
+        jest.setTimeout(15000)
+        const yea = waitFor(10000)
+        const response = await fetch(`http://127.0.0.1:3001/${process.env.SERVERAUTH_ID}/kill`, {
+            method: "POST", // *GET, POST, PUT, DELETE, etc.
+            credentials: "same-origin", // include, *same-origin, omit
+            headers: {
+                "Content-Type": "application/json",
+                'Authorization': `Basic ${Buffer.from(process.env.SERVERAUTH_ID + ':' + process.env.SERVERAUTH_TOKEN).toString('base64')}`
+            },
+            body: JSON.stringify(data), // body data type must match "Content-Type" header
+        });
+        expect(response.status).toBe(201)
+        await yea
     })
 
     test('check player update', async () => {
@@ -107,4 +130,15 @@ describe('realtime', () => {
         expect(weapon.kills).toBe(weaponKills + 1)
     })
 
+})
+
+afterAll((done) => {
+    listenClient.close(() => {
+        listenServer.close(async () => {
+            await pgClient.end()
+            await db.destroy()
+            await cache.quit()
+            done()
+        })
+    })
 })

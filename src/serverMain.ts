@@ -25,7 +25,3 @@ export default new Promise((resolve, reject) => {
     })
   })
 })
-
-app.on('close', () => {
-
-})
