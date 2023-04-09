@@ -28,8 +28,44 @@ describe('client', () => {
         expect(first[1]).toHaveProperty('kills')
     })
 
+    test('player list with weapon filter', async () => {
+        const request = await fetch("http://127.0.0.1:3000/players?weapons=sniper")
+        const data = await request.json()
+        const first = Object.entries(data)[0]
+        expect(first[1]).toHaveProperty('max_distance')
+        expect(first[1]).toHaveProperty('total_distance')
+        expect(first[1]).toHaveProperty('kills')
+    })
+
+    test('player list with weapon and server filter', async () => {
+        const request = await fetch("http://127.0.0.1:3000/players?weapons=sniper&server=1")
+        const data = await request.json()
+        const first = Object.entries(data)[0]
+        expect(first[1]).toHaveProperty('max_distance')
+        expect(first[1]).toHaveProperty('total_distance')
+        expect(first[1]).toHaveProperty('kills')
+    })
+
     test('weapon list', async () => {
         const request = await fetch("http://127.0.0.1:3000/weapons")
+        const data = await request.json()
+        const first = Object.entries(data)[0]
+        expect(first[1]).toHaveProperty('max_distance')
+        expect(first[1]).toHaveProperty('total_distance')
+        expect(first[1]).toHaveProperty('kills')
+    })
+
+    test('weapon list with player filter', async () => {
+        const request = await fetch("http://127.0.0.1:3000/weapons?players=1005930844007")
+        const data = await request.json()
+        const first = Object.entries(data)[0]
+        expect(first[1]).toHaveProperty('max_distance')
+        expect(first[1]).toHaveProperty('total_distance')
+        expect(first[1]).toHaveProperty('kills')
+    })
+
+    test('weapon list with player and server filter', async () => {
+        const request = await fetch("http://127.0.0.1:3000/weapons?players=1005930844007&server=1")
         const data = await request.json()
         const first = Object.entries(data)[0]
         expect(first[1]).toHaveProperty('max_distance')
