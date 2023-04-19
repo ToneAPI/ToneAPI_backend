@@ -3,19 +3,19 @@ const { count, max, sum } = db.fn
 import client from '../cache/redis'
 
 export const genPrefix = {
-  global: ({ server }: { server?: number }) => {
+  global: ({ server }: { server?: string }) => {
     return (server ? `servers.${server}.` : '') + 'data'
   },
-  weapon: ({ cause_of_death, server }: { cause_of_death: string, server?: number }) => {
+  weapon: ({ cause_of_death, server }: { cause_of_death: string, server?: string }) => {
     return (server ? `servers.${server}.` : '') + `weapons.${cause_of_death}`
   },
-  player: ({ attacker_id, server }: { attacker_id: string, server?: number }) => {
+  player: ({ attacker_id, server }: { attacker_id: string, server?: string }) => {
     return (server ? `servers.${server}.` : '') + `players.${attacker_id}`
   },
-  playerWeapons: ({ cause_of_death, attacker_id, server }: { attacker_id: string, cause_of_death: string, server?: number }) => {
+  playerWeapons: ({ cause_of_death, attacker_id, server }: { attacker_id: string, cause_of_death: string, server?: string }) => {
     return (server ? `servers.${server}.` : '') + `players.${attacker_id}.weapons.${cause_of_death}`
   },
-  weaponPlayers: ({ cause_of_death, attacker_id, server }: { attacker_id: string, cause_of_death: string, server?: number }) => {
+  weaponPlayers: ({ cause_of_death, attacker_id, server }: { attacker_id: string, cause_of_death: string, server?: string }) => {
     return (server ? `servers.${server}.` : '') + `weapons.${cause_of_death}.players.${attacker_id}`
   },
 }
@@ -112,12 +112,14 @@ async function processServerStats() {
   let promises: Promise<any>[] = []
   //Server global kills
   await db.selectFrom('kill')
-    .select([count('id').as('kills'), max('distance').as('max_distance'), sum('distance').as('total_distance'), 'server'])
-    .groupBy(['server']).execute().then(async (data) => {
+    .select([count('id').as('kills'), max('distance').as('max_distance'), sum('distance').as('total_distance'), 'servername', 'host'])
+    .groupBy(['servername', 'host']).execute().then(async (data) => {
       let transaction = client.multi()
-      const p = data.map(async ({ kills, max_distance, total_distance, server }) => {
-        if (!await client.json.type('kills', `servers.${server}`)) await client.json.set('kills', `servers.${server}`, { data: {}, weapons: {}, players: {} })
-        await processData(genPrefix.global({ server }), { total_distance, max_distance, kills }, transaction)
+      const p = data.map(async ({ kills, max_distance, total_distance, servername, host }) => {
+        servername = servername.replace(/[^a-z0-9]/gi, '')
+        if (!await client.json.type('kills', `servers.${host}`)) await client.json.set('kills', `servers.${host}`, {})
+        if (!await client.json.type('kills', `servers.${host}.${servername}`)) await client.json.set('kills', `servers.${host}.${servername}`, { data: {}, weapons: {}, players: {} })
+        await processData(genPrefix.global({ server: `${host}.${servername}` }), { total_distance, max_distance, kills }, transaction)
       })
       await Promise.all(p)
       return transaction.exec()
@@ -125,53 +127,58 @@ async function processServerStats() {
 
   //Server weapon kills
   await db.selectFrom('kill')
-    .select([count('id').as('kills'), max('distance').as('max_distance'), sum('distance').as('total_distance'), 'cause_of_death', 'server']).groupBy(['cause_of_death', 'server']).execute().then(async (data) => {
+    .select([count('id').as('kills'), max('distance').as('max_distance'), sum('distance').as('total_distance'), 'cause_of_death', 'servername', 'host']).groupBy(['cause_of_death', 'servername', 'host']).execute().then(async (data) => {
       let transaction = client.multi()
-      await Promise.all(data.map(async ({ kills, max_distance, total_distance, cause_of_death, server }) => {
-        const prefix = genPrefix.weapon({ cause_of_death, server })
+      await Promise.all(data.map(async ({ kills, max_distance, total_distance, cause_of_death, servername, host }) => {
+        servername = servername.replace(/[^a-z0-9]/gi, '')
+        const prefix = genPrefix.weapon({ cause_of_death, server: `${host}.${servername}` })
         if (!await client.json.type('kills', prefix)) await client.json.set('kills', prefix, { players: {} })
         await processData(prefix, { kills, max_distance, total_distance }, transaction)
       }))
       return transaction.exec()
     })
   //server player kill
-  await db.selectFrom('kill').select([count('id').as('kills'), max('distance').as('max_distance'), sum('distance').as('total_distance'), 'attacker_id', 'server']).groupBy(['attacker_id', 'server']).whereRef("attacker_id", '!=', 'victim_id').execute()
+  await db.selectFrom('kill').select([count('id').as('kills'), max('distance').as('max_distance'), sum('distance').as('total_distance'), 'attacker_id', 'servername', 'host']).groupBy(['attacker_id', 'servername', 'host']).whereRef("attacker_id", '!=', 'victim_id').execute()
     .then(async (data) => {
       let transaction = client.multi()
-      await Promise.all(data.map(async ({ kills, max_distance, total_distance, attacker_id, server }) => {
-        const prefix = genPrefix.player({ attacker_id, server })
+      await Promise.all(data.map(async ({ kills, max_distance, total_distance, attacker_id, servername, host }) => {
+        servername = servername.replace(/[^a-z0-9]/gi, '')
+        const prefix = genPrefix.player({ attacker_id, server: `${host}.${servername}` })
         if (!await client.json.type('kills', prefix)) await client.json.set('kills', prefix, { weapons: {} })
         await processData(prefix, { kills, max_distance, total_distance }, transaction)
       }))
       return transaction.exec()
     })
   //server player deaths
-  await db.selectFrom('kill').select([count('id').as('kills'), 'victim_id', 'server']).groupBy(['victim_id', 'server']).execute()
+  await db.selectFrom('kill').select([count('id').as('kills'), 'victim_id', 'servername', 'host']).groupBy(['victim_id', 'servername', 'host']).execute()
     .then(async (data) => {
       let transaction = client.multi()
-      await Promise.all(data.map(async ({ kills, victim_id, server }) => {
-        const prefix = genPrefix.player({ attacker_id: victim_id, server })
+      await Promise.all(data.map(async ({ kills, victim_id, servername, host }) => {
+        servername = servername.replace(/[^a-z0-9]/gi, '')
+        const prefix = genPrefix.player({ attacker_id: victim_id, server: `${host}.${servername}` })
         transaction.json.set('kills', prefix + ".deaths", Number(kills))
       }))
       return transaction.exec()
     })
 
   //player weapon kills
-  await db.selectFrom('kill').select([count('id').as('kills'), max('distance').as('max_distance'), sum('distance').as('total_distance'), 'attacker_id', 'cause_of_death', 'server']).groupBy(['attacker_id', 'cause_of_death', 'server']).whereRef("attacker_id", '!=', 'victim_id').execute()
+  await db.selectFrom('kill').select([count('id').as('kills'), max('distance').as('max_distance'), sum('distance').as('total_distance'), 'attacker_id', 'cause_of_death', 'servername', 'host']).groupBy(['attacker_id', 'cause_of_death', 'servername', 'host']).whereRef("attacker_id", '!=', 'victim_id').execute()
     .then(async (data) => {
       let transaction = client.multi()
-      await Promise.all(data.map(async ({ kills, max_distance, total_distance, attacker_id, cause_of_death, server }) => {
-        await processData(genPrefix.playerWeapons({ attacker_id, cause_of_death, server }), { kills, max_distance, total_distance }, transaction)
-        await processData(genPrefix.weaponPlayers({ attacker_id, cause_of_death, server }), { kills, max_distance, total_distance }, transaction)
+      await Promise.all(data.map(async ({ kills, max_distance, total_distance, attacker_id, cause_of_death, servername, host }) => {
+        servername = servername.replace(/[^a-z0-9]/gi, '')
+        await processData(genPrefix.playerWeapons({ attacker_id, cause_of_death, server: `${host}.${servername}` }), { kills, max_distance, total_distance }, transaction)
+        await processData(genPrefix.weaponPlayers({ attacker_id, cause_of_death, server: `${host}.${servername}` }), { kills, max_distance, total_distance }, transaction)
       }))
       return transaction.exec()
     })
   //player weapon deaths
-  await db.selectFrom('kill').select([count('id').as('kills'), 'victim_id', 'cause_of_death', 'server']).groupBy(['victim_id', 'cause_of_death', 'server']).execute()
+  await db.selectFrom('kill').select([count('id').as('kills'), 'victim_id', 'cause_of_death', 'servername', 'host']).groupBy(['victim_id', 'cause_of_death', 'servername', 'host']).execute()
     .then(async (data) => {
       let transaction = client.multi()
-      await Promise.all(data.map(async ({ kills, victim_id, cause_of_death, server }) => {
-        transaction.json.set('kills', genPrefix.weaponPlayers({ attacker_id: victim_id, cause_of_death, server }) + ".deaths", Number(kills))
+      await Promise.all(data.map(async ({ kills, victim_id, cause_of_death, servername, host }) => {
+        servername = servername.replace(/[^a-z0-9]/gi, '')
+        transaction.json.set('kills', genPrefix.weaponPlayers({ attacker_id: victim_id, cause_of_death, server: `${host}.${servername}` }) + ".deaths", Number(kills))
       }))
       return transaction.exec()
     })

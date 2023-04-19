@@ -14,6 +14,7 @@ let pgClient
 const data = {
     attacker_weapon_1_mods: 0,
     victim_id: '0',
+    servername: 'testServer',
     victim_name: 'TestVictim',
     victim_offhand_weapon_2: 0,
     attacker_offhand_weapon_3: '0',
@@ -67,7 +68,7 @@ beforeAll(async () => {
         credentials: "same-origin", // include, *same-origin, omit
         headers: {
             "Content-Type": "application/json",
-            'Authorization': `Basic ${Buffer.from(process.env.SERVERAUTH_ID + ':' + process.env.SERVERAUTH_TOKEN).toString('base64')}`
+            'Authorization': `Bearer ${Buffer.from('' + process.env.SERVERAUTH_TOKEN).toString('base64')}`
         },
         body: JSON.stringify(data), // body data type must match "Content-Type" header
     });
@@ -108,7 +109,7 @@ describe('realtime', () => {
             credentials: "same-origin", // include, *same-origin, omit
             headers: {
                 "Content-Type": "application/json",
-                'Authorization': `Basic ${Buffer.from(process.env.SERVERAUTH_ID + ':' + process.env.SERVERAUTH_TOKEN).toString('base64')}`
+                'Authorization': `Bearer ${Buffer.from('' + process.env.SERVERAUTH_TOKEN).toString('base64')}`
             },
             body: JSON.stringify(data), // body data type must match "Content-Type" header
         });

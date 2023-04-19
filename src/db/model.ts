@@ -2,7 +2,8 @@ import { ColumnType, Generated } from 'kysely'
 
 export interface KillTable {
   id: Generated<number>
-  server: number
+  servername: string
+  host: number
   killstat_version: string
   match_id: string
   game_mode: string
@@ -56,10 +57,9 @@ interface MapTable {
   description: string
   image: string
 }
-interface ServerTable {
+interface HosterTable {
   id: Generated<number>
   name: string
-  description: string
   token: Generated<string>
 }
 interface Database {
@@ -67,7 +67,7 @@ interface Database {
   player: PlayerTable
   weapon: WeaponTable
   maps: MapTable
-  server: ServerTable
+  hoster: HosterTable
 }
 
 export default Database

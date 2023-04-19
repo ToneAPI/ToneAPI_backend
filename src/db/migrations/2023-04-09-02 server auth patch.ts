@@ -17,9 +17,12 @@ export async function up(db: Kysely<any>): Promise<void> {
 
   await pgClient.query('ALTER TABLE server RENAME TO hoster')
   await pgClient.query('ALTER TABLE hoster DROP COLUMN description')
+  await pgClient.query('ALTER TABLE kill ADD COLUMN host integer NULL')
+  //Update the hosts column once the hoster table is manually updated
 }
 
 export async function down(db: Kysely<any>): Promise<void> {
+  await pgClient.query('ALTER TABLE kill DROP COLUMN host')
   await pgClient.query('ALTER TABLE hoster add description character varying NULL')
   await pgClient.query('ALTER TABLE hoster RENAME TO server')
 

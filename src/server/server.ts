@@ -1,37 +1,32 @@
 import { NextFunction, Router } from 'express'
 import expressBasicAuth from 'express-basic-auth'
 import { body, header, param } from 'express-validator'
-import register from './register'
 import { CreateKillRecord, CheckServerToken } from '../db/db'
 import { validateErrors } from '../common'
 
 const router = Router()
 
-router.use('/', register)
-
 //auth middleware
 router.post(
-  '/:serverId*',
+  '/*',
   header('authorization')
     .exists({ checkFalsy: true })
     .withMessage('Missing Authorization Header')
     .bail()
-    .contains('Basic')
-    .withMessage('Authorization Token is not Basic'),
+    .contains('Bearer')
+    .withMessage('Authorization Token is not Bearer'),
   validateErrors,
-  //Huge mess to retrieve server id from expressBasicAuth. We probably should fix it.
-  (req, res, next) => {
-    if (!req) res.sendStatus(500)
-    return expressBasicAuth({
-      authorizeAsync: true,
-      authorizer: CheckServerToken.bind(req),
-      unauthorizedResponse: { error: 'invalid credentials' }
-    })(req as any, res, next)
+  async (req, res, next) => {
+    if (!req) return res.sendStatus(500)
+    if (!req.headers.authorization) return res.sendStatus(403)
+    const query = await CheckServerToken(req.headers.authorization.split(' ')[1])
+    if (!query || !query.id) return res.sendStatus(403)
+    next()
   }
 )
 
 //Route to check auth
-router.post('/:serverId', (req, res) => {
+router.post('/', (req, res) => {
   res.sendStatus(200)
 })
 
@@ -39,8 +34,8 @@ const serversCount: { [id: string]: number } = {}
 const serversTimeout: { [id: string]: NodeJS.Timeout } = {}
 
 //same rate limiting code as register. max 10 kills per server every 1 sec. should be enough.
-router.post('/:serverId/kill', (req, res, next) => {
-  let serverId = Number(req.query.serverId)
+/*router.post('/kill', (req, res, next) => {
+  let host = Number(req.query.serverId)
   if (serversCount[serverId] > 2) {
     return res.status(429).json({
       error: 'too many requests. Are players really making that much kills ?'
@@ -53,11 +48,10 @@ router.post('/:serverId/kill', (req, res, next) => {
     serversCount[serverId] = 0
   }, 1000)
   next()
-})
+})*/
 
 router.post(
-  '/:serverId/kill',
-  param('serverId').exists().toInt().isInt(),
+  '/kill',
   body([
     'attacker_current_weapon_mods',
     'attacker_weapon_1_mods',
@@ -104,6 +98,7 @@ router.post(
     .withMessage('must be a valid float'),
   body(
     [
+      'servername',
       'attacker_id',
       'victim_id',
       'killstat_version',
@@ -131,9 +126,15 @@ router.post(
     min: 0
   }),
   body(['cause_of_death', 'victim_id'], 'mandatory').exists().notEmpty(),
+  body('servername').customSanitizer(e => e.replace(/[^a-z0-9]/gi, '')),
   validateErrors,
-  (req, res) => {
+  async (req, res) => {
+    if (!req.headers.authorization) return res.sendStatus(403)
+    const query = (await CheckServerToken(req.headers.authorization.split(' ')[1]))
+    if (!query) return
+    const host = query.id
     const {
+      servername,
       killstat_version,
       match_id,
       game_mode,
@@ -167,13 +168,10 @@ router.post(
       cause_of_death,
       distance
     } = req.body
-    if (!req.params.serverId) {
-      res.status(500).send('serverId cannot be undefined')
-      return
-    }
     CreateKillRecord({
       killstat_version,
-      server: Number(req.params.serverId),
+      servername,
+      host,
       match_id,
       game_mode,
       map,
@@ -209,16 +207,15 @@ router.post(
       .then((e) => {
         res.sendStatus(201)
         console.log(
-          `[${Date.now().toLocaleString()}] Kill submitted for server ${
-            req.params.serverId
-          }, ${attacker_name} killed ${victim_name}`
+          `[${Date.now().toLocaleString()}] Kill submitted for server ${servername}, ${attacker_name} killed ${victim_name}`
         )
       })
       .catch((e) => {
         res.sendStatus(500)
         console.log({
           killstat_version,
-          server: Number(req.params.serverId),
+          servername,
+          host,
           match_id,
           game_mode,
           map,

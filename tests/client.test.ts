@@ -16,9 +16,9 @@ describe('client', () => {
         const request = await fetch("http://127.0.0.1:3000/servers")
         const data = await request.json()
         const first = Object.entries(data)[0]
-        expect(first).toHaveProperty('name')
-        expect(first).toHaveProperty('id')
-        expect(first).toHaveProperty('description')
+        expect(first[1]).toHaveProperty('name')
+        expect(first[1]).toHaveProperty('id')
+        expect(first[1]).toHaveProperty('description')
     })
 
     test('player list', async () => {

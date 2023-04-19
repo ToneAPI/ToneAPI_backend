@@ -41,43 +41,36 @@ export async function CreateKillRecord(data: KillRecord) {
     .execute()
 }
 
-export async function FindServer({ name }: { name: string }) {
-  return await db
-    .selectFrom('server')
-    .select(['server.name', 'server.description'])
-    .where('server.name', '=', name)
-    .executeTakeFirst()
-}
+// export async function FindServer({ name }: { name: string }) {
+//   return await db
+//     .selectFrom('server')
+//     .select(['server.name', 'server.description'])
+//     .where('server.name', '=', name)
+//     .executeTakeFirst()
+// }
 
-export async function CreateServer({
-  name,
-  description
-}: {
-  name: string
-  description: string
-}) {
-  return await db
-    .insertInto('server')
-    .values({ name, description })
-    .returning(['id', 'token'])
-    .executeTakeFirstOrThrow()
-}
+// export async function CreateServer({
+//   name,
+//   description
+// }: {
+//   name: string
+//   description: string
+// }) {
+//   return await db
+//     .insertInto('server')
+//     .values({ name, description })
+//     .returning(['id', 'token'])
+//     .executeTakeFirstOrThrow()
+// }
 
 //tokens are stored in raw... maybe we should use something better in the future
 //Using callback for express-basic-auth
-export function CheckServerToken(
-  this: { params: any, body: any },
-  name: string,
-  password: string,
-  cb: (error: Error | null, success: boolean) => void
-) {
-  db.selectFrom('server')
-    .where('id', '=', Number(name))
-    .where('token', '=', password)
+export function CheckServerToken(token: string) {
+  return db.selectFrom('hoster').select('id')
+    .where('token', '=', Buffer.from(token, 'base64').toString())
     .executeTakeFirst()
     .then((result) => {
-      if (name != this.params.serverId) return cb(null, false)
-      return cb(null, !!result)
+      return result
     })
 }
 /*
