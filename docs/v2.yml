@@ -1,0 +1,447 @@
+openapi: 3.0.2
+info:
+  title: ToneAPI
+  version: '2.0'
+  contact:
+    name: Legonzaur
+    url: 'https://github.com/Legonzaur'
+  license:
+    name: The Unlicense
+    url: 'https://unlicense.org/'
+  description: 'Stats tracking API for Titanfall 2 Northstar '
+tags:
+  - name: client
+    description: Routes accessibles by everyone
+  - name: server
+    description: Routes accessibles only to server owners
+servers:
+  - url: 'https://tone.sleepycat.date/v2'
+paths:
+  /client/hosts:
+    get:
+      summary: List of hosts
+      tags:
+        - client
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  '[number] host_id':
+                    type: string
+                    example: Fvnkhead
+              examples:
+                Example 1:
+                  value:
+                    '1': Fvnkhead
+                    '2': Legonzaur
+      operationId: get-client-hosts
+      description: An object with host ID as keys and host name as values
+  /client/servers:
+    get:
+      summary: Statistics for servers
+      tags:
+        - client
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  '[string] server_name':
+                    type: object
+                    properties:
+                      deaths:
+                        type: integer
+                      kills:
+                        type: integer
+                      max_distance:
+                        type: integer
+                      total_distance:
+                        type: integer
+                      host:
+                        type: integer
+              examples:
+                Example 1:
+                  value:
+                    fvnkhead's 3v3:
+                      deaths: 79810
+                      kills: 76218
+                      max_distance: 3733
+                      total_distance: 42200935
+                      host: 1
+                    fvnkhead's 7v7:
+                      deaths: 148609
+                      kills: 163272
+                      max_distance: 6578
+                      total_distance: 113915706
+                      host: 1
+      operationId: get-server-list
+      description: A JSON object with server names as keys and server data as values
+      parameters:
+        - $ref: '#/components/parameters/server'
+        - $ref: '#/components/parameters/player'
+        - $ref: '#/components/parameters/weapon'
+        - $ref: '#/components/parameters/map'
+        - $ref: '#/components/parameters/gamemode'
+        - $ref: '#/components/parameters/host'
+    parameters: []
+  /client/weapons:
+    get:
+      summary: Statistics for weapons
+      tags:
+        - client
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  '[string] weapon_id':
+                    $ref: '#/components/schemas/KillData'
+              examples:
+                Example 1:
+                  value:
+                    autopistol:
+                      deaths: 27
+                      kills: 28
+                      max_distance: 2173
+                      total_distance: 12792
+                    car:
+                      deaths: 1394
+                      kills: 1534
+                      max_distance: 3217
+                      total_distance: 905505
+      operationId: get-client-weapons
+      parameters:
+        - $ref: '#/components/parameters/server'
+        - $ref: '#/components/parameters/player'
+        - $ref: '#/components/parameters/weapon'
+        - $ref: '#/components/parameters/map'
+        - $ref: '#/components/parameters/gamemode'
+        - $ref: '#/components/parameters/host'
+      requestBody:
+        content: {}
+        description: A JSON Object with weapon IDS as keys and weapon data as value
+      description: A JSON Object with weapon IDs as keys and weapon data as values
+    parameters: []
+  /client/players:
+    get:
+      summary: Statistics for players
+      tags:
+        - client
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  '[number] player_id':
+                    type: object
+                    properties:
+                      deaths:
+                        type: integer
+                      kills:
+                        type: integer
+                      max_distance:
+                        type: integer
+                      total_distance:
+                        type: integer
+                      username:
+                        type: string
+              examples:
+                Example 1:
+                  value:
+                    '2250125460':
+                      username: Legonzaur
+                      deaths: 0
+                      kills: 0
+                      max_kill_distance: 0
+                      avg_kill_distance: 0
+      operationId: get-client-players
+      parameters:
+        - $ref: '#/components/parameters/weapon'
+        - $ref: '#/components/parameters/server'
+        - $ref: '#/components/parameters/player'
+        - $ref: '#/components/parameters/gamemode'
+        - $ref: '#/components/parameters/map'
+        - $ref: '#/components/parameters/host'
+      description: A JSON Object with player IDs as keys and player data as values
+  /client/maps:
+    get:
+      summary: Statistics for maps
+      tags:
+        - client
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  '[string] map_id':
+                    $ref: '#/components/schemas/KillData'
+              examples:
+                Example 1:
+                  value:
+                    lf_meadow:
+                      deaths: 13628
+                      kills: 11791
+                      max_distance: 3970
+                      total_distance: 7139763
+                    lf_township:
+                      deaths: 14861
+                      kills: 14232
+                      max_distance: 3642
+                      total_distance: 9022513
+      operationId: get-client-maps
+      parameters:
+        - $ref: '#/components/parameters/host'
+        - $ref: '#/components/parameters/gamemode'
+        - $ref: '#/components/parameters/map'
+        - $ref: '#/components/parameters/weapon'
+        - $ref: '#/components/parameters/player'
+        - $ref: '#/components/parameters/server'
+      description: A JSON Object with map IDs as keys and map data as values
+  /client/gamemodes:
+    get:
+      summary: Statistics for gamemodes
+      tags:
+        - client
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  '[string] gamemode_id':
+                    $ref: '#/components/schemas/KillData'
+              examples:
+                Example 1:
+                  value:
+                    ps:
+                      deaths: 273232
+                      kills: 286679
+                      max_distance: 8521
+                      total_distance: 184069789
+                    aitdm:
+                      deaths: 11388
+                      kills: 12814
+                      max_distance: 5689
+                      total_distance: 9184028
+                    sns:
+                      deaths: 20364
+                      kills: 19294
+                      max_distance: 4623
+                      total_distance: 10297366
+                    fw:
+                      deaths: 25
+                      kills: 53
+                      max_distance: 4031
+                      total_distance: 45761
+      operationId: get-client-gamemodes
+      description: A JSON Object with gamemodes IDs as keys and gamemodes data as values
+      parameters:
+        - $ref: '#/components/parameters/host'
+        - $ref: '#/components/parameters/gamemode'
+        - $ref: '#/components/parameters/map'
+        - $ref: '#/components/parameters/weapon'
+        - $ref: '#/components/parameters/player'
+        - $ref: '#/components/parameters/server'
+  /servers:
+    parameters: []
+    post:
+      tags:
+        - server
+      summary: ''
+      operationId: Check token validity
+      responses:
+        '200':
+          description: OK
+        '403':
+          description: Forbidden
+      description: Used to test auth
+      security:
+        - Auth_Token: []
+  /servers/kills:
+    post:
+      tags:
+        - server
+      summary: Post kills
+      operationId: post-kills
+      responses:
+        '201':
+          description: Created
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+      parameters: []
+      security:
+        - Auth_Token: []
+      description: Allows a Northstar server to record kills on the database
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Kill'
+        description: ''
+    parameters: []
+components:
+  schemas:
+    KillData:
+      title: Killdata
+      type: object
+      properties:
+        deaths:
+          type: integer
+        kills:
+          type: integer
+        max_kill_distance:
+          type: integer
+        avg_kill_distance:
+          type: number
+    Kill:
+      title: Kill
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        server:
+          type: string
+          readOnly: true
+        tone_version:
+          type: string
+        match_id:
+          type: string
+        game_mode:
+          type: string
+        map:
+          type: string
+        game_time:
+          type: string
+          format: time
+        player_count:
+          type: integer
+        attacker_name:
+          type: string
+        attacker_id:
+          type: integer
+        attacker_current_weapon:
+          type: string
+        attacker_current_weapon_mods:
+          type: integer
+        attacker_weapon_1:
+          type: string
+        attacker_weapon_1_mods:
+          type: integer
+        attacker_weapon_2:
+          type: string
+        attacker_weapon_2_mods:
+          type: integer
+        attacker_weapon_3:
+          type: string
+        attacker_weapon_3_mods:
+          type: integer
+        attacker_offhand_weapon_1:
+          type: integer
+        attacker_offhand_weapon_2:
+          type: integer
+        victim_name:
+          type: string
+        victim_id:
+          type: integer
+        victim_current_weapon:
+          type: string
+        victim_current_weapon_mods:
+          type: integer
+        victim_weapon_1:
+          type: string
+        victim_weapon_1_mods:
+          type: integer
+        victim_weapon_2:
+          type: string
+        victim_weapon_2_mods:
+          type: integer
+        victim_weapon_3:
+          type: string
+        victim_weapon_3_mods:
+          type: integer
+        victim_offhand_weapon_1:
+          type: integer
+        victim_offhand_weapon_2:
+          type: integer
+        cause_of_death:
+          type: string
+        distance:
+          type: number
+      required:
+        - cause_of_death
+  securitySchemes:
+    Auth_Token:
+      type: http
+      scheme: bearer
+  parameters:
+    server:
+      name: server
+      in: query
+      required: false
+      schema:
+        type: string
+        example: fvnkhead's 3v3
+      description: Fetch data for specific server
+    player:
+      name: player
+      in: query
+      required: false
+      schema:
+        type: integer
+        example: 1005930844007
+      description: Fetch data for specific player
+    weapon:
+      name: weapon
+      in: query
+      required: false
+      schema:
+        type: string
+        example: epg
+      description: Fetch data for specific weapon
+    map:
+      name: map
+      in: query
+      required: false
+      schema:
+        type: string
+        example: lf_stacks
+      description: Fetch data for specific map
+    gamemode:
+      name: gamemode
+      in: query
+      required: false
+      schema:
+        type: string
+        example: aitdm
+      description: Fetch data for specific gamemode
+    host:
+      name: host
+      in: query
+      required: false
+      schema:
+        type: integer
+        example: 1
+      description: Fetch data for specific host
+  responses: {}
+  examples: {}
