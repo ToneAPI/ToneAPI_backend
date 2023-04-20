@@ -11,13 +11,49 @@ beforeAll(async () => {
 })
 
 describe('server', () => {
-  test('server auth prefetch', async () => {
-    const response = await fetch(`http://127.0.0.1:3001/${process.env.SERVERAUTH_ID}`, {
+
+  test('bad auth prefetch', async () => {
+    const response = await fetch(`http://127.0.0.1:3001/`, {
       method: "POST", // *GET, POST, PUT, DELETE, etc.
       credentials: "same-origin", // include, *same-origin, omit
       headers: {
         "Content-Type": "application/json",
-        'Authorization': `Basic ${Buffer.from(process.env.SERVERAUTH_ID + ':' + process.env.SERVERAUTH_TOKEN).toString('base64')}`
+        'Authorization': `Bearere ${Buffer.from('' + process.env.SERVERAUTH_TOKEN).toString('base64')}`
+      }
+    });
+    expect(response.status).toBe(400)
+
+    const response2 = await fetch(`http://127.0.0.1:3001/`, {
+      method: "POST", // *GET, POST, PUT, DELETE, etc.
+      credentials: "same-origin", // include, *same-origin, omit
+      headers: {
+        "Content-Type": "application/json",
+        'Authorization': `Bearer ${Buffer.from('badtoken').toString('base64')}`
+      }
+    });
+    expect(response2.status).toBe(403)
+  })
+
+  test('bad kill token', async () => {
+    const response2 = await fetch(`http://127.0.0.1:3001/kill`, {
+      method: "POST", // *GET, POST, PUT, DELETE, etc.
+      credentials: "same-origin", // include, *same-origin, omit
+      headers: {
+        "Content-Type": "application/json",
+        'Authorization': `Bearer ${Buffer.from('badtoken').toString('base64')}`
+      }
+    });
+    expect(response2.status).toBe(403)
+  })
+
+
+  test('good auth prefetch', async () => {
+    const response = await fetch(`http://127.0.0.1:3001/`, {
+      method: "POST", // *GET, POST, PUT, DELETE, etc.
+      credentials: "same-origin", // include, *same-origin, omit
+      headers: {
+        "Content-Type": "application/json",
+        'Authorization': `Bearer ${Buffer.from('' + process.env.SERVERAUTH_TOKEN).toString('base64')}`
       }
     });
     expect(response.status).toBe(200)
@@ -25,6 +61,7 @@ describe('server', () => {
 
   test('register a kill', async () => {
     const data = {
+      servername: 'testserver',
       attacker_weapon_1_mods: 0,
       victim_id: '0',
       victim_name: 'TestVictim',
@@ -60,21 +97,23 @@ describe('server', () => {
       victim_weapon_3: 'defender',
       attacker_name: 'TestAttacker'
     }
-    const response = await fetch(`http://127.0.0.1:3001/${process.env.SERVERAUTH_ID}/kill`, {
+    const response = await fetch(`http://127.0.0.1:3001/kill`, {
       method: "POST", // *GET, POST, PUT, DELETE, etc.
       credentials: "same-origin", // include, *same-origin, omit
       headers: {
         "Content-Type": "application/json",
-        'Authorization': `Basic ${Buffer.from(process.env.SERVERAUTH_ID + ':' + process.env.SERVERAUTH_TOKEN).toString('base64')}`
+        'Authorization': `Bearer ${Buffer.from(process.env.SERVERAUTH_TOKEN + '').toString('base64')}`
       },
       body: JSON.stringify(data), // body data type must match "Content-Type" header
     });
+    console.log(await response.text())
     expect(response.status).toBe(201)
   })
 
 
   test('register a kill with missing data', async () => {
     const data = {
+      servername: 'testserver',
       attacker_weapon_1_mods: NaN,
       victim_id: '0',
       victim_name: 'TestVictim',
@@ -110,12 +149,12 @@ describe('server', () => {
       victim_weapon_3: 'arc_launcher',
       attacker_name: 'TestAttacker'
     }
-    const response = await fetch(`http://127.0.0.1:3001/${process.env.SERVERAUTH_ID}/kill`, {
+    const response = await fetch(`http://127.0.0.1:3001/kill`, {
       method: "POST", // *GET, POST, PUT, DELETE, etc.
       credentials: "same-origin", // include, *same-origin, omit
       headers: {
         "Content-Type": "application/json",
-        'Authorization': `Basic ${Buffer.from(process.env.SERVERAUTH_ID + ':' + process.env.SERVERAUTH_TOKEN).toString('base64')}`
+        'Authorization': `Bearer ${Buffer.from(process.env.SERVERAUTH_TOKEN + '').toString('base64')}`
       },
       body: JSON.stringify(data), // body data type must match "Content-Type" header
     });
@@ -124,9 +163,10 @@ describe('server', () => {
 })
 
 afterAll((done) => {
-  listenServer.close(() => {
-    db.deleteFrom('kill').where('attacker_id', '=', '0').orWhere('attacker_id', '=', '1').execute().then(() => {
-      db.destroy().then(() => { done() })
+  db.deleteFrom('kill').where('attacker_id', '=', '0').orWhere('attacker_id', '=', '1').execute().then(() => {
+    listenServer.close(async () => {
+      await db.destroy()
+      done()
     })
   })
 })
