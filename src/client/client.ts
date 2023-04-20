@@ -73,20 +73,23 @@ router.get(
     allData
       .filter((e) => filters(e, req.query))
       .forEach((e) => {
-        if (!data[e[index]])
-          data[e[index]] = {
+        if (!e.cause_of_death || !e.attacker_id || !e.map || !e.servername || !e.game_mode) return
+        const requestIndex = e[index]
+        if (!requestIndex) return
+        if (!data[requestIndex])
+          data[requestIndex] = {
             deaths: 0,
             kills: 0,
             max_distance: 0,
             total_distance: 0
           }
-        if (index === 'attacker_id') data[e[index]].username = e.attacker_name
-        if (index === 'servername') data[e[index]].host = e.host
-        data[e[index]].deaths += Number(e.deaths)
-        data[e[index]].kills += Number(e.kills)
-        data[e[index]].total_distance += Number(e.total_distance)
-        data[e[index]].max_distance = Math.max(
-          data[e[index]].max_distance,
+        if (index === 'attacker_id') data[requestIndex].username = e.attacker_name
+        if (index === 'servername') data[requestIndex].host = e.host
+        data[requestIndex].deaths += Number(e.deaths)
+        data[requestIndex].kills += Number(e.kills)
+        data[requestIndex].total_distance += Number(e.total_distance)
+        data[requestIndex].max_distance = Math.max(
+          data[requestIndex].max_distance,
           Number(e.max_distance)
         )
       })

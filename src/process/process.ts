@@ -62,7 +62,8 @@ async function processGlobalStats() {
         .select([
           count<number>('id').as('deaths'),
           'victim_id',
-          'victim_current_weapon',
+          sql<string>`last(victim_name)`.as('victim_name'),
+          'cause_of_death',
           'map',
           'game_mode',
           'servername',
@@ -70,7 +71,7 @@ async function processGlobalStats() {
         ])
         .groupBy([
           'victim_id',
-          'victim_current_weapon',
+          'cause_of_death',
           'map',
           'servername',
           'host',
@@ -78,17 +79,29 @@ async function processGlobalStats() {
         ])
     )
     .selectFrom('kills')
-    .leftJoin('deaths', (join) =>
+    .fullJoin('deaths', (join) =>
       join
         .onRef('deaths.victim_id', '=', 'kills.attacker_id')
-        .onRef('deaths.victim_current_weapon', '=', 'kills.cause_of_death')
+        .onRef('deaths.cause_of_death', '=', 'kills.cause_of_death')
         .onRef('deaths.servername', '=', 'kills.servername')
         .onRef('deaths.host', '=', 'kills.host')
         .onRef('deaths.game_mode', '=', 'kills.game_mode')
         .onRef('deaths.map', '=', 'kills.map')
     )
-    .selectAll('kills')
-    .select(sql<number>`COALESCE(deaths.deaths, 0)`.as('deaths'))
+    //.selectAll('kills')
+    .select([
+      sql<string>`COALESCE(kills.attacker_name, deaths.victim_name)`.as('attacker_name'),
+      sql<string>`COALESCE(kills.attacker_id, deaths.victim_id)`.as('attacker_id'),
+      sql<number>`COALESCE(kills.kills, 0)`.as('kills'),
+      sql<number>`COALESCE(kills.total_distance, 0)`.as('total_distance'),
+      sql<number>`COALESCE(kills.max_distance, 0)`.as('max_distance'),
+      sql<number>`COALESCE(deaths.deaths, 0)`.as('deaths'),
+      sql<string>`COALESCE(kills.servername, deaths.servername)`.as('servername'),
+      sql<number>`COALESCE(kills.host, deaths.host)`.as('host'),
+      sql<string>`COALESCE(kills.cause_of_death, deaths.cause_of_death)`.as('cause_of_death'),
+      sql<string>`COALESCE(kills.map, deaths.map)`.as('map'),
+      sql<string>`COALESCE(kills.game_mode, deaths.game_mode)`.as('game_mode'),
+    ])
     .execute()
 }
 export default processAll

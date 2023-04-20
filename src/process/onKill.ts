@@ -69,7 +69,7 @@ export default async function listenKills() {
 
         killEntry.kills++
         killEntry.total_distance += payload.distance
-        killEntry.max_distance = Math.max(killEntry.max_distance, payload.distance)
+        killEntry.max_distance = Math.max(killEntry.max_distance || 0, payload.distance)
         deathEntry.deaths++
     })
     return pgClient
