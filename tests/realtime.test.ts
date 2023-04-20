@@ -4,7 +4,6 @@ import serverMain from '../src/serverMain'
 import listenKills from "../src/process/onKill"
 import * as dotenv from 'dotenv'
 import db from '../src/db/db'
-import cache from '../src/cache/redis'
 dotenv.config()
 
 let listenClient
@@ -62,8 +61,8 @@ beforeAll(async () => {
     listenClient = await clientMain;
     listenServer = await serverMain;
     pgClient = await listenKills()
-    const yea = waitFor(10000)
-    const response = await fetch(`http://127.0.0.1:3001/${process.env.SERVERAUTH_ID}/kill`, {
+    const yea = waitFor(1000)
+    const response = await fetch(`http://127.0.0.1:3001/kill`, {
         method: "POST", // *GET, POST, PUT, DELETE, etc.
         credentials: "same-origin", // include, *same-origin, omit
         headers: {
@@ -103,8 +102,8 @@ describe('realtime', () => {
 
     test('update player', async () => {
         jest.setTimeout(15000)
-        const yea = waitFor(10000)
-        const response = await fetch(`http://127.0.0.1:3001/${process.env.SERVERAUTH_ID}/kill`, {
+        const yea = waitFor(1000)
+        const response = await fetch(`http://127.0.0.1:3001/kill`, {
             method: "POST", // *GET, POST, PUT, DELETE, etc.
             credentials: "same-origin", // include, *same-origin, omit
             headers: {
@@ -138,7 +137,6 @@ afterAll((done) => {
         listenServer.close(async () => {
             await pgClient.end()
             await db.destroy()
-            await cache.quit()
             done()
         })
     })

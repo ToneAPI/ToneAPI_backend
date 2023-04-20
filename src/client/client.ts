@@ -1,86 +1,81 @@
 import { Router } from 'express'
 import { param, query } from 'express-validator'
 import { validateErrors } from '../common'
-import db from '../db/db'
-import client from '../cache/redis'
+import { allData } from '../process/process'
+
 const router = Router()
 //timeout middleware ?
 router.get('/*', (req, res, next) => {
   next()
 })
 
-router.get(
-  '/weapons/:weaponId',
-  param(['weaponId']).exists().isString(),
-  query(['player', 'server']).optional().toInt().isInt(),
-  validateErrors,
-  async (req, res) => {
-    let path = ''
-    if (req.query.server) path = path + `servers.${req.query.server}.`
-    if (req.query.player) path = path + `players.${req.query.player}.`
-    path = path + `weapons.${req.params.weaponId}`
-    if (await client.json.type('kills', path)) return res.status(200).send(await client.json.get('kills', { path }))
-    res.status(404).send()
-  }
-)
+function filters(e: any, query: any) {
+  return (
+    (query.player ? query.player == e.attacker_id : true) &&
+    (query.server ? query.server == e.servername : true) &&
+    (query.host ? Number(query.host) == e.host : true) &&
+    (query.map ? query.map == e.map : true) &&
+    (query.weapon ? query.weapon == e.cause_of_death : true) &&
+    (query.gamemode ? query.gamemode == e.game_mode : true)
+  )
+}
 
 router.get(
-  '/weapons/',
-  query(['player', 'server']).optional().toInt().isInt(),
+  '/:dataType',
+  param('dataType')
+    .custom(
+      (e) => e == 'weapons' || e == 'players' || e == 'maps' || e == 'servers'
+    )
+    .withMessage('Only weapons, players, maps or servers are valid paths'),
+  query(['player', 'host']).optional().toInt().isInt(),
+  query(['server', 'map', 'weapon', 'gamemode']).optional().isString(),
   validateErrors,
-  async (req, res) => {
-    let path = ''
-    if (req.query.server) path = path + `servers.${req.query.server}.`
-    if (req.query.player) path = path + `players.${req.query.player}.`
-    path = path + `weapons`
-    if (await client.json.type('kills', path)) {
-      const data = await client.json.get('kills', { path: `weapons` }) as { [key: number]: any }
-      return res.status(200).send(Object.fromEntries(Object.entries(data).map(([key, value]) => { return [key, { total_distance: value.total_distance, max_distance: value.max_distance, kills: value.kills, deaths: value.deaths }] })))
+  (req, res) => {
+    const data: {
+      [key: string]: {
+        deaths: number
+        kills: number
+        max_distance: number
+        total_distance: number
+      }
+    } = {}
+    let index: 'cause_of_death' | 'attacker_id' | 'map' | 'servername'
+    switch (req.params.dataType) {
+      case 'weapons':
+        index = 'cause_of_death'
+        break
+      case 'players':
+        index = 'attacker_id'
+        break
+      case 'maps':
+        index = 'map'
+        break
+      case 'servers':
+        index = 'servername'
+        break
+      default:
+        return res.status(400).send()
     }
-    res.status(404).send()
+    allData
+      .filter((e) => filters(e, req.query))
+      .forEach((e) => {
+        if (!data[e[index]])
+          data[e[index]] = {
+            deaths: 0,
+            kills: 0,
+            max_distance: 0,
+            total_distance: 0
+          }
+        data[e[index]].deaths += Number(e.deaths)
+        data[e[index]].kills += Number(e.kills)
+        data[e[index]].total_distance += Number(e.total_distance)
+        data[e[index]].max_distance = Math.max(
+          data[e[index]].max_distance,
+          Number(e.max_distance)
+        )
+      })
+    res.status(200).send(data)
   }
 )
-
-router.get(
-  '/players/:playerId',
-  param(['playerId']).exists().toInt().isInt(),
-  query(['server']).optional().toInt().isInt(),
-  query('weapon').optional().isString(),
-  validateErrors,
-  async (req, res) => {
-    let path = ''
-    if (req.query.server) path = path + `servers.${req.query.server}.`
-    if (req.query.weapon) path = path + `weapons.${req.query.weapon}.`
-    path = path + `players.${req.params.playerId}`
-    if (await client.json.type('kills', path)) return res.status(200).send(await client.json.get('kills', { path }))
-    res.status(404).send()
-  }
-)
-
-router.get(
-  '/players/',
-  query(['server']).optional().toInt().isInt(),
-  query('weapon').optional().isString(),
-  validateErrors,
-  async (req, res) => {
-    let path = ''
-    if (req.query.server) path = path + `servers.${req.query.server}.`
-    if (req.query.weapon) path = path + `weapons.${req.query.weapon}.`
-    path = path + `players`
-    if (await client.json.type('kills', path)) {
-      const data = await client.json.get('kills', { path: `players` }) as { [key: number]: any }
-      return res.status(200).send(Object.fromEntries(Object.entries(data).map(([key, value]) => { return [key, { total_distance: value.total_distance, max_distance: value.max_distance, kills: value.kills, deaths: value.deaths }] })))
-    }
-    res.status(404).send()
-  }
-)
-
-//router.get('/maps/', (req, res, next) => {})
-
-router.get('/servers/', async (req, res) => {
-  const data = await client.json.get('kills', { path: `servers` }) as { [key: number]: any }
-  return res.status(200).send(Object.fromEntries(Object.entries(data).map(([key, value]) => { return [key, value.data] })))
-})
-//router.get('/servers/:serverId/', (req, res, next) => {})
 
 export default router

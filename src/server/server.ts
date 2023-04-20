@@ -1,6 +1,5 @@
-import { NextFunction, Router } from 'express'
-import expressBasicAuth from 'express-basic-auth'
-import { body, header, param } from 'express-validator'
+import { Router } from 'express'
+import { body, header } from 'express-validator'
 import { CreateKillRecord, CheckServerToken } from '../db/db'
 import { validateErrors } from '../common'
 

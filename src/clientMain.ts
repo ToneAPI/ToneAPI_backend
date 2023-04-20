@@ -3,8 +3,8 @@ dotenv.config()
 import express from 'express'
 import cors from 'cors'
 import client from './client/client'
-import db, { dbReady } from './db/db'
-import cache, { cacheReady } from './cache/redis'
+import { dbReady } from './db/db'
+import processAll from './process/process'
 
 const app = express()
 const port = 3000
@@ -19,13 +19,11 @@ app.get('/', (req, res) => {
 app.use('/', client)
 
 export default
-  new Promise((resolve, reject) => {
-    dbReady().then((e) => {
-      cacheReady().then((e) => {
-        const listenServer = app.listen(port, '0.0.0.0', () => {
-          console.log(`Tone client api listening on port ${port}`)
-          resolve(listenServer)
-        })
-      })
+  new Promise(async (resolve, reject) => {
+    await dbReady()
+    await processAll()
+    const listenServer = app.listen(port, '0.0.0.0', () => {
+      console.log(`Tone client api listening on port ${port}`)
+      resolve(listenServer)
     })
   })
