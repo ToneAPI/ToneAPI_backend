@@ -39,6 +39,7 @@ async function processGlobalStats() {
             'total_distance'
           ),
           'attacker_id',
+          sql<string>`last(attacker_name)`.as('attacker_name'),
           'cause_of_death',
           'map',
           'game_mode',
@@ -62,6 +63,7 @@ async function processGlobalStats() {
           count<number>('id').as('deaths'),
           'victim_id',
           'victim_current_weapon',
+          sql<string>`last(attacker_name)`.as('attacker_name'),
           'map',
           'game_mode',
           'servername',

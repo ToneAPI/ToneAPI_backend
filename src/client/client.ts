@@ -37,6 +37,8 @@ router.get(
         kills: number
         max_distance: number
         total_distance: number
+        username?: string
+        host?: number
       }
     } = {}
     let index: 'cause_of_death' | 'attacker_id' | 'map' | 'servername'
@@ -66,6 +68,8 @@ router.get(
             max_distance: 0,
             total_distance: 0
           }
+        if (index === 'attacker_id') data[e[index]].username = e.attacker_name
+        if (index === 'servername') data[e[index]].host = e.host
         data[e[index]].deaths += Number(e.deaths)
         data[e[index]].kills += Number(e.kills)
         data[e[index]].total_distance += Number(e.total_distance)
