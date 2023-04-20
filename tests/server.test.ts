@@ -11,7 +11,43 @@ beforeAll(async () => {
 })
 
 describe('server', () => {
-  test('server auth prefetch', async () => {
+
+  test('bad auth prefetch', async () => {
+    const response = await fetch(`http://127.0.0.1:3001/`, {
+      method: "POST", // *GET, POST, PUT, DELETE, etc.
+      credentials: "same-origin", // include, *same-origin, omit
+      headers: {
+        "Content-Type": "application/json",
+        'Authorization': `Bearere ${Buffer.from('' + process.env.SERVERAUTH_TOKEN).toString('base64')}`
+      }
+    });
+    expect(response.status).toBe(400)
+
+    const response2 = await fetch(`http://127.0.0.1:3001/`, {
+      method: "POST", // *GET, POST, PUT, DELETE, etc.
+      credentials: "same-origin", // include, *same-origin, omit
+      headers: {
+        "Content-Type": "application/json",
+        'Authorization': `Bearer ${Buffer.from('badtoken').toString('base64')}`
+      }
+    });
+    expect(response2.status).toBe(403)
+  })
+
+  test('bad kill token', async () => {
+    const response2 = await fetch(`http://127.0.0.1:3001/kill`, {
+      method: "POST", // *GET, POST, PUT, DELETE, etc.
+      credentials: "same-origin", // include, *same-origin, omit
+      headers: {
+        "Content-Type": "application/json",
+        'Authorization': `Bearer ${Buffer.from('badtoken').toString('base64')}`
+      }
+    });
+    expect(response2.status).toBe(403)
+  })
+
+
+  test('good auth prefetch', async () => {
     const response = await fetch(`http://127.0.0.1:3001/`, {
       method: "POST", // *GET, POST, PUT, DELETE, etc.
       credentials: "same-origin", // include, *same-origin, omit

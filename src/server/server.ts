@@ -12,7 +12,7 @@ router.post(
     .exists({ checkFalsy: true })
     .withMessage('Missing Authorization Header')
     .bail()
-    .contains('Bearer')
+    .custom(e => e.split(' ')[0].toLowerCase() == 'bearer')
     .withMessage('Authorization Token is not Bearer'),
   validateErrors,
   async (req, res, next) => {
@@ -129,8 +129,10 @@ router.post(
   validateErrors,
   async (req, res) => {
     if (!req.headers.authorization) return res.sendStatus(403)
-    const query = (await CheckServerToken(req.headers.authorization.split(' ')[1]))
-    if (!query) return
+    const headers = req.headers.authorization.split(' ')
+    if (headers[0].toLowerCase() != "bearer") return res.status(403).send("authorization must be token bearer")
+    const query = (await CheckServerToken(headers[1]))
+    if (!query) return res.sendStatus(403)
     const host = query.id
     const {
       servername,
