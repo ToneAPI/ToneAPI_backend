@@ -77,6 +77,27 @@ async function processGlobalStats() {
           'host',
           'game_mode'
         ])
+    ).with('deathswithweapon', (db) =>
+      db
+        .selectFrom('kill')
+        .select([
+          count<number>('id').as('deaths'),
+          'victim_id',
+          sql<string>`last(victim_name)`.as('victim_name'),
+          'victim_current_weapon',
+          'map',
+          'game_mode',
+          'servername',
+          'host'
+        ])
+        .groupBy([
+          'victim_id',
+          'victim_current_weapon',
+          'map',
+          'servername',
+          'host',
+          'game_mode'
+        ])
     )
     .selectFrom('kills')
     .fullJoin('deaths', (join) =>
@@ -88,12 +109,22 @@ async function processGlobalStats() {
         .onRef('deaths.game_mode', '=', 'kills.game_mode')
         .onRef('deaths.map', '=', 'kills.map')
     )
+    .fullJoin('deathswithweapon', (join) =>
+      join
+        .onRef('deathswithweapon.victim_id', '=', 'kills.attacker_id')
+        .onRef('deathswithweapon.victim_current_weapon', '=', 'kills.cause_of_death')
+        .onRef('deathswithweapon.servername', '=', 'kills.servername')
+        .onRef('deathswithweapon.host', '=', 'kills.host')
+        .onRef('deathswithweapon.game_mode', '=', 'kills.game_mode')
+        .onRef('deathswithweapon.map', '=', 'kills.map')
+    )
     //.selectAll('kills')
     .select([
       sql<string>`COALESCE(kills.attacker_name, deaths.victim_name)`.as('attacker_name'),
       sql<string>`COALESCE(kills.attacker_id, deaths.victim_id)`.as('attacker_id'),
       sql<number>`COALESCE(kills.kills, 0)`.as('kills'),
       sql<number>`COALESCE(kills.total_distance, 0)`.as('total_distance'),
+      sql<number>`COALESCE(deathswithweapon.deaths, 0)`.as('deaths_with_weapon'),
       sql<number>`COALESCE(kills.max_distance, 0)`.as('max_distance'),
       sql<number>`COALESCE(deaths.deaths, 0)`.as('deaths'),
       sql<string>`COALESCE(kills.servername, deaths.servername)`.as('servername'),

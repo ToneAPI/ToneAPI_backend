@@ -33,12 +33,22 @@ export default async function listenKills() {
                 e.map == payload.map &&
                 e.servername == payload.servername
         )
+        let deathWithWeaponEntry = allData.find(
+            (e) =>
+                e.attacker_id == payload.victim_id &&
+                e.cause_of_death == payload.victim_current_weapon &&
+                e.game_mode == payload.game_mode &&
+                e.host == payload.host &&
+                e.map == payload.map &&
+                e.servername == payload.servername
+        )
         if (!killEntry) {
             killEntry = {
                 kills: 0,
                 deaths: 0,
                 max_distance: 0,
                 total_distance: 0,
+                deaths_with_weapon: 0,
                 attacker_name: payload.attacker_name,
                 attacker_id: payload.attacker_id,
                 cause_of_death: payload.cause_of_death,
@@ -56,9 +66,10 @@ export default async function listenKills() {
                 deaths: 0,
                 max_distance: 0,
                 total_distance: 0,
+                deaths_with_weapon: 0,
                 attacker_name: payload.victim_name,
                 attacker_id: payload.victim_id,
-                cause_of_death: payload.victim_current_weapon,
+                cause_of_death: payload.cause_of_death,
                 game_mode: payload.game_mode,
                 host: payload.host,
                 map: payload.map,
@@ -67,10 +78,29 @@ export default async function listenKills() {
             allData.push(deathEntry)
         }
 
+        if (!deathWithWeaponEntry) {
+            deathWithWeaponEntry = {
+                kills: 0,
+                deaths: 0,
+                max_distance: 0,
+                total_distance: 0,
+                deaths_with_weapon: 0,
+                attacker_name: payload.victim_name,
+                attacker_id: payload.victim_id,
+                cause_of_death: payload.victim_current_weapon,
+                game_mode: payload.game_mode,
+                host: payload.host,
+                map: payload.map,
+                servername: payload.servername
+            }
+            allData.push(deathWithWeaponEntry)
+        }
+
         killEntry.kills++
         killEntry.total_distance += payload.distance
         killEntry.max_distance = Math.max(killEntry.max_distance || 0, payload.distance)
         deathEntry.deaths++
+        deathWithWeaponEntry.deaths++
     })
     return pgClient
 }
