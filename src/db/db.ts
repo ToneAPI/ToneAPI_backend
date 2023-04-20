@@ -34,70 +34,25 @@ interface RemoveFromKill {
 type KillRecord = Omit<KillTable, keyof RemoveFromKill>
 
 export async function CreateKillRecord(data: KillRecord) {
-  //TODO : Handle server foreign key crashes
   await db
     .insertInto('kill')
     .values({ ...data })
     .execute()
 }
-
-// export async function FindServer({ name }: { name: string }) {
-//   return await db
-//     .selectFrom('server')
-//     .select(['server.name', 'server.description'])
-//     .where('server.name', '=', name)
-//     .executeTakeFirst()
-// }
-
-// export async function CreateServer({
-//   name,
-//   description
-// }: {
-//   name: string
-//   description: string
-// }) {
-//   return await db
-//     .insertInto('server')
-//     .values({ name, description })
-//     .returning(['id', 'token'])
-//     .executeTakeFirstOrThrow()
-// }
-
+export async function getHostList() {
+  return await db.selectFrom("host").select(['id', 'host.name']).execute()
+}
 //tokens are stored in raw... maybe we should use something better in the future
 //Using callback for express-basic-auth
 export function CheckServerToken(token: string) {
-  return db.selectFrom('hoster').select('id')
+  return db.selectFrom('host').select('id')
     .where('token', '=', Buffer.from(token, 'base64').toString())
     .executeTakeFirst()
     .then((result) => {
       return result
     })
 }
-/*
-async function demo() {
-  const { id } = await db
-    .insertInto("person")
-    .values({ first_name: "Jennifer", gender: "female" })
-    .returning("id")
-    .executeTakeFirstOrThrow();
 
-  await db
-    .insertInto("pet")
-    .values({ name: "Catto", species: "cat", owner_id: id })
-    .execute();
-
-  const person = await db
-    .selectFrom("person")
-    .innerJoin("pet", "pet.owner_id", "person.id")
-    .select(["first_name", "pet.name as pet_name"])
-    .where("person.id", "=", id)
-    .executeTakeFirst();
-
-  if (person) {
-    person.pet_name;
-  }
-}
-*/
 export async function dbReady(): Promise<Kysely<Database>> {
   await migration
   return db

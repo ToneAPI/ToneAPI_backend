@@ -2,6 +2,7 @@ import { Router } from 'express'
 import { param, query } from 'express-validator'
 import { validateErrors } from '../common'
 import { allData } from '../process/process'
+import { getHostList } from '../db/db'
 
 const router = Router()
 //timeout middleware ?
@@ -19,6 +20,14 @@ function filters(e: any, query: any) {
     (query.gamemode ? query.gamemode == e.game_mode : true)
   )
 }
+
+router.get('/hosts',
+  async (req, res) => {
+    const result = (await getHostList())
+    const data: { [key: number]: string } = {}
+    result.forEach(e => data[Number(e.id)] = e.name)
+    res.status(200).send(data)
+  })
 
 router.get(
   '/:dataType',

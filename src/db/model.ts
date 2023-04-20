@@ -38,13 +38,15 @@ export interface KillTable {
   cause_of_death: string
   distance: number
 }
-
+/*
 interface PlayerTable {
   id: number
   name: string
   'opt-out': boolean
   hide_TOS: boolean
 }
+*/
+
 interface WeaponTable {
   id: string
   name: string
@@ -64,10 +66,10 @@ interface HosterTable {
 }
 interface Database {
   kill: KillTable
-  player: PlayerTable
+  //player: PlayerTable
   weapon: WeaponTable
   maps: MapTable
-  hoster: HosterTable
+  host: HosterTable
 }
 
 export default Database
