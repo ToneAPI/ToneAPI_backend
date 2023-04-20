@@ -114,7 +114,9 @@ router.post(
       'victim_weapon_1',
       'victim_weapon_2',
       'victim_weapon_3',
-      'cause_of_death'
+      'cause_of_death',
+      'victim_titan',
+      'attacker_titan'
     ],
     'must be composed of a maximum of 50 valid ascii characters'
   )

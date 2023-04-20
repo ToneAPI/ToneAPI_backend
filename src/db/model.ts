@@ -37,6 +37,7 @@ export interface KillTable {
   victim_offhand_weapon_2: number
   cause_of_death: string
   distance: number
+  titan?: string
 }
 /*
 interface PlayerTable {
