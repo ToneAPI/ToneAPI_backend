@@ -33,7 +33,7 @@ router.get(
   '/:dataType',
   param('dataType')
     .custom(
-      (e) => e == 'weapons' || e == 'players' || e == 'maps' || e == 'servers'
+      (e) => e == 'weapons' || e == 'players' || e == 'maps' || e == 'servers' || e == 'gamemodes'
     )
     .withMessage('Only weapons, players, maps or servers are valid paths'),
   query(['player', 'host']).optional().toInt().isInt(),
@@ -50,7 +50,7 @@ router.get(
         host?: number
       }
     } = {}
-    let index: 'cause_of_death' | 'attacker_id' | 'map' | 'servername'
+    let index: 'cause_of_death' | 'attacker_id' | 'map' | 'servername' | 'game_mode'
     switch (req.params.dataType) {
       case 'weapons':
         index = 'cause_of_death'
@@ -63,6 +63,9 @@ router.get(
         break
       case 'servers':
         index = 'servername'
+        break
+      case 'gamemodes':
+        index = 'game_mode'
         break
       default:
         return res.status(400).send()
