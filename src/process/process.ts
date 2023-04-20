@@ -63,7 +63,6 @@ async function processGlobalStats() {
           count<number>('id').as('deaths'),
           'victim_id',
           'victim_current_weapon',
-          sql<string>`last(attacker_name)`.as('attacker_name'),
           'map',
           'game_mode',
           'servername',
@@ -86,6 +85,7 @@ async function processGlobalStats() {
         .onRef('deaths.servername', '=', 'kills.servername')
         .onRef('deaths.host', '=', 'kills.host')
         .onRef('deaths.game_mode', '=', 'kills.game_mode')
+        .onRef('deaths.map', '=', 'kills.map')
     )
     .selectAll('kills')
     .select(sql<number>`COALESCE(deaths.deaths, 0)`.as('deaths'))
