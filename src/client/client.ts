@@ -10,34 +10,50 @@ router.get('/*', (req, res, next) => {
   next()
 })
 
-function filters(e: any, query: any) {
+function computeQueryParam(
+  queryParam: string,
+  comparison: string | number
+): boolean {
+  const params = queryParam.split(',')
+  const blacklist = params.filter((e) => e.startsWith('!')).map(e => e.substring(1))
+  const whitelist = params.filter((e) => !e.startsWith('!'))
+
+  const blackPass = blacklist.reduce((acc, element) => element != comparison && acc, true)
+  const whitePass = whitelist.length == 0 ? true : whitelist.reduce((acc, element) => element == comparison || acc, false)
+  return blackPass && whitePass
+}
+
+function filters(e: typeof allData[0], query: any) {
   return (
-    (query.player ? query.player == e.attacker_id : true) &&
-    (query.server ? query.server == e.servername : true) &&
-    (query.host ? Number(query.host) == e.host : true) &&
-    (query.map ? query.map == e.map : true) &&
-    (query.weapon ? query.weapon == e.cause_of_death : true) &&
-    (query.gamemode ? query.gamemode == e.game_mode : true)
+    (query.player ? computeQueryParam(query.player, e.attacker_id) : true) &&
+    (query.server ? computeQueryParam(query.server, e.servername) : true) &&
+    (query.host ? computeQueryParam(query.host, e.host) : true) &&
+    (query.map ? computeQueryParam(query.map, e.map) : true) &&
+    (query.weapon ? computeQueryParam(query.weapon, e.cause_of_death) : true) &&
+    (query.gamemode ? computeQueryParam(query.gamemode, e.game_mode) : true)
   )
 }
 
-router.get('/hosts',
-  async (req, res) => {
-    const result = (await getHostList())
-    const data: { [key: number]: string } = {}
-    result.forEach(e => data[Number(e.id)] = e.name)
-    res.status(200).send(data)
-  })
+router.get('/hosts', async (req, res) => {
+  const result = await getHostList()
+  const data: { [key: number]: string } = {}
+  result.forEach((e) => (data[Number(e.id)] = e.name))
+  res.status(200).send(data)
+})
 
 router.get(
   '/:dataType',
   param('dataType')
     .custom(
-      (e) => e == 'weapons' || e == 'players' || e == 'maps' || e == 'servers' || e == 'gamemodes'
+      (e) =>
+        e == 'weapons' ||
+        e == 'players' ||
+        e == 'maps' ||
+        e == 'servers' ||
+        e == 'gamemodes'
     )
     .withMessage('Only weapons, players, maps or servers are valid paths'),
-  query(['player', 'host']).optional().toInt().isInt(),
-  query(['server', 'map', 'weapon', 'gamemode']).optional().isString(),
+  query(['server', 'map', 'weapon', 'gamemode', 'player', 'host']).optional().isString(),
   validateErrors,
   (req, res) => {
     const data: {
@@ -51,7 +67,12 @@ router.get(
         deaths_while_equipped?: number
       }
     } = {}
-    let index: 'cause_of_death' | 'attacker_id' | 'map' | 'servername' | 'game_mode'
+    let index:
+      | 'cause_of_death'
+      | 'attacker_id'
+      | 'map'
+      | 'servername'
+      | 'game_mode'
     switch (req.params.dataType) {
       case 'weapons':
         index = 'cause_of_death'
@@ -74,7 +95,14 @@ router.get(
     allData
       .filter((e) => filters(e, req.query))
       .forEach((e) => {
-        if (!e.cause_of_death || !e.attacker_id || !e.map || !e.servername || !e.game_mode) return
+        if (
+          !e.cause_of_death ||
+          !e.attacker_id ||
+          !e.map ||
+          !e.servername ||
+          !e.game_mode
+        )
+          return
         const requestIndex = e[index]
         if (!requestIndex) return
         if (!data[requestIndex])
@@ -84,9 +112,13 @@ router.get(
             max_distance: 0,
             total_distance: 0
           }
-        if (index === 'attacker_id') data[requestIndex].username = e.attacker_name
+        if (index === 'attacker_id')
+          data[requestIndex].username = e.attacker_name
         if (index === 'servername') data[requestIndex].host = e.host
-        if (index === 'cause_of_death') data[requestIndex].deaths_while_equipped = Number(e.deaths_with_weapon)
+        if (index === 'cause_of_death')
+          data[requestIndex].deaths_while_equipped = Number(
+            e.deaths_with_weapon
+          )
         data[requestIndex].deaths += Number(e.deaths)
         data[requestIndex].kills += Number(e.kills)
         data[requestIndex].total_distance += Number(e.total_distance)
