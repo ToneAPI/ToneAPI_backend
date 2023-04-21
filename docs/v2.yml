@@ -8,7 +8,10 @@ info:
   license:
     name: The Unlicense
     url: 'https://unlicense.org/'
-  description: 'Stats tracking API for Titanfall 2 Northstar '
+  description: |-
+    Stats tracking API for Titanfall 2 Northstar 
+
+    All query params can be negated using `!`. Example : (`https://tone.sleepycat.date/v2/client/gamemodes?gamemode=!sns`)
 tags:
   - name: client
     description: Routes accessibles by everyone
@@ -19,7 +22,7 @@ servers:
 paths:
   /client/hosts:
     get:
-      summary: List of hosts
+      summary: Your GET endpoint
       tags:
         - client
       responses:
@@ -42,7 +45,7 @@ paths:
       description: An object with host ID as keys and host name as values
   /client/servers:
     get:
-      summary: Statistics for servers
+      summary: List of servers
       tags:
         - client
       responses:
@@ -93,7 +96,7 @@ paths:
     parameters: []
   /client/weapons:
     get:
-      summary: Statistics for weapons
+      summary: Statistics for all weapons
       tags:
         - client
       responses:
@@ -105,7 +108,20 @@ paths:
                 type: object
                 properties:
                   '[string] weapon_id':
-                    $ref: '#/components/schemas/KillData'
+                    type: object
+                    properties:
+                      deaths:
+                        type: integer
+                        description: Number of deaths caused by this weapon
+                      kills:
+                        type: integer
+                      max_distance:
+                        type: integer
+                      total_distance:
+                        type: integer
+                      deaths_while_equipped:
+                        type: integer
+                        description: Number of deaths while this weapon is equipped
               examples:
                 Example 1:
                   value:
@@ -134,7 +150,7 @@ paths:
     parameters: []
   /client/players:
     get:
-      summary: Statistics for players
+      summary: Statistics for all players
       tags:
         - client
       responses:
@@ -178,7 +194,7 @@ paths:
       description: A JSON Object with player IDs as keys and player data as values
   /client/maps:
     get:
-      summary: Statistics for maps
+      summary: Your GET endpoint
       tags:
         - client
       responses:
@@ -215,7 +231,7 @@ paths:
       description: A JSON Object with map IDs as keys and map data as values
   /client/gamemodes:
     get:
-      summary: Statistics for gamemodes
+      summary: Your GET endpoint
       tags:
         - client
       responses:
@@ -241,16 +257,6 @@ paths:
                       kills: 12814
                       max_distance: 5689
                       total_distance: 9184028
-                    sns:
-                      deaths: 20364
-                      kills: 19294
-                      max_distance: 4623
-                      total_distance: 10297366
-                    fw:
-                      deaths: 25
-                      kills: 53
-                      max_distance: 4031
-                      total_distance: 45761
       operationId: get-client-gamemodes
       description: A JSON Object with gamemodes IDs as keys and gamemodes data as values
       parameters:
@@ -266,7 +272,7 @@ paths:
       tags:
         - server
       summary: ''
-      operationId: Check token validity
+      operationId: post-servers-serverId
       responses:
         '200':
           description: OK
