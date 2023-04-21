@@ -14,13 +14,7 @@ function computeQueryParam(
   queryParam: string,
   comparison: string | number
 ): boolean {
-  const params = queryParam.split(',')
-  const blacklist = params.filter((e) => e.startsWith('!')).map(e => e.substring(1))
-  const whitelist = params.filter((e) => !e.startsWith('!'))
-
-  const blackPass = blacklist.reduce((acc, element) => element != comparison && acc, true)
-  const whitePass = whitelist.length == 0 ? true : whitelist.reduce((acc, element) => element == comparison || acc, false)
-  return blackPass && whitePass
+  return queryParam.startsWith('!') ? queryParam.substring(1) != comparison : queryParam == comparison
 }
 
 function filters(e: typeof allData[0], query: any) {
@@ -92,6 +86,7 @@ router.get(
       default:
         return res.status(400).send()
     }
+    const timeStart = new Date()
     allData
       .filter((e) => filters(e, req.query))
       .forEach((e) => {
@@ -127,6 +122,11 @@ router.get(
           Number(e.max_distance)
         )
       })
+    console.log(
+      'Data calculation finished. Took + ' +
+      Math.abs(new Date().getTime() - timeStart.getTime()) / 1000 +
+      ' seconds'
+    )
     res.status(200).send(data)
   }
 )
