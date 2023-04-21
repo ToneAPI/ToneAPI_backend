@@ -14,7 +14,9 @@ function computeQueryParam(
   queryParam: string,
   comparison: string | number
 ): boolean {
-  return queryParam.startsWith('!') ? queryParam.substring(1) != comparison : queryParam == comparison
+  return queryParam.startsWith('!')
+    ? queryParam.substring(1) != comparison
+    : queryParam == comparison
 }
 
 function filters(e: typeof allData[0], query: any) {
@@ -47,7 +49,9 @@ router.get(
         e == 'gamemodes'
     )
     .withMessage('Only weapons, players, maps or servers are valid paths'),
-  query(['server', 'map', 'weapon', 'gamemode', 'player', 'host']).optional().isString(),
+  query(['server', 'map', 'weapon', 'gamemode', 'player', 'host'])
+    .optional()
+    .isString(),
   validateErrors,
   (req, res) => {
     const data: {
@@ -111,9 +115,9 @@ router.get(
           data[requestIndex].username = e.attacker_name
         if (index === 'servername') data[requestIndex].host = e.host
         if (index === 'cause_of_death')
-          data[requestIndex].deaths_while_equipped = Number(
-            e.deaths_with_weapon
-          )
+          data[requestIndex].deaths_while_equipped =
+            Number(e.deaths_with_weapon) +
+            (data[requestIndex].deaths_while_equipped || 0)
         data[requestIndex].deaths += Number(e.deaths)
         data[requestIndex].kills += Number(e.kills)
         data[requestIndex].total_distance += Number(e.total_distance)
