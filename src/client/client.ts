@@ -114,7 +114,12 @@ router.get(
         if (index === 'attacker_id')
           data[requestIndex].username = e.attacker_name
         if (index === 'servername') data[requestIndex].host = e.host
-        if (index === 'cause_of_death' || (req.query.weapon && !req.query.weapon.toString().startsWith('!') && index === 'attacker_id'))
+        if (
+          index === 'cause_of_death' ||
+          (req.query.weapon &&
+            !req.query.weapon.toString().startsWith('!') &&
+            index === 'attacker_id')
+        )
           data[requestIndex].deaths_while_equipped =
             Number(e.deaths_with_weapon) +
             (data[requestIndex].deaths_while_equipped || 0)
@@ -127,9 +132,12 @@ router.get(
         )
       })
     console.log(
-      'Data calculation finished. Took + ' +
-      Math.abs(new Date().getTime() - timeStart.getTime()) / 1000 +
-      ' seconds'
+      new Date().toLocaleString() + ',' +
+      (req.headers['x-forwarded-for']?.toString() ||
+        req.socket.remoteAddress?.toString() ||
+        '') +
+      ',' +
+      Math.abs(new Date().getTime() - timeStart.getTime()) / 1000
     )
     res.status(200).send(data)
   }
