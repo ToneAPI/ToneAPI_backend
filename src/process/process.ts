@@ -83,7 +83,6 @@ async function processGlobalStats() {
         .select([
           count<number>('id').as('deaths'),
           'victim_id',
-          sql<string>`last(victim_name)`.as('victim_name'),
           'victim_current_weapon',
           'map',
           'game_mode',
@@ -109,7 +108,7 @@ async function processGlobalStats() {
         .onRef('deaths.game_mode', '=', 'kills.game_mode')
         .onRef('deaths.map', '=', 'kills.map')
     )
-    .fullJoin('deathswithweapon', (join) =>
+    .leftJoin('deathswithweapon', (join) =>
       join
         .onRef('deathswithweapon.victim_id', '=', 'kills.attacker_id')
         .onRef('deathswithweapon.victim_current_weapon', '=', 'kills.cause_of_death')
