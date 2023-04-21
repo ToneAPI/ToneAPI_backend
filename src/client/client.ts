@@ -137,7 +137,7 @@ router.get(
         req.socket.remoteAddress?.toString() ||
         '') +
       ',' +
-      Math.abs(new Date().getTime() - timeStart.getTime()) / 1000
+      Math.abs(new Date().getTime() - timeStart.getTime()) / 1000 + ',' + req.originalUrl
     )
     res.status(200).send(data)
   }
