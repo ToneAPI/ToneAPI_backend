@@ -56,14 +56,14 @@ router.post(
     'attacker_weapon_1_mods',
     'attacker_weapon_2_mods',
     'attacker_weapon_3_mods',
-    'attacker_offhand_weapon_1',
-    'attacker_offhand_weapon_2',
+    'attacker_offhand_weapon_1_mods',
+    'attacker_offhand_weapon_2_mods',
     'victim_current_weapon_mods',
     'victim_weapon_1_mods',
     'victim_weapon_2_mods',
     'victim_weapon_3_mods',
-    'victim_offhand_weapon_1',
-    'victim_offhand_weapon_2'
+    'victim_offhand_weapon_1_mods',
+    'victim_offhand_weapon_2_mods'
   ]).customSanitizer((value) => {
     if (isNaN(value) || !value) {
       value = 0
@@ -75,14 +75,14 @@ router.post(
     'attacker_weapon_1_mods',
     'attacker_weapon_2_mods',
     'attacker_weapon_3_mods',
-    'attacker_offhand_weapon_1',
-    'attacker_offhand_weapon_2',
+    'attacker_offhand_weapon_1_mods',
+    'attacker_offhand_weapon_2_mods',
     'victim_current_weapon_mods',
     'victim_weapon_1_mods',
     'victim_weapon_2_mods',
     'victim_weapon_3_mods',
-    'victim_offhand_weapon_1',
-    'victim_offhand_weapon_2'
+    'victim_offhand_weapon_1_mods',
+    'victim_offhand_weapon_2_mods'
   ])
     .toInt()
     .isInt()
@@ -107,19 +107,17 @@ router.post(
       'attacker_name',
       'attacker_current_weapon',
       'attacker_weapon_1',
-      'attacker_weapon_1_mods',
       'attacker_weapon_2',
-      'attacker_weapon_2_mods',
       'attacker_weapon_3',
-      'attacker_weapon_3_mods',
+      'attacker_offhand_weapon_1',
+      'attacker_offhand_weapon_2',
       'victim_name',
       'victim_current_weapon',
       'victim_weapon_1',
-      'victim_weapon_1_mods',
       'victim_weapon_2',
-      'victim_weapon_2_mods',
       'victim_weapon_3',
-      'victim_weapon_3_mods',
+      'victim_offhand_weapon_1',
+      'victim_offhand_weapon_2',
       'cause_of_death',
       'victim_titan',
       'attacker_titan'
@@ -161,7 +159,9 @@ router.post(
       attacker_weapon_3,
       attacker_weapon_3_mods,
       attacker_offhand_weapon_1,
+      attacker_offhand_weapon_1_mods,
       attacker_offhand_weapon_2,
+      attacker_offhand_weapon_2_mods,
       victim_name,
       victim_id,
       victim_current_weapon,
@@ -173,7 +173,9 @@ router.post(
       victim_weapon_3,
       victim_weapon_3_mods,
       victim_offhand_weapon_1,
+      victim_offhand_weapon_1_mods,
       victim_offhand_weapon_2,
+      victim_offhand_weapon_2_mods,
       cause_of_death,
       distance
     } = req.body
@@ -197,7 +199,9 @@ router.post(
       attacker_weapon_3,
       attacker_weapon_3_mods,
       attacker_offhand_weapon_1,
+      attacker_offhand_weapon_1_mods,
       attacker_offhand_weapon_2,
+      attacker_offhand_weapon_2_mods,
       victim_name,
       victim_id,
       victim_current_weapon,
@@ -209,7 +213,9 @@ router.post(
       victim_weapon_3,
       victim_weapon_3_mods,
       victim_offhand_weapon_1,
+      victim_offhand_weapon_1_mods,
       victim_offhand_weapon_2,
+      victim_offhand_weapon_2_mods,
       cause_of_death,
       distance
     })
