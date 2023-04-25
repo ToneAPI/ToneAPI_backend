@@ -1,7 +1,7 @@
 import { Client } from 'pg'
 import { allData } from './process'
 
-const pgClient = new Client({
+export const pgClient = new Client({
     host: process.env.POSTGRES_HOST,
     database: process.env.POSTGRES_DATABASE,
     user: process.env.POSTGRES_USER,
