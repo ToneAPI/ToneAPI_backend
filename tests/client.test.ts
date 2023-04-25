@@ -1,11 +1,13 @@
-import { afterAll, beforeAll, describe, expect, test } from '@jest/globals'
+import { afterAll, beforeAll, describe, expect, jest, test } from '@jest/globals'
 import clientMain from '../src/clientMain'
+import { pgClient } from '../src/process/onKill'
 import * as dotenv from 'dotenv'
 import db from '../src/db/db'
 dotenv.config()
 
 let listenServer
 
+jest.setTimeout(30000)
 beforeAll(async () => {
     listenServer = await clientMain;
 })
@@ -59,6 +61,7 @@ describe('client', () => {
 
 afterAll((done) => {
     listenServer.close(async () => {
+        await pgClient.end()
         await db.destroy()
         done()
     })

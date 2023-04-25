@@ -5,6 +5,7 @@ import cors from 'cors'
 import client from './client/client'
 import { dbReady } from './db/db'
 import processAll from './process/process'
+import listenKills from './process/onKill'
 
 const app = express()
 const port = 3000
@@ -22,6 +23,7 @@ export default
   new Promise(async (resolve, reject) => {
     await dbReady()
     await processAll()
+    await listenKills()
     const listenServer = app.listen(port, '0.0.0.0', () => {
       console.log(`Tone client api listening on port ${port}`)
       resolve(listenServer)

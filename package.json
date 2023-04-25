@@ -33,7 +33,7 @@
     "build": "npx tsc",
     "startServer": "node out/serverMain.js",
     "startClient": "node out/clientMain.js",
-    "documentation": "redocly build-docs .\\docs\\v1.yml --output=docs\\index.html",
+    "documentation": "redocly build-docs .\\docs\\v2.yml --output=docs\\index.html",
     "test": "jest --runInBand"
   }
 }
