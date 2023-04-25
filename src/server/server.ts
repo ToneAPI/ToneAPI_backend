@@ -131,7 +131,8 @@ router.post(
     min: 0
   }),
   body(['cause_of_death', 'victim_id'], 'mandatory').exists().notEmpty(),
-  body('servername').customSanitizer(e => e.replace(/[^a-z0-9]/gi, '')),
+  //do we need this ?
+  //body('servername').customSanitizer(e => e.replace(/[^a-z0-9]/gi, '')),
   validateErrors,
   async (req, res) => {
     if (!req.headers.authorization) return res.sendStatus(403)
