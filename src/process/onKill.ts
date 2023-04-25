@@ -96,9 +96,11 @@ export default async function listenKills() {
             allData.push(deathWithWeaponEntry)
         }
 
-        killEntry.kills++
-        killEntry.total_distance += payload.distance
-        killEntry.max_distance = Math.max(killEntry.max_distance || 0, payload.distance)
+        if (payload.victim_id != payload.attacker_id) {
+            killEntry.kills++
+            killEntry.total_distance += payload.distance
+            killEntry.max_distance = Math.max(killEntry.max_distance || 0, payload.distance)
+        }
         deathEntry.deaths++
         deathWithWeaponEntry.deaths_with_weapon++
     })
