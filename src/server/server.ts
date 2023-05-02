@@ -23,7 +23,9 @@ router.post(
     }
     const query = await CheckServerToken(req.headers.authorization.split(' ')[1])
     if (!query || !query.id) {
-      console.error("incorrect token : " + req.headers.authorization.split(' ')[1])
+      console.error("incorrect token : " + req.headers.authorization.split(' ')[1] + " for " + req.body.servername + " with IP " + (req.headers['x-forwarded-for']?.toString() ||
+        req.socket.remoteAddress?.toString() ||
+        ''))
       return res.sendStatus(403)
     }
     next()
