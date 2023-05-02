@@ -17,9 +17,15 @@ router.post(
   validateErrors,
   async (req, res, next) => {
     if (!req) return res.sendStatus(500)
-    if (!req.headers.authorization) return res.sendStatus(403)
+    if (!req.headers.authorization) {
+      console.error("no authorization header")
+      return res.sendStatus(403)
+    }
     const query = await CheckServerToken(req.headers.authorization.split(' ')[1])
-    if (!query || !query.id) return res.sendStatus(403)
+    if (!query || !query.id) {
+      console.error("incorrect token : " + req.headers.authorization.split(' ')[1])
+      return res.sendStatus(403)
+    }
     next()
   }
 )
