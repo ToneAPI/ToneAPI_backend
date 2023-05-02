@@ -25,9 +25,9 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Launch Process API",
+      "name": "Launch Websocket",
       "skipFiles": ["<node_internals>/**"],
-      "program": "${workspaceFolder}/src/processMain.ts",
+      "program": "${workspaceFolder}/src/websocket.ts",
       "preLaunchTask": "tsc: build - tsconfig.json",
       "outFiles": ["${workspaceFolder}/out/**/*.js"]
     }
