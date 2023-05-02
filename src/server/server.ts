@@ -97,7 +97,6 @@ router.post(
     .withMessage('must be a valid float'),
   body(
     [
-      'servername',
       'attacker_id',
       'victim_id',
       'killstat_version',
@@ -126,6 +125,9 @@ router.post(
   )
     .isString()
     .isLength({ max: 50 })
+    .isAscii(),
+  body('servername',).isString()
+    .isLength({ max: 100 })
     .isAscii(),
   body(['distance', 'game_time'], 'must be postitive floats').isFloat({
     min: 0
