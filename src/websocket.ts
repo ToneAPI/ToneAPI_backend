@@ -39,7 +39,7 @@ export default new Promise(async (resolve, reject) => {
         if (!data.payload) return
         const payload = JSON.parse(data.payload) as KillTable
         wss.clients.forEach(function (client) {
-            if (client.readyState === WebSocket.OPEN) {
+            if (client.readyState === client.OPEN) {
                 client.send(
                     JSON.stringify({
                         attacker_id: payload.attacker_id,
