@@ -233,7 +233,7 @@ router.post(
       .then((e) => {
         res.sendStatus(201)
         console.log(
-          `[${Date.now().toLocaleString()}] Kill submitted for server ${servername}, ${attacker_name} killed ${victim_name}`
+          `[${new Date().toLocaleString()}] Kill submitted for server ${servername}, ${attacker_name} killed ${victim_name}`
         )
       })
       .catch((e) => {
