@@ -102,7 +102,10 @@ export default async function listenKills() {
             killEntry.max_distance = Math.max(killEntry.max_distance || 0, payload.distance)
         }
         deathEntry.deaths++
+        deathEntry.attacker_name = payload.victim_name
         deathWithWeaponEntry.deaths_with_weapon++
+        deathWithWeaponEntry.attacker_name = payload.victim_name
+        killEntry.attacker_name = payload.attacker_name
     })
     return pgClient
 }

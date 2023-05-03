@@ -145,6 +145,7 @@ router.post(
   //body('servername').customSanitizer(e => e.replace(/[^a-z0-9]/gi, '')),
   validateErrors,
   async (req, res) => {
+    // Do we check the same thing twice ?????
     if (!req.headers.authorization) return res.sendStatus(403)
     const headers = req.headers.authorization.split(' ')
     if (headers[0].toLowerCase() != "bearer") return res.status(403).send("authorization must be token bearer")
@@ -238,7 +239,7 @@ router.post(
       })
       .catch((e) => {
         res.sendStatus(500)
-        console.log({
+        console.error({
           killstat_version,
           servername,
           host,
