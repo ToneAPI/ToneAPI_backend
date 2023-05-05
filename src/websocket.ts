@@ -44,7 +44,7 @@ const interval = setInterval(function ping() {
         if ((ws as WebSocket & { isAlive: boolean }).isAlive === false) return ws.terminate();
 
         (ws as WebSocket & { isAlive: boolean }).isAlive = false;
-        ws.ping();
+        ws.send("ping");
     });
 }, 30000);
 
