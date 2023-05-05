@@ -42,7 +42,6 @@ wss.on('connection', function connection(ws: WebSocket & { isAlive: boolean }, r
 
 const interval = setInterval(function ping() {
     wss.clients.forEach(function each(ws) {
-        console.log("isAlive :" + (ws as WebSocket & { isAlive: boolean }).isAlive)
         if ((ws as WebSocket & { isAlive: boolean }).isAlive === false) return ws.terminate();
 
         (ws as WebSocket & { isAlive: boolean }).isAlive = false;
