@@ -34,6 +34,7 @@ wss.on('connection', function connection(ws: WebSocket & { isAlive: boolean }, r
             ws.isAlive = true
         }
     }
+    ws.ping();
 })
 
 const interval = setInterval(function ping() {
