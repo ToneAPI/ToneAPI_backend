@@ -30,9 +30,11 @@ wss.on('connection', function connection(ws: WebSocket & { isAlive: boolean }, r
         )
     }
     ws.onmessage = function (msg) {
-        console.log(msg.data)
         if (msg.data === "pong") {
-            ws.isAlive = true
+            return ws.isAlive = true
+        }
+        if (msg.data === "ping") {
+            return ws.send("pong")
         }
     }
     ws.send("ping");
