@@ -1,7 +1,7 @@
 import * as dotenv from 'dotenv'
 dotenv.config()
 import { Client } from 'pg'
-import { WebSocketServer } from 'ws'
+import { WebSocket, WebSocketServer } from 'ws'
 import { KillTable } from './db/model'
 
 const port = 3002
@@ -14,7 +14,7 @@ export const pgClient = new Client({
     password: process.env.POSTGRES_PASSWORD
 })
 
-wss.on('connection', function connection(ws: WebSocket, req) {
+wss.on('connection', function connection(ws: WebSocket & { isAlive: boolean }, req) {
     const ip =
         req?.headers['x-forwarded-for']?.toString().split(',')[0].trim() ||
         req.socket.remoteAddress
@@ -29,7 +29,25 @@ wss.on('connection', function connection(ws: WebSocket, req) {
             new Date().toLocaleString() + ',' + ip + ',close,' + wss.clients.size
         )
     }
+    ws.onmessage = function (msg) {
+        if (msg.data === "pong") {
+            ws.isAlive = true
+        }
+    }
 })
+
+const interval = setInterval(function ping() {
+    wss.clients.forEach(function each(ws) {
+        if ((ws as WebSocket & { isAlive: boolean }).isAlive === false) return ws.terminate();
+
+        (ws as WebSocket & { isAlive: boolean }).isAlive = false;
+        ws.ping();
+    });
+}, 30000);
+
+wss.on('close', function close() {
+    clearInterval(interval);
+});
 
 export default new Promise(async (resolve, reject) => {
     await pgClient.connect()
