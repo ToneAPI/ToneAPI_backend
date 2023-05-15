@@ -64,6 +64,7 @@ export default new Promise(async (resolve, reject) => {
             if (client.readyState === client.OPEN) {
                 client.send(
                     JSON.stringify({
+                        match_id: payload.match_id,
                         attacker_id: payload.attacker_id,
                         attacker_name: payload.attacker_name,
                         cause_of_death: payload.cause_of_death,
