@@ -22,7 +22,7 @@ servers:
 paths:
   /client/hosts:
     get:
-      summary: Your GET endpoint
+      summary: List of hosts
       tags:
         - client
       responses:
@@ -194,7 +194,7 @@ paths:
       description: A JSON Object with player IDs as keys and player data as values
   /client/maps:
     get:
-      summary: Your GET endpoint
+      summary: Statistics for all maps
       tags:
         - client
       responses:
@@ -231,7 +231,7 @@ paths:
       description: A JSON Object with map IDs as keys and map data as values
   /client/gamemodes:
     get:
-      summary: Your GET endpoint
+      summary: Statistics for all gamemodes
       tags:
         - client
       responses:
