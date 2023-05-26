@@ -33,7 +33,7 @@ export default
     if (!cluster.isPrimary) {
       const app = express()
       app.use(express.json())
-      app.use(cors())
+      app.use(cors({ allowedHeaders: ['X-File-Size', 'Content-Encoding'] }))
       app.get('/', (req, res) => {
         res.send('Tone client API online')
       })
