@@ -142,7 +142,7 @@ router.get(
     const dataString = JSON.stringify(data)
     const buffer = Buffer.from(dataString)
     const size = buffer.length
-    res.status(200).setHeader('x-file-size', size).send(buffer)
+    res.status(200).setHeader('X-File-Size', size).send(buffer)
   }
 )
 
