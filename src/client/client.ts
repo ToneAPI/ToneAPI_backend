@@ -139,7 +139,10 @@ router.get(
       ',' +
       Math.abs(new Date().getTime() - timeStart.getTime()) / 1000 + ',' + req.originalUrl
     )
-    res.status(200).send(data)
+    const dataString = JSON.stringify(data)
+    const buffer = Buffer.from(dataString)
+    const size = buffer.length
+    res.status(200).setHeader('X-File-Size', size).setHeader('Content-Type', 'application/json').send(buffer)
   }
 )
 
