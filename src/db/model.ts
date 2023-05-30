@@ -1,4 +1,4 @@
-import { ColumnType, Generated } from 'kysely'
+import { type Generated } from 'kysely'
 
 export interface KillTable {
   id: Generated<number>
@@ -43,37 +43,30 @@ export interface KillTable {
   distance: number
   titan?: string
 }
-/*
-interface PlayerTable {
-  id: number
-  name: string
-  'opt-out': boolean
-  hide_TOS: boolean
-}
-*/
 
-interface WeaponTable {
-  id: string
-  name: string
-  description: string
-  image: string
+export interface KillViewTable {
+  kills: number
+  deaths: number
+  deaths_with_weapon: number
+  attacker_id: number
+  attacker_name: string
+  map: string
+  game_mode: string
+  cause_of_death: string
+  servername: string
+  host: number
+  max_distance: number
+  total_distance: number
 }
-interface MapTable {
-  id: string
-  name: string
-  description: string
-  image: string
-}
+
 interface HosterTable {
   id: Generated<number>
   name: string
   token: Generated<string>
 }
 interface Database {
+  kill_view: KillViewTable
   kill: KillTable
-  //player: PlayerTable
-  weapon: WeaponTable
-  maps: MapTable
   host: HosterTable
 }
 
