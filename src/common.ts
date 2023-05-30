@@ -1,11 +1,11 @@
-import { RequestHandler } from 'express'
-import { Result, validationResult } from 'express-validator'
+import { type RequestHandler } from 'express'
+import { validationResult } from 'express-validator'
 import http from 'http'
 import https from 'https'
 
-export function GetRequest(url: string) {
-  return new Promise<string>((resolve, reject) => {
-    let handler = (resp: http.IncomingMessage) => {
+export async function GetRequest (url: string) {
+  return await new Promise<string>((resolve, reject) => {
+    const handler = (resp: http.IncomingMessage) => {
       let data = ''
 
       // A chunk of data has been received.

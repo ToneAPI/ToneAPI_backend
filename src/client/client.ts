@@ -1,149 +1,118 @@
 import { Router } from 'express'
-import { param, query } from 'express-validator'
+import { param } from 'express-validator'
 import { validateErrors } from '../common'
-import { allData } from '../process/process'
-import { getHostList } from '../db/db'
+import db, { getHostList } from '../db/db'
+import { sql } from 'kysely'
 
+const { max, sum } = db.fn
 const router = Router()
-//timeout middleware ?
+// timeout middleware ?
 router.get('/*', (req, res, next) => {
   next()
 })
 
-function computeQueryParam(
-  queryParam: string,
-  comparison: string | number
-): boolean {
-  return queryParam.startsWith('!')
-    ? queryParam.substring(1) != comparison
-    : queryParam == comparison
+const queryFilters = {
+  player: 'attacker_id',
+  server: 'servername',
+  map: 'map',
+  weapon: 'cause_of_death',
+  gamemode: 'game_mode',
+  host: 'host'
+} as const
+
+const path = {
+  player: 'attacker_id',
+  servers: 'servername',
+  maps: 'map',
+  weapons: 'cause_of_death',
+  gamemodes: 'game_mode',
+  hosts: 'host'
+} as const
+
+interface KillRecord {
+  kills: number
+  deaths?: number
+  deaths_while_equipped?: number
+  username?: string
+  max_distance: number
+  total_distance: number
 }
 
-function filters(e: typeof allData[0], query: any) {
-  return (
-    (query.player ? computeQueryParam(query.player, e.attacker_id) : true) &&
-    (query.server ? computeQueryParam(query.server, e.servername) : true) &&
-    (query.host ? computeQueryParam(query.host, e.host) : true) &&
-    (query.map ? computeQueryParam(query.map, e.map) : true) &&
-    (query.weapon ? computeQueryParam(query.weapon, e.cause_of_death) : true) &&
-    (query.gamemode ? computeQueryParam(query.gamemode, e.game_mode) : true)
-  )
-}
-
-router.get('/hosts', async (req, res) => {
-  const result = await getHostList()
-  const data: { [key: number]: string } = {}
-  result.forEach((e) => (data[Number(e.id)] = e.name))
-  res.status(200).send(data)
+router.get('/hosts', (_req, res) => {
+  void (async () => {
+    const result = await getHostList()
+    const data: Record<number, string> = {}
+    result.forEach((e) => (data[Number(e.id)] = e.name))
+    res.status(200).send(data)
+  })()
 })
 
-router.get(
-  '/:dataType',
+function processQueryArgs (data: ReturnType<typeof db.selectFrom<'kill_view'>>, queryArgs: string | string[]): ReturnType<typeof db.selectFrom<'kill_view'>> {
+  Object.entries(queryArgs).forEach(([one, two]) => {
+    if (!two) return
+    if (!(one in queryFilters)) return
+    const key = one as keyof typeof queryFilters
+    if (Array.isArray(two)) {
+      data = data.where((qb) => {
+        (two as string[]).forEach((e) => { qb = qb.orWhere(queryFilters[key], '=', e) })
+        return qb
+      })
+    } else {
+      data = data.where(queryFilters[key], '=', two)
+    }
+  })
+  return data
+}
+
+router.get('/players',
+  (req, res) => {
+    void (async () => {
+      let data = db.selectFrom('kill_view')
+      if (req.query) {
+        data = processQueryArgs(data, req.query as unknown as string | string[])
+      }
+      const selection = data.select([sum<number>('kills').as('kills'), sum<number>('deaths').as('deaths'), sum<number>('deaths_with_weapon').as('deaths_while_equipped'), 'attacker_id', sql<string>`last(attacker_name)`.as('username'), sum<number>('total_distance').as('total_distance'), max('max_distance').as('max_distance')]).groupBy('attacker_id')
+      const test = (await selection.execute()).reduce<Record<string, KillRecord>>((acc, curr) => {
+        acc[curr.attacker_id] = {
+          kills: Number(curr.kills),
+          deaths: Number(curr.deaths),
+          max_distance: Number(curr.max_distance),
+          total_distance: Number(curr.total_distance),
+          deaths_while_equipped: Number(curr.deaths_while_equipped),
+          username: curr.username
+        }
+        return acc
+      }, {})
+      res.send(test)
+    })()
+  })
+
+router.get('/:dataType',
   param('dataType')
-    .custom(
-      (e) =>
-        e == 'weapons' ||
-        e == 'players' ||
-        e == 'maps' ||
-        e == 'servers' ||
-        e == 'gamemodes'
-    )
-    .withMessage('Only weapons, players, maps or servers are valid paths'),
-  query(['server', 'map', 'weapon', 'gamemode', 'player', 'host'])
-    .optional()
-    .isString(),
+    .custom((e) => e in path)
+    .withMessage('Only weapons, players, maps, gamemodes or servers are valid paths'),
   validateErrors,
   (req, res) => {
-    const data: {
-      [key: string]: {
-        deaths: number
-        kills: number
-        max_distance: number
-        total_distance: number
-        username?: string
-        host?: number
-        deaths_while_equipped?: number
+    void (async () => {
+      let data = db.selectFrom('kill_view')
+      if (req.query) {
+        data = processQueryArgs(data, req.query as unknown as string | string[])
       }
-    } = {}
-    let index:
-      | 'cause_of_death'
-      | 'attacker_id'
-      | 'map'
-      | 'servername'
-      | 'game_mode'
-    switch (req.params.dataType) {
-      case 'weapons':
-        index = 'cause_of_death'
-        break
-      case 'players':
-        index = 'attacker_id'
-        break
-      case 'maps':
-        index = 'map'
-        break
-      case 'servers':
-        index = 'servername'
-        break
-      case 'gamemodes':
-        index = 'game_mode'
-        break
-      default:
-        return res.status(400).send()
-    }
-    const timeStart = new Date()
-    allData
-      .filter((e) => filters(e, req.query))
-      .forEach((e) => {
-        if (
-          !e.cause_of_death ||
-          !e.attacker_id ||
-          !e.map ||
-          !e.servername ||
-          !e.game_mode
-        )
-          return
-        const requestIndex = e[index]
-        if (!requestIndex) return
-        if (!data[requestIndex])
-          data[requestIndex] = {
-            deaths: 0,
-            kills: 0,
-            max_distance: 0,
-            total_distance: 0
-          }
-        if (index === 'attacker_id')
-          data[requestIndex].username = e.attacker_name
-        if (index === 'servername') data[requestIndex].host = e.host
-        if (
-          index === 'cause_of_death' ||
-          (req.query.weapon &&
-            !req.query.weapon.toString().startsWith('!') &&
-            index === 'attacker_id')
-        )
-          data[requestIndex].deaths_while_equipped =
-            Number(e.deaths_with_weapon) +
-            (data[requestIndex].deaths_while_equipped || 0)
-        data[requestIndex].deaths += Number(e.deaths)
-        data[requestIndex].kills += Number(e.kills)
-        data[requestIndex].total_distance += Number(e.total_distance)
-        data[requestIndex].max_distance = Math.max(
-          data[requestIndex].max_distance,
-          Number(e.max_distance)
-        )
-      })
-    console.log(
-      new Date().toLocaleString() + ',' +
-      (req.headers['x-forwarded-for']?.toString() ||
-        req.socket.remoteAddress?.toString() ||
-        '') +
-      ',' +
-      Math.abs(new Date().getTime() - timeStart.getTime()) / 1000 + ',' + req.originalUrl
-    )
-    const dataString = JSON.stringify(data)
-    const buffer = Buffer.from(dataString)
-    const size = buffer.length
-    res.status(200).setHeader('X-File-Size', size).setHeader('Content-Type', 'application/json').send(buffer)
-  }
-)
+      const dataType = req.params.dataType as keyof typeof path
+
+      const selection = data.select([sum<number>('kills').as('kills'), sum<number>('deaths').as('deaths'), sum<number>('deaths_with_weapon').as('deaths_while_equipped'), path[dataType], sum<number>('total_distance').as('total_distance'), max('max_distance').as('max_distance')]).groupBy(path[dataType])
+      const test = (await selection.execute()).reduce<Record<string, KillRecord>>((acc, curr) => {
+        acc[curr[path[dataType]]] = {
+          kills: Number(curr.kills),
+          deaths: Number(curr.deaths),
+          max_distance: Number(curr.max_distance),
+          total_distance: Number(curr.total_distance),
+          deaths_while_equipped: Number(curr.deaths_while_equipped)
+        }
+        return acc
+      }, {})
+      res.send(test)
+    })()
+  })
 
 export default router

@@ -4,12 +4,14 @@ module.exports = {
     es2021: true
   },
   extends: 'standard-with-typescript',
-  overrides: [
-  ],
+  overrides: [],
   parserOptions: {
     ecmaVersion: 'latest',
-    sourceType: 'module'
+    sourceType: 'module',
+    project: ['./tsconfig.json']
   },
   rules: {
+    '@typescript-eslint/strict-boolean-expressions': 0,
+    '@typescript-eslint/explicit-function-return-type': 'off'
   }
 }

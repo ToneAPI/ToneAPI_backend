@@ -1,6 +1,6 @@
 import db from '../db/db'
-const { count, max, sum, coalesce } = db.fn
 import { sql } from 'kysely'
+const { count, max, sum, coalesce } = db.fn
 
 export let allData: Awaited<ReturnType<typeof processGlobalStats>>
 
@@ -8,23 +8,16 @@ export let allData: Awaited<ReturnType<typeof processGlobalStats>>
  * populates allData
  * @returns
  */
-async function processAll() {
+async function processAll (): Promise<void> {
   console.log('Starting data calculation...')
   const timeStart = new Date()
 
-  allData = await processGlobalStats()
+  // allData = await processGlobalStats()
 
-  console.log(
-    'Data calculation finished. Took + ' +
-    Math.abs(new Date().getTime() - timeStart.getTime()) / 1000 +
-    ' seconds'
-  )
-  if (process.env.ENVIRONMENT == 'production') {
-    return
-  }
+  console.log(`Data calculation finished. Took + ${Math.abs(new Date().getTime() - timeStart.getTime()) / 1000} seconds`)
 }
 
-async function processGlobalStats() {
+async function processGlobalStats () {
   return await db
     .with('kills', (db) =>
       db
@@ -117,7 +110,7 @@ async function processGlobalStats() {
         .onRef('deathswithweapon.game_mode', '=', 'kills.game_mode')
         .onRef('deathswithweapon.map', '=', 'kills.map')
     )
-    //.selectAll('kills')
+    // .selectAll('kills')
     .select([
       sql<string>`COALESCE(kills.attacker_name, deaths.victim_name)`.as('attacker_name'),
       sql<string>`COALESCE(kills.attacker_id, deaths.victim_id)`.as('attacker_id'),
@@ -130,7 +123,7 @@ async function processGlobalStats() {
       sql<number>`COALESCE(kills.host, deaths.host)`.as('host'),
       sql<string>`COALESCE(kills.cause_of_death, deaths.cause_of_death)`.as('cause_of_death'),
       sql<string>`COALESCE(kills.map, deaths.map)`.as('map'),
-      sql<string>`COALESCE(kills.game_mode, deaths.game_mode)`.as('game_mode'),
+      sql<string>`COALESCE(kills.game_mode, deaths.game_mode)`.as('game_mode')
     ])
     .execute()
 }
