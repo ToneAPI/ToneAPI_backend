@@ -43,7 +43,11 @@ router.get('/hosts', (_req, res) => {
     const result = await getHostList()
     const data: Record<number, string> = {}
     result.forEach((e) => (data[Number(e.id)] = e.name))
-    res.status(200).send(data)
+
+    const dataString = JSON.stringify(data)
+    const buffer = Buffer.from(dataString)
+    const size = buffer.length
+    res.status(200).setHeader('X-File-Size', size).setHeader('Content-Type', 'application/json').send(buffer)
   })()
 })
 
@@ -67,12 +71,12 @@ function processQueryArgs (data: ReturnType<typeof db.selectFrom<'kill_view'>>, 
 router.get('/players',
   (req, res) => {
     void (async () => {
-      let data = db.selectFrom('kill_view')
+      let result = db.selectFrom('kill_view')
       if (req.query) {
-        data = processQueryArgs(data, req.query as unknown as string | string[])
+        result = processQueryArgs(result, req.query as unknown as string | string[])
       }
-      const selection = data.select([sum<number>('kills').as('kills'), sum<number>('deaths').as('deaths'), sum<number>('deaths_with_weapon').as('deaths_while_equipped'), 'attacker_id', sql<string>`last(attacker_name)`.as('username'), sum<number>('total_distance').as('total_distance'), max('max_distance').as('max_distance')]).groupBy('attacker_id')
-      const test = (await selection.execute()).reduce<Record<string, KillRecord>>((acc, curr) => {
+      const selection = result.select([sum<number>('kills').as('kills'), sum<number>('deaths').as('deaths'), sum<number>('deaths_with_weapon').as('deaths_while_equipped'), 'attacker_id', sql<string>`last(attacker_name)`.as('username'), sum<number>('total_distance').as('total_distance'), max('max_distance').as('max_distance')]).groupBy('attacker_id')
+      const data = (await selection.execute()).reduce<Record<string, KillRecord>>((acc, curr) => {
         acc[curr.attacker_id] = {
           kills: Number(curr.kills),
           deaths: Number(curr.deaths),
@@ -83,7 +87,10 @@ router.get('/players',
         }
         return acc
       }, {})
-      res.send(test)
+      const dataString = JSON.stringify(data)
+      const buffer = Buffer.from(dataString)
+      const size = buffer.length
+      res.status(200).setHeader('X-File-Size', size).setHeader('Content-Type', 'application/json').send(buffer)
     })()
   })
 
@@ -94,14 +101,14 @@ router.get('/:dataType',
   validateErrors,
   (req, res) => {
     void (async () => {
-      let data = db.selectFrom('kill_view')
+      let result = db.selectFrom('kill_view')
       if (req.query) {
-        data = processQueryArgs(data, req.query as unknown as string | string[])
+        result = processQueryArgs(result, req.query as unknown as string | string[])
       }
       const dataType = req.params.dataType as keyof typeof path
 
-      const selection = data.select([sum<number>('kills').as('kills'), sum<number>('deaths').as('deaths'), sum<number>('deaths_with_weapon').as('deaths_while_equipped'), path[dataType], sum<number>('total_distance').as('total_distance'), max('max_distance').as('max_distance')]).groupBy(path[dataType])
-      const result = (await selection.execute()).reduce<Record<string, KillRecord>>((acc, curr) => {
+      const selection = result.select([sum<number>('kills').as('kills'), sum<number>('deaths').as('deaths'), sum<number>('deaths_with_weapon').as('deaths_while_equipped'), path[dataType], sum<number>('total_distance').as('total_distance'), max('max_distance').as('max_distance')]).groupBy(path[dataType])
+      const data = (await selection.execute()).reduce<Record<string, KillRecord>>((acc, curr) => {
         acc[curr[path[dataType]]] = {
           kills: Number(curr.kills),
           deaths: Number(curr.deaths),
@@ -111,7 +118,7 @@ router.get('/:dataType',
         }
         return acc
       }, {})
-      const dataString = JSON.stringify(result)
+      const dataString = JSON.stringify(data)
       const buffer = Buffer.from(dataString)
       const size = buffer.length
       res.status(200).setHeader('X-File-Size', size).setHeader('Content-Type', 'application/json').send(buffer)
