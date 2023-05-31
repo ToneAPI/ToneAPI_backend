@@ -34,7 +34,8 @@ async function processGlobalStats () {
       deaths: Number(curr.deaths),
       max_distance: Number(curr.max_distance),
       total_distance: Number(curr.total_distance),
-      deaths_while_equipped: Number(curr.deaths_while_equipped)
+      deaths_while_equipped: Number(curr.deaths_while_equipped),
+      username: curr.username
     }
     return acc
   }, {})
