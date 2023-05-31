@@ -72,11 +72,12 @@ function processQueryArgs (data: ReturnType<typeof db.selectFrom<'kill_view'>>, 
 router.get('/players',
   (req, res) => {
     void (async () => {
-      let result = db.selectFrom('kill_view')
+      const result = db.selectFrom('kill_view')
       let data
-      if (Object.keys(req.query).length > 0) {
-        result = processQueryArgs(result, req.query as unknown as string | string[])
-        const selection = result.select([sum<number>('kills').as('kills'), sum<number>('deaths').as('deaths'), sum<number>('deaths_with_weapon').as('deaths_while_equipped'), 'attacker_id', sql<string>`last(attacker_name)`.as('username'), sum<number>('total_distance').as('total_distance'), max('max_distance').as('max_distance')]).groupBy('attacker_id')
+      const resultFiltered = processQueryArgs(result, req.query as unknown as string | string[])
+      console.log(result !== resultFiltered)
+      if (result !== resultFiltered) {
+        const selection = resultFiltered.select([sum<number>('kills').as('kills'), sum<number>('deaths').as('deaths'), sum<number>('deaths_with_weapon').as('deaths_while_equipped'), 'attacker_id', sql<string>`last(attacker_name)`.as('username'), sum<number>('total_distance').as('total_distance'), max('max_distance').as('max_distance')]).groupBy('attacker_id')
         data = (await selection.execute()).reduce<Record<string, KillRecord>>((acc, curr) => {
           acc[curr.attacker_id] = {
             kills: Number(curr.kills),
