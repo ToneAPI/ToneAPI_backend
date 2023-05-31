@@ -112,7 +112,6 @@ describe('realtime', () => {
 
     test('update player', async () => {
         jest.setTimeout(15000)
-        const yea = waitFor(1000)
         const response = await fetch(`http://127.0.0.1:3001/kill`, {
             method: "POST", // *GET, POST, PUT, DELETE, etc.
             credentials: "same-origin", // include, *same-origin, omit
@@ -123,10 +122,12 @@ describe('realtime', () => {
             body: JSON.stringify(data), // body data type must match "Content-Type" header
         });
         expect(response.status).toBe(201)
+        const yea = waitFor(1000)
         await yea
     })
 
     test('check player update', async () => {
+        
         const request = await fetch("http://127.0.0.1:3000/players")
         const data = await request.json()
         const player = data["1"]

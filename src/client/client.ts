@@ -3,6 +3,7 @@ import { param } from 'express-validator'
 import { validateErrors } from '../common'
 import db, { getHostList } from '../db/db'
 import { sql } from 'kysely'
+import { allData } from '../process/process'
 
 const { max, sum } = db.fn
 const router = Router()
@@ -31,8 +32,8 @@ const path = {
 
 interface KillRecord {
   kills: number
-  deaths?: number
-  deaths_while_equipped?: number
+  deaths: number
+  deaths_while_equipped: number
   username?: string
   max_distance: number
   total_distance: number
@@ -72,21 +73,25 @@ router.get('/players',
   (req, res) => {
     void (async () => {
       let result = db.selectFrom('kill_view')
-      if (req.query) {
+      let data
+      if (Object.keys(req.query).length > 0) {
         result = processQueryArgs(result, req.query as unknown as string | string[])
+        const selection = result.select([sum<number>('kills').as('kills'), sum<number>('deaths').as('deaths'), sum<number>('deaths_with_weapon').as('deaths_while_equipped'), 'attacker_id', sql<string>`last(attacker_name)`.as('username'), sum<number>('total_distance').as('total_distance'), max('max_distance').as('max_distance')]).groupBy('attacker_id')
+        data = (await selection.execute()).reduce<Record<string, KillRecord>>((acc, curr) => {
+          acc[curr.attacker_id] = {
+            kills: Number(curr.kills),
+            deaths: Number(curr.deaths),
+            max_distance: Number(curr.max_distance),
+            total_distance: Number(curr.total_distance),
+            deaths_while_equipped: Number(curr.deaths_while_equipped),
+            username: curr.username
+          }
+          return acc
+        }, {})
+      } else {
+        data = allData
       }
-      const selection = result.select([sum<number>('kills').as('kills'), sum<number>('deaths').as('deaths'), sum<number>('deaths_with_weapon').as('deaths_while_equipped'), 'attacker_id', sql<string>`last(attacker_name)`.as('username'), sum<number>('total_distance').as('total_distance'), max('max_distance').as('max_distance')]).groupBy('attacker_id')
-      const data = (await selection.execute()).reduce<Record<string, KillRecord>>((acc, curr) => {
-        acc[curr.attacker_id] = {
-          kills: Number(curr.kills),
-          deaths: Number(curr.deaths),
-          max_distance: Number(curr.max_distance),
-          total_distance: Number(curr.total_distance),
-          deaths_while_equipped: Number(curr.deaths_while_equipped),
-          username: curr.username
-        }
-        return acc
-      }, {})
+
       const dataString = JSON.stringify(data)
       const buffer = Buffer.from(dataString)
       const size = buffer.length

@@ -5,6 +5,8 @@ import express from 'express'
 import cors from 'cors'
 import client from './client/client'
 import { dbReady } from './db/db'
+import processAll from './process/process'
+import listenKills from './process/onKill'
 dotenv.config()
 
 const cCPUs = os.cpus().length
@@ -38,6 +40,8 @@ new Promise((resolve, reject) => {
       app.use('/', client)
 
       await dbReady()
+      await processAll()
+      await listenKills()
       const listenServer = app.listen(port, '0.0.0.0', () => {
         console.log(`Tone client api listening on port ${port}`)
         resolve(listenServer)
