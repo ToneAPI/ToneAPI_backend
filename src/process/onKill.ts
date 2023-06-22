@@ -15,7 +15,6 @@ export default async function listenKills () {
   pgClient.on('notification', (data) => {
     if (!data.payload) return
     const payload = JSON.parse(data.payload)
-    console.log(`recieved kill for ${payload.attacker_name as string}`)
     let killEntry = allData[payload.attacker_id]
     let deathEntry = allData[payload.victim_id]
 

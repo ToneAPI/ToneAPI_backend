@@ -75,6 +75,7 @@ router.get('/players',
       const result = db.selectFrom('kill_view')
       let data
       const resultFiltered = processQueryArgs(result, req.query as unknown as string | string[])
+      // Cache stuff when no route is present so request doesn't takes 4secs to complete
       if (result !== resultFiltered) {
         const selection = resultFiltered.select([sum<number>('kills').as('kills'), sum<number>('deaths').as('deaths'), sum<number>('deaths_with_weapon').as('deaths_while_equipped'), 'attacker_id', sql<string>`last(attacker_name)`.as('username'), sum<number>('total_distance').as('total_distance'), max('max_distance').as('max_distance')]).groupBy('attacker_id')
         data = (await selection.execute()).reduce<Record<string, KillRecord>>((acc, curr) => {
