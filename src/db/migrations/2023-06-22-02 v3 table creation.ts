@@ -27,12 +27,12 @@ export async function up (db: Kysely<any>): Promise<void> {
 
   await db.schema.createTable('ToneAPI.player')
     .addColumn('player_id', 'bigint', (col) => col.notNull().primaryKey())
-    .addColumn('playername', 'varchar(50)', (col) => col.notNull())
+    .addColumn('player_name', 'varchar(50)', (col) => col.notNull())
     .execute()
 
   await db.schema.createTable('ToneAPI.weapon')
     .addColumn('weapon_id', 'varchar(50)', (col) => col.notNull().primaryKey())
-    .addColumn('weaponname', 'varchar(50)', (col) => col.notNull())
+    .addColumn('weapon_name', 'varchar(50)', (col) => col.notNull())
     .execute()
 
   await db.schema.createTable('ToneAPI.mods_on_weapon')
@@ -88,7 +88,7 @@ export async function up (db: Kysely<any>): Promise<void> {
     .addColumn('attacker_speed', 'integer')
     .addColumn('victim_speed', 'integer')
     .addColumn('attacker_movementstate', 'varchar(50)')
-    .addColumn('attacker_movementstate', 'varchar(50)')
+    .addColumn('victim_movementstate', 'varchar(50)')
     .addColumn('distance', 'integer')
     .addColumn('unix_time', 'timestamp')
     .addColumn('game_time', 'decimal')
