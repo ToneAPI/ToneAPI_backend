@@ -53,8 +53,8 @@ BEGIN
            new.servername = servername AND 
            new.host = host;
    ELSE
-       INSERT INTO kill_view(kills,deaths, deaths_with_weapon, attacker_id, map, game_mode, cause_of_death, servername, host, max_distance, total_distance, attacker_name)
-       VALUES(1,0,0, new.attacker_id, new.map, new.game_mode, new.cause_of_death, new.servername, new.host,new.distance, new.distance, new.attacker_name);
+       INSERT INTO kill_view(kills,deaths, deaths_with_weapon, attacker_id, map, game_mode, cause_of_death, servername, host, max_distance, total_distance)
+       VALUES(1,0,0, new.attacker_id, new.map, new.game_mode, new.cause_of_death, new.servername, new.host,new.distance, new.distance);
  END IF;
    
    
@@ -77,8 +77,8 @@ BEGIN
            new.servername = servername AND 
            new.host = host;
    ELSE
-       INSERT INTO kill_view(deaths, kills, deaths_with_weapon, attacker_id, map, game_mode, cause_of_death, servername, host, max_distance, total_distance, attacker_name)
-       VALUES(1,0,0, new.victim_id, new.map, new.game_mode, new.cause_of_death, new.servername, new.host,0,0, new.victim_name);
+       INSERT INTO kill_view(deaths, kills, deaths_with_weapon, attacker_id, map, game_mode, cause_of_death, servername, host, max_distance, total_distance)
+       VALUES(1,0,0, new.victim_id, new.map, new.game_mode, new.cause_of_death, new.servername, new.host,0,0);
  END IF;
  
  
@@ -101,8 +101,8 @@ BEGIN
            new.servername = servername AND 
            new.host = host;
    ELSE
-       INSERT INTO kill_view(deaths, kills, deaths_with_weapon, attacker_id, map, game_mode, cause_of_death, servername, host, max_distance, total_distance, attacker_name)
-       VALUES(0,0,1, new.victim_id, new.map, new.game_mode, new.attacker_current_weapon, new.servername, new.host,0,0, new.victim_name);
+       INSERT INTO kill_view(deaths, kills, deaths_with_weapon, attacker_id, map, game_mode, cause_of_death, servername, host, max_distance, total_distance)
+       VALUES(0,0,1, new.victim_id, new.map, new.game_mode, new.attacker_current_weapon, new.servername, new.host,0,0);
  END IF;
    
    
