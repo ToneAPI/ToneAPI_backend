@@ -14,6 +14,6 @@ module.exports = {
     "@typescript-eslint/strict-boolean-expressions": 0,
     "@typescript-eslint/explicit-function-return-type": "off",
   },
-  plugins: ["jest"],
+  plugins: ["jest", { transform: "typia/lib/transform" }],
   "jest/globals": true,
 };

@@ -1,8 +1,12 @@
+// Typed routes from https://urosstok.com/blog/typed-routes-in-express
+
+
+
 import * as dotenv from 'dotenv'
 import express from 'express'
 import cors from 'cors'
 import { dbReady } from './db/db'
-import server from './server/server'
+import server from './generated/server'
 dotenv.config()
 
 const app = express()
