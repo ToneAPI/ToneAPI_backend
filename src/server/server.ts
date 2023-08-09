@@ -1,47 +1,58 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 import { Router } from 'express'
 import { body, header } from 'express-validator'
-import { CreateKillRecord, CheckServerToken } from '../db/db'
+import { /* CreateKillRecord, */ CheckServerToken } from '../db/db'
 import { validateErrors } from '../common'
 
 const router = Router()
 
-//auth middleware
+// auth middleware
 router.post(
   '/*',
   header('authorization')
     .exists({ checkFalsy: true })
     .withMessage('Missing Authorization Header')
     .bail()
-    .custom(e => e.split(' ')[0].toLowerCase() == 'bearer')
+    .custom((e) => e.split(' ')[0].toLowerCase() === 'bearer')
     .withMessage('Authorization Token is not Bearer'),
   validateErrors,
-  async (req, res, next) => {
-    if (!req) return res.sendStatus(500)
-    if (!req.headers.authorization) {
-      console.error("no authorization header")
-      return res.sendStatus(403)
-    }
-    const query = await CheckServerToken(req.headers.authorization.split(' ')[1])
-    if (!query || !query.id) {
-      console.error("incorrect token : " + req.headers.authorization.split(' ')[1] + " for " + req.body.servername + " with IP " + (req.headers['x-forwarded-for']?.toString() ||
-        req.socket.remoteAddress?.toString() ||
-        ''))
-      return res.sendStatus(403)
-    }
-    next()
+  (req, res, next) => {
+    void (async () => {
+      if (!req) return res.sendStatus(500)
+      if (!req.headers.authorization) {
+        console.error('no authorization header')
+        return res.sendStatus(403)
+      }
+      const query = await CheckServerToken(
+        req.headers.authorization.split(' ')[1]
+      )
+      if (!query?.host_id) {
+        console.error(
+          `incorrect token : ${
+            req.headers.authorization.split(' ')[1]
+          } with IP ${
+            req.headers['x-forwarded-for']?.toString() ??
+            req.socket.remoteAddress?.toString() ??
+            ''
+          }`
+        )
+        return res.sendStatus(403)
+      }
+      next()
+    })()
   }
 )
 
-//Route to check auth
+// Route to check auth
 router.post('/', (req, res) => {
   res.sendStatus(200)
 })
 
-const serversCount: { [id: string]: number } = {}
-const serversTimeout: { [id: string]: NodeJS.Timeout } = {}
+// const serversCount: Record<string, number> = {}
+// const serversTimeout: Record<string, NodeJS.Timeout> = {}
 
-//same rate limiting code as register. max 10 kills per server every 1 sec. should be enough.
-/*router.post('/kill', (req, res, next) => {
+// same rate limiting code as register. max 10 kills per server every 1 sec. should be enough.
+/* router.post('/kill', (req, res, next) => {
   let host = Number(req.query.serverId)
   if (serversCount[serverId] > 2) {
     return res.status(429).json({
@@ -55,7 +66,7 @@ const serversTimeout: { [id: string]: NodeJS.Timeout } = {}
     serversCount[serverId] = 0
   }, 1000)
   next()
-})*/
+}) */
 
 router.post(
   '/kill',
@@ -134,149 +145,147 @@ router.post(
     .isString()
     .isLength({ max: 50 })
     .isAscii(),
-  body('servername',).isString()
-    .isLength({ max: 100 })
-    .isAscii(),
+  body('servername').isString().isLength({ max: 100 }).isAscii(),
   body(['distance', 'game_time'], 'must be postitive floats').isFloat({
     min: 0
   }),
   body(['cause_of_death', 'victim_id'], 'mandatory').exists().notEmpty(),
-  //do we need this ?
-  //body('servername').customSanitizer(e => e.replace(/[^a-z0-9]/gi, '')),
+  // do we need this ?
+  // body('servername').customSanitizer(e => e.replace(/[^a-z0-9]/gi, '')),
   validateErrors,
-  async (req, res) => {
-    // Do we check the same thing twice ?????
-    if (!req.headers.authorization) return res.sendStatus(403)
-    const headers = req.headers.authorization.split(' ')
-    if (headers[0].toLowerCase() != "bearer") return res.status(403).send("authorization must be token bearer")
-    const query = (await CheckServerToken(headers[1]))
-    if (!query) return res.sendStatus(403)
-    const host = query.id
-    const {
-      servername,
-      killstat_version,
-      match_id,
-      game_mode,
-      map,
-      game_time,
-      player_count,
-      attacker_name,
-      attacker_id,
-      attacker_current_weapon,
-      attacker_current_weapon_mods,
-      attacker_weapon_1,
-      attacker_weapon_1_mods,
-      attacker_weapon_2,
-      attacker_weapon_2_mods,
-      attacker_weapon_3,
-      attacker_weapon_3_mods,
-      attacker_offhand_weapon_1,
-      attacker_offhand_weapon_1_mods,
-      attacker_offhand_weapon_2,
-      attacker_offhand_weapon_2_mods,
-      victim_name,
-      victim_id,
-      victim_current_weapon,
-      victim_current_weapon_mods,
-      victim_weapon_1,
-      victim_weapon_1_mods,
-      victim_weapon_2,
-      victim_weapon_2_mods,
-      victim_weapon_3,
-      victim_weapon_3_mods,
-      victim_offhand_weapon_1,
-      victim_offhand_weapon_1_mods,
-      victim_offhand_weapon_2,
-      victim_offhand_weapon_2_mods,
-      cause_of_death,
-      distance
-    } = req.body
-    CreateKillRecord({
-      killstat_version,
-      servername,
-      host,
-      match_id,
-      game_mode,
-      map,
-      game_time,
-      player_count,
-      attacker_name,
-      attacker_id,
-      attacker_current_weapon,
-      attacker_current_weapon_mods,
-      attacker_weapon_1,
-      attacker_weapon_1_mods,
-      attacker_weapon_2,
-      attacker_weapon_2_mods,
-      attacker_weapon_3,
-      attacker_weapon_3_mods,
-      attacker_offhand_weapon_1,
-      attacker_offhand_weapon_1_mods,
-      attacker_offhand_weapon_2,
-      attacker_offhand_weapon_2_mods,
-      victim_name,
-      victim_id,
-      victim_current_weapon,
-      victim_current_weapon_mods,
-      victim_weapon_1,
-      victim_weapon_1_mods,
-      victim_weapon_2,
-      victim_weapon_2_mods,
-      victim_weapon_3,
-      victim_weapon_3_mods,
-      victim_offhand_weapon_1,
-      victim_offhand_weapon_1_mods,
-      victim_offhand_weapon_2,
-      victim_offhand_weapon_2_mods,
-      cause_of_death,
-      distance
-    })
-      .then((e) => {
-        res.sendStatus(201)
-        console.log(
-          `[${new Date().toLocaleString()}] Kill submitted for server ${servername}, ${attacker_name} killed ${victim_name}`
-        )
-      })
-      .catch((e) => {
-        res.sendStatus(500)
-        console.error({
-          killstat_version,
-          servername,
-          host,
-          match_id,
-          game_mode,
-          map,
-          game_time,
-          player_count,
-          attacker_name,
-          attacker_id,
-          attacker_current_weapon,
-          attacker_current_weapon_mods,
-          attacker_weapon_1,
-          attacker_weapon_1_mods,
-          attacker_weapon_2,
-          attacker_weapon_2_mods,
-          attacker_weapon_3,
-          attacker_weapon_3_mods,
-          attacker_offhand_weapon_1,
-          attacker_offhand_weapon_2,
-          victim_name,
-          victim_id,
-          victim_current_weapon,
-          victim_current_weapon_mods,
-          victim_weapon_1,
-          victim_weapon_1_mods,
-          victim_weapon_2,
-          victim_weapon_2_mods,
-          victim_weapon_3,
-          victim_weapon_3_mods,
-          victim_offhand_weapon_1,
-          victim_offhand_weapon_2,
-          cause_of_death,
-          distance
-        })
-        console.error(e)
-      })
+  (req, res) => {
+    void (async () => {
+      // Do we check the same thing twice ?????
+      if (!req.headers.authorization) return res.sendStatus(403)
+      const headers = req.headers.authorization.split(' ')
+      if (headers[0].toLowerCase() !== 'bearer') { return res.status(403).send('authorization must be token bearer') }
+      const query = await CheckServerToken(headers[1])
+      if (!query) return res.sendStatus(403)
+      // const host = query.id
+      // const {
+      //   servername,
+      //   match_id,
+      //   game_mode,
+      //   map,
+      //   game_time,
+      //   player_count,
+      //   attacker_name,
+      //   attacker_id,
+      //   attacker_current_weapon,
+      //   attacker_current_weapon_mods,
+      //   attacker_weapon_1,
+      //   attacker_weapon_1_mods,
+      //   attacker_weapon_2,
+      //   attacker_weapon_2_mods,
+      //   attacker_weapon_3,
+      //   attacker_weapon_3_mods,
+      //   attacker_offhand_weapon_1,
+      //   attacker_offhand_weapon_1_mods,
+      //   attacker_offhand_weapon_2,
+      //   attacker_offhand_weapon_2_mods,
+      //   victim_name,
+      //   victim_id,
+      //   victim_current_weapon,
+      //   victim_current_weapon_mods,
+      //   victim_weapon_1,
+      //   victim_weapon_1_mods,
+      //   victim_weapon_2,
+      //   victim_weapon_2_mods,
+      //   victim_weapon_3,
+      //   victim_weapon_3_mods,
+      //   victim_offhand_weapon_1,
+      //   victim_offhand_weapon_1_mods,
+      //   victim_offhand_weapon_2,
+      //   victim_offhand_weapon_2_mods,
+      //   cause_of_death,
+      //   distance
+      // } = req.body
+    //   CreateKillRecord({
+    //     servername,
+    //     host,
+    //     match_id,
+    //     game_mode,
+    //     map,
+    //     game_time,
+    //     player_count,
+    //     attacker_name,
+    //     attacker_id,
+    //     attacker_current_weapon,
+    //     attacker_current_weapon_mods,
+    //     attacker_weapon_1,
+    //     attacker_weapon_1_mods,
+    //     attacker_weapon_2,
+    //     attacker_weapon_2_mods,
+    //     attacker_weapon_3,
+    //     attacker_weapon_3_mods,
+    //     attacker_offhand_weapon_1,
+    //     attacker_offhand_weapon_1_mods,
+    //     attacker_offhand_weapon_2,
+    //     attacker_offhand_weapon_2_mods,
+    //     victim_name,
+    //     victim_id,
+    //     victim_current_weapon,
+    //     victim_current_weapon_mods,
+    //     victim_weapon_1,
+    //     victim_weapon_1_mods,
+    //     victim_weapon_2,
+    //     victim_weapon_2_mods,
+    //     victim_weapon_3,
+    //     victim_weapon_3_mods,
+    //     victim_offhand_weapon_1,
+    //     victim_offhand_weapon_1_mods,
+    //     victim_offhand_weapon_2,
+    //     victim_offhand_weapon_2_mods,
+    //     cause_of_death,
+    //     distance
+    //   })
+    //     .then((e) => {
+    //       res.sendStatus(201)
+    //       console.log(
+    //       `[${new Date().toLocaleString()}] Kill submitted for server ${servername}, ${attacker_name} killed ${victim_name}`
+    //       )
+    //     })
+    //     .catch((e) => {
+    //       res.sendStatus(500)
+    //       console.error({
+    //         killstat_version,
+    //         servername,
+    //         host,
+    //         match_id,
+    //         game_mode,
+    //         map,
+    //         game_time,
+    //         player_count,
+    //         attacker_name,
+    //         attacker_id,
+    //         attacker_current_weapon,
+    //         attacker_current_weapon_mods,
+    //         attacker_weapon_1,
+    //         attacker_weapon_1_mods,
+    //         attacker_weapon_2,
+    //         attacker_weapon_2_mods,
+    //         attacker_weapon_3,
+    //         attacker_weapon_3_mods,
+    //         attacker_offhand_weapon_1,
+    //         attacker_offhand_weapon_2,
+    //         victim_name,
+    //         victim_id,
+    //         victim_current_weapon,
+    //         victim_current_weapon_mods,
+    //         victim_weapon_1,
+    //         victim_weapon_1_mods,
+    //         victim_weapon_2,
+    //         victim_weapon_2_mods,
+    //         victim_weapon_3,
+    //         victim_weapon_3_mods,
+    //         victim_offhand_weapon_1,
+    //         victim_offhand_weapon_2,
+    //         cause_of_death,
+    //         distance
+    //       })
+    //       console.error(e)
+    //     })
+    })()
   }
 )
 export default router

@@ -43,7 +43,7 @@ router.get('/hosts', (_req, res) => {
   void (async () => {
     const result = await getHostList()
     const data: Record<number, string> = {}
-    result.forEach((e) => (data[Number(e.id)] = e.name))
+    result.forEach((e) => (data[Number(e.host_id)] = e.host_name))
 
     const dataString = JSON.stringify(data)
     const buffer = Buffer.from(dataString)
