@@ -183,9 +183,11 @@ router.post(
           .execute();
       }
 
-      await db.updateTable("ToneAPI_v3.match")
+      await db
+        .updateTable("ToneAPI_v3.match")
         .set({ ongoing: false })
-        .where("ToneAPI_v3.match.server_name", "=", server_name).execute();
+        .where("ToneAPI_v3.match.server_name", "=", server_name)
+        .execute();
 
       const match = await db
         .insertInto("ToneAPI_v3.match")
