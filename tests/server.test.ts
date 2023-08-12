@@ -167,7 +167,6 @@ describe('server', () => {
     expect(response.status).toBe(201)
   })
 
-
   test('register a kill with missing data', async () => {
     const data = testKill
     const response = await fetch(`http://127.0.0.1:3001/kill`, {

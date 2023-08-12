@@ -36,9 +36,7 @@
   "scripts": {
     "build": "npm run generate && npx tsc",
     "startServer": "node out/serverMain.js",
-    "startClient": "node out/clientMain.js",
-    "startWebsocket": "node out/websocket.js",
-    "documentation": "redocly build-docs .\\docs\\v2.yml --output=docs\\index.html",
+    "documentation": "redocly build-docs .\\docs\\v3.yml --output=docs\\index.html",
     "test": "jest --runInBand",
     "generate": "npx typia generate --input src/templates --output src/generated --project tsconfig.json"
   }

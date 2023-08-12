@@ -9,7 +9,7 @@ import {
 import db, { /* createKillRecord, */ checkServerToken } from "../db";
 import { validateErrors } from "../common";
 import { KillData, MatchData, validateBody } from "../types";
-import typia, { validate } from "typia";
+import typia from "typia";
 
 const router = Router();
 

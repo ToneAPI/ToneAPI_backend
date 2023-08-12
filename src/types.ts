@@ -44,8 +44,6 @@ export type KillData = {
   cause_of_death: string;
 };
 
-type RequestBody<T> = Request<{}, {}, T>;
-
 export const validateBody =
   <T>(checker: (input: T) => typia.IValidation<T>): RequestHandler =>
   (req, res, next) => {
