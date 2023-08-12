@@ -100,7 +100,7 @@ router.post(
       } = req.body;
       const match = await db
         .selectFrom("ToneAPI_v3.match")
-        .select(["ToneAPI_v3.match.host_id", "ToneAPI_v3.match.match_id"])
+        .select(["ToneAPI_v3.match.ongoing", "ToneAPI_v3.match.match_id"])
         .where("ToneAPI_v3.match.host_id", "=", host_id)
         .where("ToneAPI_v3.match.match_id", "=", match_id)
         .executeTakeFirst();
@@ -109,6 +109,19 @@ router.post(
           errors: [
             {
               msg: "Match does not exists",
+              param: "match_id",
+              location: "body",
+            },
+          ],
+        });
+        return;
+      }
+
+      if(!match.ongoing){
+        res.status(409).send({
+          errors: [
+            {
+              msg: "Match is already closed",
               param: "match_id",
               location: "body",
             },
