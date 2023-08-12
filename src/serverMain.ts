@@ -1,31 +1,43 @@
 // Typed routes from https://urosstok.com/blog/typed-routes-in-express
 
+import * as dotenv from "dotenv";
+import express from "express";
+import cors from "cors";
+import { dbReady } from "./db";
+import server from "./generated/server";
+dotenv.config();
 
+const app = express();
+const port = 3001;
 
-import * as dotenv from 'dotenv'
-import express from 'express'
-import cors from 'cors'
-import { dbReady } from './db/db'
-import server from './generated/server'
-dotenv.config()
+app.use(express.json());
 
-const app = express()
-const port = 3001
+app.use(cors());
+app.get("/", (req, res) => {
+  res.send("Tone server API online");
+});
 
-app.use(express.json())
-
-app.use(cors())
-app.get('/', (req, res) => {
-  res.send('Tone server API online')
-})
-
-app.use('/', server)
+app.use("/", (req, res, next) => {
+  try {
+    next();
+  } catch (error) {
+    res.status(500).send({
+      errors: [
+        {
+          msg: "Internal error",
+          data: error,
+        },
+      ],
+    });
+  }
+});
+app.use("/", server);
 
 export default new Promise((resolve, reject) => {
   void dbReady().then((e) => {
-    const listenServer = app.listen(port, '0.0.0.0', () => {
-      console.log(`Tone server api listening on port ${port}`)
-      resolve(listenServer)
-    })
-  })
-})
+    const listenServer = app.listen(port, "0.0.0.0", () => {
+      console.log(`Tone server api listening on port ${port}`);
+      resolve(listenServer);
+    });
+  });
+});

@@ -2,24 +2,28 @@ import { RequestHandler, Request } from "express";
 import typia from "typia";
 
 type WeaponKillData = {
-  name: string;
+  id: string;
   mods: number;
+};
+
+export type LoadoutKillData = {
+  ordnance: WeaponKillData | null;
+  secondary: WeaponKillData | null;
+  primary: WeaponKillData | null;
+  tactical: WeaponKillData | null;
+  anti_titan: WeaponKillData | null;
+  passive1:string | null;
+  passive2:string | null;
+  titan: string | null;
 };
 
 type PlayerKillData = {
   velocity: number;
   name: string;
-  loadout: {
-    ordnance: WeaponKillData;
-    secondary: WeaponKillData;
-    primary: WeaponKillData;
-    tactical: WeaponKillData;
-    anti_titan: WeaponKillData;
-  };
+  loadout: LoadoutKillData;
   current_weapon: WeaponKillData;
   state: string;
-  titan: string | null;
-  id: number | bigint;
+  id: number;
   cloaked: boolean;
 };
 

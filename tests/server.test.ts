@@ -1,8 +1,8 @@
 import { afterAll, beforeAll, describe, expect, test } from '@jest/globals'
 import serverMain from '../src/serverMain'
-import db from "../src/db/db"
+import db, {dbReady} from "../src/db"
 import * as dotenv from 'dotenv'
-import {type KillData} from '../src/server/types'
+import {type KillData} from '../src/types'
 dotenv.config()
 
 let listenServer
@@ -11,7 +11,7 @@ const headers = {
   "Content-Type": "application/json",
   'Authorization': `Bearer ${Buffer.from(process.env.SERVERAUTH_TOKEN + '').toString('base64')}`
 }
-const testMatch = { air_accel:false, server_name:Math.floor(Math.random()*100).toString(), game_map:"testMap", gamemode:"test" }
+const testMatch = { air_accel:false, server_name:"servertest"+Math.floor(Math.random()*100).toString(), game_map:"testMap", gamemode:"test" }
 const testKill = {
   "game_time": 22.616668701171876,
   "player_count": 1,
@@ -20,68 +20,74 @@ const testKill = {
       "velocity": 0.0,
       "name": "Legonzaur",
       "loadout": {
+        "titan":"testTitan",
+        "passive1":"testPassive1",
+        "passive2":"testPassive2",
           "ordnance": {
-              "name": "mp_weapon_satchel",
+              "id": "mp_weapon_satchel",
               "mods": 0
           },
           "secondary": {
-              "name": "mp_weapon_wingman",
+              "id": "mp_weapon_wingman",
               "mods": 140
           },
           "primary": {
-              "name": "mp_weapon_sniper",
+              "id": "mp_weapon_sniper",
               "mods": 1168
           },
           "tactical": {
-              "name": "mp_ability_grapple",
+              "id": "mp_ability_grapple",
               "mods": 8
           },
           "anti_titan": {
-              "name": "mp_weapon_defender",
+              "id": "mp_weapon_defender",
               "mods": 134
           }
       },
       "current_weapon": {
-          "name": "mp_weapon_sniper",
+          "id": "mp_weapon_sniper",
           "mods": 1168
       },
       "state": "OnGround",
       "titan": "null",
-      "id": 1005930844007n,
+      "id": 1005930844007,
       "cloaked": false
   },
   "attacker": {
       "velocity": 0.0,
       "name": "Legonzaur",
       "loadout": {
+        "titan":"testTitan",
+        "passive1":"testPassive1",
+        "passive2":"testPassive2",
           "ordnance": {
-              "name": "mp_weapon_satchel",
+              "id": "mp_weapon_satchel",
               "mods": 0
           },
           "secondary": {
-              "name": "mp_weapon_wingman",
+              "id": "mp_weapon_wingman",
               "mods": 140
           },
           "primary": {
-              "name": "mp_weapon_sniper",
+              "id": "mp_weapon_sniper",
               "mods": 1168
           },
           "tactical": {
-              "name": "mp_ability_grapple",
+              "id": "mp_ability_grapple",
               "mods": 8
           },
           "anti_titan": {
-              "name": "mp_weapon_defender",
+              "id": "mp_weapon_defender",
               "mods": 134
           }
       },
       "current_weapon": {
-          "name": "mp_weapon_sniper",
+          "id": "mp_weapon_sniper",
           "mods": 1168
       },
       "state": "OnGround",
       "titan": "null",
-      "id": 1005930844007n,
+      "id": 1005930844007,
       "cloaked": false
   },
   "distance": 0.0,
@@ -91,6 +97,7 @@ const testKill = {
 
 beforeAll(async () => {
   listenServer = await serverMain;
+  await dbReady()
 })
 
 describe('server', () => {
@@ -114,7 +121,7 @@ describe('server', () => {
         'Authorization': `Bearer ${Buffer.from('badtoken').toString('base64')}`
       }
     });
-    expect(response2.status).toBe(403)
+    expect(response2.status).toBe(401)
   })
 
   test('bad kill token', async () => {
@@ -126,7 +133,7 @@ describe('server', () => {
         'Authorization': `Bearer ${Buffer.from('badtoken').toString('base64')}`
       }
     });
-    expect(response2.status).toBe(403)
+    expect(response2.status).toBe(401)
   })
 
   test('good auth prefetch', async () => {
@@ -144,7 +151,9 @@ describe('server', () => {
       headers,
       body: JSON.stringify(testMatch),
     });
-    expect(await response.json()).toHaveProperty("match")
+    const json = await response.json()
+    expect(json).toHaveProperty("match")
+    expect(json.match).not.toBeNaN()
     expect(response.status).toBe(201)
   })
 
