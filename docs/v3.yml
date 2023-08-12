@@ -1,0 +1,565 @@
+openapi: 3.0.2
+info:
+  version: '3.0'
+  title: ToneAPI
+  description: |-
+    Stats tracking API for Titanfall 2 Northstar
+
+    All query params can be negated using `!`. Example : (`https://tone.sleepycat.date/v2/client/gamemodes?gamemode=!sns`)
+  contact:
+    name: Legonzaur
+    url: 'https://github.com/Legonzaur'
+  license:
+    url: 'https://unlicense.org/'
+    name: The Unlicense
+servers:
+  - url: 'https://tone.sleepycat.date/v3'
+paths:
+  /client/hosts:
+    get:
+      tags:
+        - client
+      summary: Your GET endpoint
+      description: An object with host ID as keys and host name as values
+      operationId: get-client-hosts
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  '[number] host_id':
+                    $ref: '#/components/schemas/%5Bnumber%5D%20host_id'
+                    example: Fvnkhead
+              examples:
+                Example 1:
+                  value:
+                    '1': Fvnkhead
+                    '2': Legonzaur
+      servers:
+        - url: 'https://tone.sleepycat.date/v3'
+  /client/servers:
+    get:
+      tags:
+        - client
+      summary: List of servers
+      description: A JSON object with server names as keys and server data as values
+      operationId: get-server-list
+      parameters:
+        - $ref: '#/components/parameters/server'
+        - $ref: '#/components/parameters/player'
+        - $ref: '#/components/parameters/weapon'
+        - $ref: '#/components/parameters/map'
+        - $ref: '#/components/parameters/gamemode'
+        - $ref: '#/components/parameters/host'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  '[string] server_name':
+                    $ref: '#/components/schemas/%5Bstring%5D%20server_name'
+              examples:
+                Example 1:
+                  value:
+                    fvnkhead's 3v3:
+                      deaths: 79810
+                      kills: 76218
+                      max_distance: 3733
+                      total_distance: 42200935
+                      host: 1
+                    fvnkhead's 7v7:
+                      deaths: 148609
+                      kills: 163272
+                      max_distance: 6578
+                      total_distance: 113915706
+                      host: 1
+      servers:
+        - url: 'https://tone.sleepycat.date/v3'
+  /client/weapons:
+    get:
+      tags:
+        - client
+      summary: Statistics for all weapons
+      description: A JSON Object with weapon IDs as keys and weapon data as values
+      operationId: get-client-weapons
+      parameters:
+        - $ref: '#/components/parameters/server'
+        - $ref: '#/components/parameters/player'
+        - $ref: '#/components/parameters/weapon'
+        - $ref: '#/components/parameters/map'
+        - $ref: '#/components/parameters/gamemode'
+        - $ref: '#/components/parameters/host'
+      requestBody:
+        description: A JSON Object with weapon IDS as keys and weapon data as value
+        content: {}
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  '[string] weapon_id':
+                    $ref: '#/components/schemas/%5Bstring%5D%20weapon_id'
+              examples:
+                Example 1:
+                  value:
+                    autopistol:
+                      deaths: 27
+                      kills: 28
+                      max_distance: 2173
+                      total_distance: 12792
+                    car:
+                      deaths: 1394
+                      kills: 1534
+                      max_distance: 3217
+                      total_distance: 905505
+      servers:
+        - url: 'https://tone.sleepycat.date/v3'
+  /client/players:
+    get:
+      tags:
+        - client
+      summary: Statistics for all players
+      description: A JSON Object with player IDs as keys and player data as values
+      operationId: get-client-players
+      parameters:
+        - $ref: '#/components/parameters/weapon'
+        - $ref: '#/components/parameters/server'
+        - $ref: '#/components/parameters/player'
+        - $ref: '#/components/parameters/gamemode'
+        - $ref: '#/components/parameters/map'
+        - $ref: '#/components/parameters/host'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  '[number] player_id':
+                    $ref: '#/components/schemas/%5Bnumber%5D%20player_id'
+              examples:
+                Example 1:
+                  value:
+                    '2250125460':
+                      username: Legonzaur
+                      deaths: 0
+                      kills: 0
+                      max_kill_distance: 0
+                      avg_kill_distance: 0
+      servers:
+        - url: 'https://tone.sleepycat.date/v3'
+  /client/maps:
+    get:
+      tags:
+        - client
+      summary: Your GET endpoint
+      description: A JSON Object with map IDs as keys and map data as values
+      operationId: get-client-maps
+      parameters:
+        - $ref: '#/components/parameters/host'
+        - $ref: '#/components/parameters/gamemode'
+        - $ref: '#/components/parameters/map'
+        - $ref: '#/components/parameters/weapon'
+        - $ref: '#/components/parameters/player'
+        - $ref: '#/components/parameters/server'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  KillData:
+                    $ref: '#/components/schemas/KillData'
+              examples:
+                Example 1:
+                  value:
+                    lf_meadow:
+                      deaths: 13628
+                      kills: 11791
+                      max_distance: 3970
+                      total_distance: 7139763
+                    lf_township:
+                      deaths: 14861
+                      kills: 14232
+                      max_distance: 3642
+                      total_distance: 9022513
+      servers:
+        - url: 'https://tone.sleepycat.date/v3'
+  /client/gamemodes:
+    get:
+      tags:
+        - client
+      summary: Your GET endpoint
+      description: A JSON Object with gamemodes IDs as keys and gamemodes data as values
+      operationId: get-client-gamemodes
+      parameters:
+        - $ref: '#/components/parameters/host'
+        - $ref: '#/components/parameters/gamemode'
+        - $ref: '#/components/parameters/map'
+        - $ref: '#/components/parameters/weapon'
+        - $ref: '#/components/parameters/player'
+        - $ref: '#/components/parameters/server'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  KillData:
+                    $ref: '#/components/schemas/KillData'
+              examples:
+                Example 1:
+                  value:
+                    ps:
+                      deaths: 273232
+                      kills: 286679
+                      max_distance: 8521
+                      total_distance: 184069789
+                    aitdm:
+                      deaths: 11388
+                      kills: 12814
+                      max_distance: 5689
+                      total_distance: 9184028
+      servers:
+        - url: 'https://tone.sleepycat.date/v3'
+  /servers:
+    post:
+      tags:
+        - server
+      summary: Test Authentication
+      description: Used to test auth
+      operationId: server-auth-test
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/Invalid-Auth'
+      security:
+        - Auth_Token: []
+      servers:
+        - url: 'https://tone.sleepycat.date/v3'
+  /servers/match:
+    post:
+      tags:
+        - server
+      summary: Match
+      description: Allows a Northstar server to create a match on the database
+      operationId: server-match
+      requestBody:
+        description: ''
+        content: {}
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  match:
+                    type: integer
+        '400':
+          $ref: '#/components/responses/Bad-Request'
+        '401':
+          $ref: '#/components/responses/Invalid-Auth'
+        '500':
+          $ref: '#/components/responses/Internal-Server-Error'
+      security:
+        - Auth_Token: []
+      servers:
+        - url: 'https://tone.sleepycat.date/v3'
+  /servers/kill:
+    post:
+      tags:
+        - server
+      summary: Kill
+      description: Allows a Northstar server to record kills on the database
+      operationId: server-kill
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Kill'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+        '400':
+          $ref: '#/components/responses/Bad-Request'
+        '401':
+          $ref: '#/components/responses/Invalid-Auth'
+        '403':
+          description: |-
+            Match ID invalid.
+            Use /servers/match to create a match.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+        '409':
+          description: Match is already closed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+        '500':
+          $ref: '#/components/responses/Internal-Server-Error'
+      security:
+        - Auth_Token: []
+      servers:
+        - url: 'https://tone.sleepycat.date/v3'
+tags:
+  - name: client
+    description: Routes accessibles by everyone
+  - name: server
+    description: Routes accessibles only to server owners
+components:
+  parameters:
+    server:
+      name: server
+      in: query
+      description: Fetch data for specific server
+      required: false
+      schema:
+        type: string
+        example: fvnkhead's 3v3
+    player:
+      name: player
+      in: query
+      description: Fetch data for specific player
+      required: false
+      schema:
+        type: integer
+        example: 1005930844007
+    weapon:
+      name: weapon
+      in: query
+      description: Fetch data for specific weapon
+      required: false
+      schema:
+        type: string
+        example: epg
+    map:
+      name: map
+      in: query
+      description: Fetch data for specific map
+      required: false
+      schema:
+        type: string
+        example: lf_stacks
+    gamemode:
+      name: gamemode
+      in: query
+      description: Fetch data for specific gamemode
+      required: false
+      schema:
+        type: string
+        example: aitdm
+    host:
+      name: host
+      in: query
+      description: Fetch data for specific host
+      required: false
+      schema:
+        type: integer
+        example: 1
+  securitySchemes:
+    Auth_Token:
+      type: http
+      scheme: bearer
+  responses:
+    Invalid-Auth:
+      description: Your token is probably invalid
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              errors:
+                type: array
+                items:
+                  type: object
+    Bad-Request:
+      description: Request body is invalid
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              errors:
+                type: array
+                items:
+                  type: object
+    Internal-Server-Error:
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              errors:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    msg:
+                      type: string
+                    data:
+                      type: string
+  schemas:
+    '[number] host_id':
+      type: string
+      example: Fvnkhead
+    '[string] server_name':
+      type: object
+      properties:
+        deaths:
+          type: integer
+        kills:
+          type: integer
+        max_distance:
+          type: integer
+        total_distance:
+          type: integer
+        host:
+          type: integer
+    '[string] weapon_id':
+      type: object
+      properties:
+        deaths:
+          type: integer
+          description: Number of deaths caused by this weapon
+        kills:
+          type: integer
+        max_distance:
+          type: integer
+        total_distance:
+          type: integer
+        deaths_while_equipped:
+          type: integer
+          description: Number of deaths while this weapon is equipped
+    '[number] player_id':
+      type: object
+      properties:
+        deaths:
+          type: integer
+        kills:
+          type: integer
+        max_distance:
+          type: integer
+        total_distance:
+          type: integer
+        username:
+          type: string
+    KillData:
+      type: object
+      title: Killdata
+      properties:
+        deaths:
+          $ref: '#/components/schemas/deaths'
+        kills:
+          $ref: '#/components/schemas/kills'
+        max_kill_distance:
+          $ref: '#/components/schemas/max_kill_distance'
+        avg_kill_distance:
+          $ref: '#/components/schemas/avg_kill_distance'
+    deaths:
+      type: integer
+    kills:
+      type: integer
+    max_kill_distance:
+      type: integer
+    avg_kill_distance:
+      type: number
+    Kill:
+      type: object
+      title: Kill
+      properties:
+        game_time:
+          type: number
+        player_count:
+          type: integer
+        match_id:
+          type: integer
+        cause_of_death:
+          type: string
+        distance:
+          type: number
+        victim:
+          $ref: '#/components/schemas/PlayerKillData'
+        attacker:
+          $ref: '#/components/schemas/PlayerKillData'
+    PlayerKillData:
+      type: object
+      title: PlayerKillData
+      properties:
+        velocity:
+          type: number
+        name:
+          type: string
+        loadout:
+          type: object
+          properties:
+            ordnance:
+              $ref: '#/components/schemas/WeaponKillData'
+            secondary:
+              $ref: '#/components/schemas/WeaponKillData'
+            primary:
+              $ref: '#/components/schemas/WeaponKillData'
+            tactical:
+              $ref: '#/components/schemas/WeaponKillData'
+            anti_titan:
+              $ref: '#/components/schemas/WeaponKillData'
+            passive1:
+              type: string
+            passive2:
+              type: string
+        current_weapon:
+          $ref: '#/components/schemas/WeaponKillData'
+        state:
+          type: string
+        titan:
+          type: string
+        id:
+          type: integer
+        cloaked:
+          type: boolean
+    WeaponKillData:
+      type: object
+      title: WeaponKillData
+      properties:
+        mods:
+          type: integer
+        id:
+          type: string
