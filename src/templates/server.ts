@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import { Router, Request, Response } from "express";
-import { header, param } from "express-validator";
+import { header } from "express-validator";
 import {
   checkOrCreateLoadout,
   checkOrCreateWeapon,
@@ -90,6 +90,7 @@ router.post(
   (req: RequestBody<KillData>, res: Response) => {
     void (async () => {
       const host_id = res.locals.host_id;
+      const startTime = Date.now()
       const {
         game_time,
         distance,
@@ -98,6 +99,14 @@ router.post(
         victim: victimData,
         cause_of_death,
       } = req.body;
+      const attacker_id = Number(attackerData.id);
+      const victim_id = Number(victimData.id);
+      if (isNaN(attacker_id) || isNaN(victim_id)) {
+        res
+          .status(400)
+          .send({ errors: [{ msg: "attacker_id or victim_id is NaN" }] });
+        return;
+      }
       const match = await db
         .selectFrom("ToneAPI_v3.match")
         .select(["ToneAPI_v3.match.ongoing", "ToneAPI_v3.match.match_id"])
@@ -117,7 +126,7 @@ router.post(
         return;
       }
 
-      if(!match.ongoing){
+      if (!match.ongoing) {
         res.status(409).send({
           errors: [
             {
@@ -131,30 +140,37 @@ router.post(
       }
       let attacker_loadout: number | undefined;
       let victim_loadout: number | undefined;
-      await Promise.all([
-        checkUpdateOrCreatePlayer(attackerData),
-        checkUpdateOrCreatePlayer(victimData),
-        checkOrCreateWeapon(cause_of_death),
-        checkOrCreateWeapon(attackerData.current_weapon.id),
-        checkOrCreateWeapon(victimData.current_weapon.id),
-        checkOrCreateLoadout(attackerData.loadout).then(
+      await db.transaction().execute(async (trx) => {
+        await checkUpdateOrCreatePlayer(
+          { id: attacker_id, name: attackerData.name },
+          trx
+        );
+        await checkUpdateOrCreatePlayer(
+          { id: victim_id, name: victimData.name },
+          trx
+        );
+        await checkOrCreateWeapon(cause_of_death, trx);
+        await checkOrCreateWeapon(attackerData.current_weapon.id, trx);
+        await checkOrCreateWeapon(victimData.current_weapon.id, trx);
+        await checkOrCreateLoadout(attackerData.loadout, trx).then(
           (e) => (attacker_loadout = e)
-        ),
-        checkOrCreateLoadout(victimData.loadout).then(
+        );
+        await checkOrCreateLoadout(victimData.loadout, trx).then(
           (e) => (victim_loadout = e)
-        ),
-      ]);
+        );
+      });
+
       if (attacker_loadout === undefined) {
-        throw new Error("attacker_lodaout is undefined");
+        throw new Error("attacker_loadout is undefined");
       }
       if (victim_loadout === undefined) {
-        throw new Error("victim_lodaout is undefined");
+        throw new Error("victim_loadout is undefined");
       }
       const insertResult = await db
         .insertInto("ToneAPI_v3.kill")
         .values({
-          attacker_id: attackerData.id,
-          victim_id: victimData.id,
+          attacker_id,
+          victim_id,
           match_id,
           attacker_loadout_id: attacker_loadout,
           victim_loadout_id: victim_loadout,
@@ -172,6 +188,7 @@ router.post(
         .executeTakeFirstOrThrow();
 
       res.status(201).send({ id: insertResult.kill_id });
+      console.log(Date.now()-startTime)
     })();
   }
 );
