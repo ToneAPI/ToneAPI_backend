@@ -23,7 +23,7 @@ type PlayerKillData = {
   loadout: LoadoutKillData;
   current_weapon: WeaponKillData;
   state: string;
-  id: number;
+  id: string;
   cloaked: boolean;
 };
 
@@ -50,6 +50,7 @@ export const validateBody =
     const result: typia.IValidation<T> = checker(req.body);
     if (!result.success) {
       res.status(400).send({ errors: result.errors });
+      console.error(result.errors)
     } else {
       next();
     }
