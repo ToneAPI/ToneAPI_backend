@@ -7,14 +7,14 @@ type WeaponKillData = {
 };
 
 export type LoadoutKillData = {
-  ordnance: WeaponKillData | null;
-  secondary: WeaponKillData | null;
-  primary: WeaponKillData | null;
-  tactical: WeaponKillData | null;
-  anti_titan: WeaponKillData | null;
-  passive1:string | null;
-  passive2:string | null;
-  titan: string | null;
+  ordnance: WeaponKillData | undefined;
+  secondary: WeaponKillData | undefined;
+  primary: WeaponKillData | undefined;
+  tactical: WeaponKillData | undefined;
+  anti_titan: WeaponKillData | undefined;
+  passive1:string | undefined;
+  passive2:string | undefined;
+  titan: string | undefined;
 };
 
 type PlayerKillData = {

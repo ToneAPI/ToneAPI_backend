@@ -86,7 +86,7 @@ type RequestBody<T> = Request<{}, {}, T>;
 
 router.post(
   "/kill",
-  validateBody(typia.createValidate<KillData>()),
+  // validateBody(typia.createValidate<KillData>()),
   (req: RequestBody<KillData>, res: Response) => {
     void (async () => {
       const host_id = res.locals.host_id;
@@ -190,7 +190,7 @@ router.post(
 
 router.post(
   "/match",
-  validateBody(typia.createValidate<MatchData>()),
+  // validateBody(typia.createValidate<MatchData>()),
   (req: RequestBody<MatchData>, res: Response) => {
     void (async () => {
       const host_id = res.locals.host_id;

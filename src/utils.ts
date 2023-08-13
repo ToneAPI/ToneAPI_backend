@@ -115,7 +115,7 @@ export async function checkOrCreateTitan(titan_id: string | null, trx?:Transacti
         .execute();
     }
   }
-  
+
   await createOrRunInTransaction(runner, trx) 
  
 }
@@ -128,40 +128,53 @@ export async function checkOrCreateLoadout(loadoutData: LoadoutKillData) {
       let loadout = await trx
         .selectFrom("ToneAPI_v3.loadout")
         .select("ToneAPI_v3.loadout.loadout_id")
-        .where("primary_weapon", "=", loadoutData.primary?.id ?? null)
-        .where("primary_mod_id", "=", loadoutData.primary?.mods ?? null)
-        .where("secondary_weapon", "=", loadoutData.secondary?.id ?? null)
-        .where("secondary_mod_id", "=", loadoutData.secondary?.mods ?? null)
-        .where("anti_titan_weapon", "=", loadoutData.anti_titan?.id ?? null)
-        .where("anti_titan_mod_id", "=", loadoutData.anti_titan?.mods ?? null)
-        .where(
-          "ToneAPI_v3.loadout.ordnance",
-          "=",
-          loadoutData.ordnance?.id ?? null
-        )
-        .where(
-          "ToneAPI_v3.loadout.tactical",
-          "=",
-          loadoutData.tactical?.id ?? null
-        )
-        .where("ToneAPI_v3.loadout.pilot_passive_1", "=", loadoutData.passive1)
-        .where("ToneAPI_v3.loadout.pilot_passive_2", "=", loadoutData.passive2)
-        .where("ToneAPI_v3.loadout.titan_id", "=", loadoutData.titan)
+        .$if(loadoutData.primary?.id !== undefined, (qb)=>qb.where("primary_weapon", "=", loadoutData.primary!.id))
+        .$if(loadoutData.primary?.id == undefined, (qb)=>qb.where("primary_weapon", "is", null))
+        .$if(loadoutData.primary?.mods !== undefined, (qb)=>qb.where("primary_mod_id", "=", loadoutData.primary!.mods))
+        .$if(loadoutData.primary?.mods == undefined, (qb)=>qb.where("primary_mod_id", "is", null))
+        .$if(loadoutData.secondary?.id !== undefined, (qb)=>qb.where("secondary_weapon", "=", loadoutData.secondary!.id))
+        .$if(loadoutData.secondary?.id == undefined, (qb)=>qb.where("secondary_weapon", "is", null))
+        .$if(loadoutData.secondary?.mods !== undefined, (qb)=>qb.where("secondary_mod_id", "=", loadoutData.secondary!.mods))
+        .$if(loadoutData.secondary?.mods == undefined, (qb)=>qb.where("secondary_mod_id", "is", null))
+        .$if(loadoutData.anti_titan?.id !== undefined, (qb)=>qb.where("anti_titan_weapon", "=", loadoutData.anti_titan!.id))
+        .$if(loadoutData.anti_titan?.id == undefined, (qb)=>qb.where("anti_titan_weapon", "is", null))
+        .$if(loadoutData.anti_titan?.mods !== undefined, (qb)=>qb.where("anti_titan_mod_id", "=", loadoutData.anti_titan!.mods))
+        .$if(loadoutData.anti_titan?.mods == undefined, (qb)=>qb.where("anti_titan_mod_id", "is", null))
+
+        .$if(loadoutData.ordnance?.id !== undefined, (qb)=>qb.where("ordnance", "=", loadoutData.ordnance!.id))
+        .$if(loadoutData.ordnance?.id == undefined, (qb)=>qb.where("ordnance", "is", null))
+
+        .$if(loadoutData.ordnance?.id !== undefined, (qb)=>qb.where("ordnance", "=", loadoutData.ordnance!.id))
+        .$if(loadoutData.ordnance?.id == undefined, (qb)=>qb.where("ordnance", "is", null))
+
+        .$if(loadoutData.tactical?.id !== undefined, (qb)=>qb.where("tactical", "=", loadoutData.tactical!.id))
+        .$if(loadoutData.tactical?.id == undefined, (qb)=>qb.where("tactical", "is", null))
+
+
+        .$if(loadoutData.passive1 !== undefined, (qb)=>qb.where("pilot_passive_1", "=", loadoutData.passive1!))
+        .$if(loadoutData.passive1 == undefined, (qb)=>qb.where("pilot_passive_1", "is", null))
+        .$if(loadoutData.passive2 !== undefined, (qb)=>qb.where("pilot_passive_2", "=", loadoutData.passive2!))
+        .$if(loadoutData.passive2 == undefined, (qb)=>qb.where("pilot_passive_2", "is", null))
+        .$if(loadoutData.titan !== undefined, (qb)=>qb.where("titan_id", "=", loadoutData.titan!))
+        .$if(loadoutData.titan == undefined, (qb)=>qb.where("titan_id", "is", null))
+
         .executeTakeFirst();
       if (!loadout) {
-        if (loadoutData.primary !== null) {
+        if (loadoutData.primary !== undefined) {
           await checkOrCreateWeaponMods(loadoutData.primary, trx);
         }
-        if (loadoutData.secondary !== null) {
+        if (loadoutData.secondary !== undefined) {
           await checkOrCreateWeaponMods(loadoutData.secondary, trx);
         }
-        if (loadoutData.anti_titan !== null) {
+        if (loadoutData.anti_titan !== undefined) {
           await checkOrCreateWeaponMods(loadoutData.anti_titan, trx);
         }
-        if (loadoutData.ordnance !== null) {
+        if (loadoutData.ordnance !== undefined) {
           await checkOrCreateWeapon(loadoutData.ordnance.id, trx);
         }
-        await checkOrCreateTitan(loadoutData.titan, trx);
+        if (loadoutData.titan !== undefined) {
+          await checkOrCreateTitan(loadoutData.titan, trx);
+        }
         const result = await trx
           .insertInto("ToneAPI_v3.loadout")
           .values({
