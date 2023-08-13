@@ -128,36 +128,17 @@ export async function checkOrCreateLoadout(loadoutData: LoadoutKillData) {
       let loadout = await trx
         .selectFrom("ToneAPI_v3.loadout")
         .select("ToneAPI_v3.loadout.loadout_id")
-        .$if(loadoutData.primary?.id !== undefined, (qb)=>qb.where("primary_weapon", "=", loadoutData.primary!.id))
-        .$if(loadoutData.primary?.id == undefined, (qb)=>qb.where("primary_weapon", "is", null))
-        .$if(loadoutData.primary?.mods !== undefined, (qb)=>qb.where("primary_mod_id", "=", loadoutData.primary!.mods))
-        .$if(loadoutData.primary?.mods == undefined, (qb)=>qb.where("primary_mod_id", "is", null))
-        .$if(loadoutData.secondary?.id !== undefined, (qb)=>qb.where("secondary_weapon", "=", loadoutData.secondary!.id))
-        .$if(loadoutData.secondary?.id == undefined, (qb)=>qb.where("secondary_weapon", "is", null))
-        .$if(loadoutData.secondary?.mods !== undefined, (qb)=>qb.where("secondary_mod_id", "=", loadoutData.secondary!.mods))
-        .$if(loadoutData.secondary?.mods == undefined, (qb)=>qb.where("secondary_mod_id", "is", null))
-        .$if(loadoutData.anti_titan?.id !== undefined, (qb)=>qb.where("anti_titan_weapon", "=", loadoutData.anti_titan!.id))
-        .$if(loadoutData.anti_titan?.id == undefined, (qb)=>qb.where("anti_titan_weapon", "is", null))
-        .$if(loadoutData.anti_titan?.mods !== undefined, (qb)=>qb.where("anti_titan_mod_id", "=", loadoutData.anti_titan!.mods))
-        .$if(loadoutData.anti_titan?.mods == undefined, (qb)=>qb.where("anti_titan_mod_id", "is", null))
-
-        .$if(loadoutData.ordnance?.id !== undefined, (qb)=>qb.where("ordnance", "=", loadoutData.ordnance!.id))
-        .$if(loadoutData.ordnance?.id == undefined, (qb)=>qb.where("ordnance", "is", null))
-
-        .$if(loadoutData.ordnance?.id !== undefined, (qb)=>qb.where("ordnance", "=", loadoutData.ordnance!.id))
-        .$if(loadoutData.ordnance?.id == undefined, (qb)=>qb.where("ordnance", "is", null))
-
-        .$if(loadoutData.tactical?.id !== undefined, (qb)=>qb.where("tactical", "=", loadoutData.tactical!.id))
-        .$if(loadoutData.tactical?.id == undefined, (qb)=>qb.where("tactical", "is", null))
-
-
-        .$if(loadoutData.passive1 !== undefined, (qb)=>qb.where("pilot_passive_1", "=", loadoutData.passive1!))
-        .$if(loadoutData.passive1 == undefined, (qb)=>qb.where("pilot_passive_1", "is", null))
-        .$if(loadoutData.passive2 !== undefined, (qb)=>qb.where("pilot_passive_2", "=", loadoutData.passive2!))
-        .$if(loadoutData.passive2 == undefined, (qb)=>qb.where("pilot_passive_2", "is", null))
-        .$if(loadoutData.titan !== undefined, (qb)=>qb.where("titan_id", "=", loadoutData.titan!))
-        .$if(loadoutData.titan == undefined, (qb)=>qb.where("titan_id", "is", null))
-
+        .where("primary_weapon", loadoutData.primary?.id !== undefined ? "=" : "is", loadoutData.primary?.id === undefined ? null : loadoutData.primary?.id)
+        .where("primary_mod_id", loadoutData.primary?.mods !== undefined ? "=" : "is", loadoutData.primary?.mods === undefined ? null : loadoutData.primary?.mods)
+        .where("secondary_weapon", loadoutData.secondary?.id !== undefined ? "=" : "is", loadoutData.secondary?.id === undefined ? null : loadoutData.secondary?.id )
+        .where("secondary_mod_id", loadoutData.secondary?.mods !== undefined ? "=" : "is", loadoutData.secondary?.mods === undefined ? null : loadoutData.secondary?.mods)
+        .where("anti_titan_weapon", loadoutData.anti_titan?.id !== undefined ? "=" : "is", loadoutData.anti_titan?.id === undefined ? null : loadoutData.anti_titan?.id )
+        .where("anti_titan_mod_id", loadoutData.anti_titan?.mods !== undefined ? "=" : "is", loadoutData.anti_titan?.mods === undefined ? null : loadoutData.anti_titan?.mods)
+        .where("ordnance", loadoutData.ordnance?.id !== undefined ? "=" : "is", loadoutData.ordnance?.id === undefined ? null :  loadoutData.ordnance?.id)
+        .where("tactical", loadoutData.tactical?.id !== undefined ? "=" : "is", loadoutData.tactical?.id === undefined ? null :  loadoutData.tactical?.id)
+        .where("pilot_passive_1", loadoutData.passive1 !== undefined ?  "=" : "is", loadoutData.passive1 === undefined ? null : loadoutData.passive1)
+        .where("pilot_passive_2", loadoutData.passive2 !== undefined ?  "=" : "is", loadoutData.passive2 === undefined ? null : loadoutData.passive2)
+        .where("titan_id", loadoutData.titan !== undefined ? "=" : "is", loadoutData.titan === undefined ? null : loadoutData.titan)
         .executeTakeFirst();
       if (!loadout) {
         if (loadoutData.primary !== undefined) {
