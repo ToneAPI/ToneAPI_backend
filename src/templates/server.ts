@@ -140,26 +140,21 @@ router.post(
       }
       let attacker_loadout: number | undefined;
       let victim_loadout: number | undefined;
-      await db.transaction().execute(async (trx) => {
+
         await checkUpdateOrCreatePlayer(
-          { id: attacker_id, name: attackerData.name },
-          trx
-        );
+          { id: attacker_id, name: attackerData.name });
         await checkUpdateOrCreatePlayer(
-          { id: victim_id, name: victimData.name },
-          trx
+          { id: victim_id, name: victimData.name }
         );
-        await checkOrCreateWeapon(cause_of_death, trx);
-        await checkOrCreateWeapon(attackerData.current_weapon.id, trx);
-        await checkOrCreateWeapon(victimData.current_weapon.id, trx);
-        await checkOrCreateLoadout(attackerData.loadout, trx).then(
+        await checkOrCreateWeapon(cause_of_death);
+        await checkOrCreateWeapon(attackerData.current_weapon.id);
+        await checkOrCreateWeapon(victimData.current_weapon.id);
+        await checkOrCreateLoadout(attackerData.loadout).then(
           (e) => (attacker_loadout = e)
         );
-        await checkOrCreateLoadout(victimData.loadout, trx).then(
+        await checkOrCreateLoadout(victimData.loadout).then(
           (e) => (victim_loadout = e)
         );
-      });
-
       if (attacker_loadout === undefined) {
         throw new Error("attacker_loadout is undefined");
       }
