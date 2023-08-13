@@ -1,17 +1,19 @@
+import { Kysely, Transaction } from 'kysely';
 import db from "./db";
+import Database from './db/model';
 import { LoadoutKillData } from "./types";
 
 export async function checkUpdateOrCreatePlayer(data: {
   id: number;
   name: string;
-}) {
-  const player = await db
+}, trx : Kysely<Database> | Transaction<Database>) {
+  const player = await trx
     .selectFrom("ToneAPI_v3.player")
     .select(["player_name"])
     .where("player_id", "=", data.id)
     .executeTakeFirst();
   if (!player) {
-    await db
+    await trx
       .insertInto("ToneAPI_v3.player")
       .values({
         player_id: data.id,
@@ -19,7 +21,7 @@ export async function checkUpdateOrCreatePlayer(data: {
       })
       .execute();
   } else if (player.player_name != data.name) {
-    await db
+    await trx
       .updateTable("ToneAPI_v3.player")
       .set({ player_name: data.name })
       .where("ToneAPI_v3.player.player_id", "=", data.id)
@@ -27,14 +29,14 @@ export async function checkUpdateOrCreatePlayer(data: {
   }
 }
 
-export async function checkOrCreateWeapon(weapon_id: string) {
-  const weapon = await db
+export async function checkOrCreateWeapon(weapon_id: string, trx : Kysely<Database> | Transaction<Database>) {
+  const weapon = await trx
     .selectFrom("ToneAPI_v3.weapon")
     .select("ToneAPI_v3.weapon.weapon_id")
     .where("weapon_id", "=", weapon_id)
     .executeTakeFirst();
   if (!weapon) {
-    await db
+    await trx
       .insertInto("ToneAPI_v3.weapon")
       .values({
         weapon_id,
@@ -46,16 +48,16 @@ export async function checkOrCreateWeapon(weapon_id: string) {
 export async function checkOrCreateWeaponMods(weapon_mods: {
   id: string;
   mods: number;
-}) {
-  await checkOrCreateWeapon(weapon_mods.id);
-  const weaponMods = await db
+}, trx : Kysely<Database> | Transaction<Database>) {
+  await checkOrCreateWeapon(weapon_mods.id, trx);
+  const weaponMods = await trx
     .selectFrom("ToneAPI_v3.mods_on_weapon")
     .select("ToneAPI_v3.mods_on_weapon.mod_id")
     .where("mod_id", "=", weapon_mods.mods)
     .where("weapon_id", "=", weapon_mods.id)
     .executeTakeFirst();
   if (!weaponMods) {
-    await db
+    await trx
       .insertInto("ToneAPI_v3.mods_on_weapon")
       .values({
         mod_id: weapon_mods.mods,
@@ -66,17 +68,17 @@ export async function checkOrCreateWeaponMods(weapon_mods: {
   }
 }
 
-export async function checkOrCreateTitan(titan_id: string | null) {
+export async function checkOrCreateTitan(titan_id: string | null, trx : Kysely<Database> | Transaction<Database>) {
   if (titan_id == null) {
     return;
   }
-  const titan = await db
+  const titan = await trx
     .selectFrom("ToneAPI_v3.titan_chassis")
     .select("ToneAPI_v3.titan_chassis.titan_id")
     .where("titan_id", "=", titan_id)
     .executeTakeFirst();
   if (!titan) {
-    await db
+    await trx
       .insertInto("ToneAPI_v3.titan_chassis")
       .values({
         titan_id,
@@ -85,8 +87,8 @@ export async function checkOrCreateTitan(titan_id: string | null) {
   }
 }
 
-export async function checkOrCreateLoadout(loadoutData: LoadoutKillData) {
-  let loadout = await db
+export async function checkOrCreateLoadout(loadoutData: LoadoutKillData, trx : Kysely<Database> | Transaction<Database>) {
+  let loadout = await trx
     .selectFrom("ToneAPI_v3.loadout")
     .select("ToneAPI_v3.loadout.loadout_id")
     .where("primary_weapon", "=", loadoutData.primary?.id ?? null)
@@ -102,21 +104,20 @@ export async function checkOrCreateLoadout(loadoutData: LoadoutKillData) {
     .where("ToneAPI_v3.loadout.titan_id", "=", loadoutData.titan)
     .executeTakeFirst();
   if (!loadout) {
-    const promises = new Array<Promise<void>>();
     if (loadoutData.primary !== null) {
-      promises.push(checkOrCreateWeaponMods(loadoutData.primary));
+      await checkOrCreateWeaponMods(loadoutData.primary, trx);
     }
     if (loadoutData.secondary !== null) {
-      promises.push(checkOrCreateWeaponMods(loadoutData.secondary));
+      await checkOrCreateWeaponMods(loadoutData.secondary, trx);
     }
     if (loadoutData.anti_titan !== null) {
-      promises.push(checkOrCreateWeaponMods(loadoutData.anti_titan));
+      await checkOrCreateWeaponMods(loadoutData.anti_titan, trx);
     }
     if (loadoutData.ordnance !== null) {
-      promises.push(checkOrCreateWeapon(loadoutData.ordnance.id));
+      await checkOrCreateWeapon(loadoutData.ordnance.id, trx);
     }
-    await Promise.all([...promises, checkOrCreateTitan(loadoutData.titan)]);
-    const result = await db
+    await checkOrCreateTitan(loadoutData.titan, trx);
+    const result = await trx
       .insertInto("ToneAPI_v3.loadout")
       .values({
         primary_weapon: loadoutData.primary?.id ?? null,
@@ -130,9 +131,10 @@ export async function checkOrCreateLoadout(loadoutData: LoadoutKillData) {
         pilot_passive_1: loadoutData.passive1,
         pilot_passive_2: loadoutData.passive2,
         titan_id: loadoutData.titan,
-      }).returning('ToneAPI_v3.loadout.loadout_id')
+      })
+      .returning("ToneAPI_v3.loadout.loadout_id")
       .executeTakeFirstOrThrow();
-      return result.loadout_id;
+    return result.loadout_id;
   }
-  return loadout.loadout_id
+  return loadout.loadout_id;
 }
