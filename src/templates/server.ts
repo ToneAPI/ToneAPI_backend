@@ -1,63 +1,70 @@
-/* eslint-disable @typescript-eslint/naming-convention */
-import { Router } from "express";
-import { header } from "express-validator";
+import { Router } from 'express'
+import { header } from 'express-validator'
 
-import { /* createKillRecord, */ checkServerToken } from "../db";
-import { validateErrors } from "../common";
+import { /* createKillRecord, */ checkServerToken } from '../db'
+import { validateErrors } from '../common'
 
 import match from './match'
 import kill from './kill'
+import player from './player'
 
-const router = Router();
+const router = Router()
+
+router.use('/*', (req, res, next) => {
+  try {
+    next()
+  } catch (error) {
+    res.status(500).send({ errors: [{ msg: 'Internal Error! You\'d better report this' }] })
+    console.error(error)
+  }
+})
 
 // auth middleware
 router.post(
-  "/*",
-  header("authorization")
+  '/*',
+  header('authorization')
     .exists({ checkFalsy: true })
-    .withMessage("Missing Authorization Header")
+    .withMessage('Missing Authorization Header')
     .bail()
-    .custom((e) => e.split(" ")[0].toLowerCase() === "bearer")
-    .withMessage("Authorization Token is not Bearer"),
+    .custom((e) => e.split(' ')[0].toLowerCase() === 'bearer')
+    .withMessage('Authorization Token is not Bearer'),
   validateErrors,
   (req, res, next) => {
     void (async () => {
       if (!req.headers.authorization) {
-        return res.sendStatus(401);
+        return res.sendStatus(401)
       }
       const query = await checkServerToken(
-        req.headers.authorization.split(" ")[1]
-      );
+        req.headers.authorization.split(' ')[1]
+      )
       if (!query?.host_id) {
         console.error(
-          `incorrect token : ${
-            req.headers.authorization.split(" ")[1]
-          } with IP ${
-            req.headers["x-forwarded-for"]?.toString() ??
-            req.socket.remoteAddress?.toString() ??
-            ""
+          `incorrect token : ${req.headers.authorization.split(' ')[1]
+          } with IP ${req.headers['x-forwarded-for']?.toString() ??
+          req.socket.remoteAddress?.toString() ??
+          ''
           }`
-        );
+        )
         return res.status(401).send({
           errors: [
             {
-              msg: "Incorrect Token",
-              param: "authorization",
-              location: "headers",
-            },
-          ],
-        });
+              msg: 'Incorrect Token',
+              param: 'authorization',
+              location: 'headers'
+            }
+          ]
+        })
       }
-      res.locals.host_id = query.host_id;
-      next();
-    })();
+      res.locals.host_id = query.host_id
+      next()
+    })()
   }
-);
+)
 
 // Route to check auth
-router.post("/", (req, res) => {
-  res.sendStatus(200);
-});
+router.post('/', (req, res) => {
+  res.sendStatus(200)
+})
 
 // const serversCount: Record<string, number> = {}
 // const serversTimeout: Record<string, NodeJS.Timeout> = {}
@@ -79,7 +86,7 @@ router.post("/", (req, res) => {
   next()
 }) */
 
-
-router.use("/kill", kill)
-router.use("/match", match)
-export default router;
+router.use('/kill', kill)
+router.use('/match', match)
+router.use('/player', player)
+export default router

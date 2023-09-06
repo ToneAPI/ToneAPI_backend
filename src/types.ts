@@ -44,6 +44,32 @@ export interface KillData {
   cause_of_death: string
 }
 
+export type MatchCloseData = Record<string, MatchClosePlayerData>
+export interface MatchClosePlayerData {
+  weapons: Record<string, MatchCloseWeaponData>
+  titans: Record<string, MatchCloseWeaponData>
+  stats: {
+    distance: {
+      ground: number
+      wall: number
+      air: number
+    }
+    time: {
+      ground: number
+      wall: number
+      air: number
+    }
+  }
+}
+export interface MatchCloseWeaponData {
+  shotsFired: number
+  shotsHit: number
+  shotsCrit: number
+  shotsHeadshot: number
+  shotsRichochet: number
+  playtime: number
+}
+
 export type RequestBody<T> = Request<any, any, T>
 
 export const validateBody =
@@ -52,6 +78,7 @@ export const validateBody =
       const result: typia.IValidation<T> = checker(req.body)
       if (!result.success) {
         res.status(400).send({ errors: result.errors })
+        console.log(req.body)
         console.error(result.errors)
       } else {
         next()
