@@ -21,12 +21,16 @@ Alternatively, you can find it converted at https://toneapi.github.io/ToneAPI_ba
 - [x] Player stats
 - [x] Match stats
 - [x] Weapon shots, hits, crits, ricochets
+- [X] Weapon time
 - [ ] Grenade shots
+- [X] Notify that a player has connected
 
 ### Backend
 - [x] Match registration
 - [x] Kill stats
-- [ ] Match stats
+- [X] Match stats
+- [ ] Titan not being registered in loadout
+- [ ] Titan weapons not being registered in loadout
 
 ### Frontend
 - [ ] Everything
