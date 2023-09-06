@@ -13,3 +13,20 @@ The serverside and clientside parts are two different executables. You may need 
 An OpenAPI file is located in `docs` directory.
 
 Alternatively, you can find it converted at https://toneapi.github.io/ToneAPI_backend/
+
+
+# V3 Roadmap
+### Server mod
+- [x] Match registration
+- [x] Player stats
+- [x] Match stats
+- [x] Weapon shots, hits, crits, ricochets
+- [ ] Grenade shots
+
+### Backend
+- [x] Match registration
+- [x] Kill stats
+- [ ] Match stats
+
+### Frontend
+- [ ] Everything
