@@ -23,7 +23,7 @@ Alternatively, you can find it converted at https://toneapi.github.io/ToneAPI_ba
 - [x] Weapon shots, hits, crits, ricochets
 - [X] Weapon time
 - [ ] Grenade shots
-- [X] Notify that a player has connected
+- [ ] Notify that a player has connected
 
 ### Backend
 - [x] Match registration
