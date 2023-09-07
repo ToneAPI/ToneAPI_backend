@@ -104,12 +104,28 @@ const testMatchStats: MatchCloseData = {
         air: 1220.2,
         ground: 500.4,
         wall: 200.1
-      },
-      data: {
-        username: 'Legonzaur'
       }
     },
-    weapons: {}
+    weapons: {
+      mp_testweapon: {
+        playtime: 1569.1,
+        shotsCrit: 15,
+        shotsFired: 5,
+        shotsHeadshot: 9,
+        shotsHit: 4,
+        shotsRichochet: 0
+      }
+    },
+    titans: {
+      testTitan: {
+        playtime: 1569.1,
+        shotsCrit: 15,
+        shotsFired: 5,
+        shotsHeadshot: 9,
+        shotsHit: 4,
+        shotsRichochet: 0
+      }
+    }
   }
 }
 
@@ -177,6 +193,16 @@ describe('stats', () => {
     expect(json).toHaveProperty('match')
     expect(json.match).not.toBeNaN()
     expect(response.status).toBe(201)
+  })
+
+  test('register a player', async () => {
+    const response = await fetch(`http://127.0.0.1:3001/player/${testKill.attacker.id}/connect`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ username: 'Legonzaur', match_id: testKill.match_id })
+    })
+    console.log(await response.text())
+    expect(response.status).toBe(200)
   })
 
   test('register a kill', async () => {
