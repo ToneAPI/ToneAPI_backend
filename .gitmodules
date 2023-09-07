@@ -1,6 +1,3 @@
 [submodule "src/db"]
 	path = src/db
 	url = https://github.com/ToneAPI/backend-model
-[submodule "docs"]
-	path = docs
-	url = https://github.com/ToneAPI/api_docs
