@@ -10,15 +10,6 @@ import player from './player'
 
 const router = Router()
 
-router.use('/*', (req, res, next) => {
-  try {
-    next()
-  } catch (error) {
-    res.status(500).send({ errors: [{ msg: 'Internal Error! You\'d better report this' }] })
-    console.error(error)
-  }
-})
-
 // auth middleware
 router.post(
   '/*',
