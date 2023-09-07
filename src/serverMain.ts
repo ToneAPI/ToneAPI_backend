@@ -1,7 +1,7 @@
 // Typed routes from https://urosstok.com/blog/typed-routes-in-express
 
 import * as dotenv from 'dotenv'
-import express from 'express'
+import express, { type ErrorRequestHandler } from 'express'
 import cors from 'cors'
 import { dbReady } from './db'
 import server from './generated/server'
@@ -17,21 +17,12 @@ app.get('/', (req, res) => {
   res.send('Tone server API online')
 })
 
-app.use('/', (req, res, next) => {
-  try {
-    next()
-  } catch (error) {
-    res.status(500).send({
-      errors: [
-        {
-          msg: 'Internal error',
-          data: error
-        }
-      ]
-    })
-  }
-})
 app.use('/', server)
+const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
+  res.status(500).send({ error: [{ msg: 'Internal Error! You\'d better report this' }] })
+  console.error(err)
+}
+app.use(errorHandler)
 
 export default new Promise((resolve, reject) => {
   void dbReady().then((e) => {
