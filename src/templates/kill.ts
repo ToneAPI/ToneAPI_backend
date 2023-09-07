@@ -65,36 +65,25 @@ router.post(
         })
         return
       }
-      let attacker_loadout: number | undefined
-      let victim_loadout: number | undefined
-
       // await checkUpdateOrCreatePlayer(
       //   { id: attacker_id, name: attackerData.name })
       // await checkUpdateOrCreatePlayer(
       //   { id: victim_id, name: victimData.name }
       // )
-      if (attackerData.loadout.titan) {
-        await checkOrCreateTitan(attackerData.loadout.titan)
-      }
-      if (victimData.loadout.titan) {
-        await checkOrCreateTitan(victimData.loadout.titan)
-      }
-      await checkOrCreateWeapon(cause_of_death)
-      await checkOrCreateWeapon(attackerData.current_weapon.id)
-      await checkOrCreateWeapon(victimData.current_weapon.id)
 
-      await checkOrCreateLoadout(attackerData.loadout).then(
-        (e) => (attacker_loadout = e)
-      )
-      await checkOrCreateLoadout(victimData.loadout).then(
-        (e) => (victim_loadout = e)
-      )
-      if (attacker_loadout === undefined) {
-        throw new Error('attacker_loadout is undefined')
-      }
-      if (victim_loadout === undefined) {
-        throw new Error('victim_loadout is undefined')
-      }
+      await Promise.all([
+        checkOrCreateWeapon(cause_of_death),
+        checkOrCreateWeapon(attackerData.current_weapon.id),
+        checkOrCreateWeapon(victimData.current_weapon.id),
+        async () => { if (attackerData.loadout.titan) { await checkOrCreateTitan(attackerData.loadout.titan) } },
+        async () => { if (victimData.loadout.titan) { await checkOrCreateTitan(victimData.loadout.titan) } }
+      ])
+
+      const [attacker_loadout, victim_loadout] = await Promise.all([
+        checkOrCreateLoadout(attackerData.loadout),
+        checkOrCreateLoadout(victimData.loadout)
+      ])
+
       const insertResult = await db
         .insertInto('ToneAPI_v3.kill')
         .values({
