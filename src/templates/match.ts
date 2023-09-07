@@ -91,7 +91,6 @@ router.post(
           return
         }
         const playerData = req.body[playerId]
-        console.log(req.body)
 
         const promises: Array<Promise<any>> = []
         const weaponStats: WeaponStatsInMatchTable[] = []
@@ -131,15 +130,19 @@ router.post(
         }
 
         playerPromises.push(Promise.all(promises).then(async e => {
-          await db.insertInto('ToneAPI_v3.weapon_stats_in_match')
-            .values(weaponStats)
-            .execute()
+          if (weaponStats.length > 0) {
+            await db.insertInto('ToneAPI_v3.weapon_stats_in_match')
+              .values(weaponStats)
+              .execute()
+          }
         }))
 
         playerPromises.push(Promise.all(promises).then(async e => {
-          await db.insertInto('ToneAPI_v3.titan_stats_in_match')
-            .values(titanStats)
-            .execute()
+          if (titanStats.length > 0) {
+            await db.insertInto('ToneAPI_v3.titan_stats_in_match')
+              .values(titanStats)
+              .execute()
+          }
         }))
 
         playerPromises.push(db.insertInto('ToneAPI_v3.player_stats_in_match')
@@ -156,6 +159,10 @@ router.post(
           .execute())
       }
       await Promise.all(playerPromises)
+      await db.updateTable('ToneAPI_v3.match')
+        .set({ ongoing: false })
+        .where('match_id', '=', match_id)
+        .execute()
       res.sendStatus(201)
     })()
   }
