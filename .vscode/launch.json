@@ -10,26 +10,8 @@
       "name": "Launch Server API",
       "skipFiles": ["<node_internals>/**"],
       "program": "${workspaceFolder}/src/serverMain.ts",
-      "preLaunchTask": "tsc: build - tsconfig.json",
-      "outFiles": ["${workspaceFolder}/out/**/*.js"]
-    },
-    {
-      "type": "node",
-      "request": "launch",
-      "name": "Launch Client API",
-      "skipFiles": ["<node_internals>/**"],
-      "program": "${workspaceFolder}/src/clientMain.ts",
-      "preLaunchTask": "tsc: build - tsconfig.json",
-      "outFiles": ["${workspaceFolder}/out/**/*.js"]
-    },
-    {
-      "type": "node",
-      "request": "launch",
-      "name": "Launch Websocket",
-      "skipFiles": ["<node_internals>/**"],
-      "program": "${workspaceFolder}/src/websocket.ts",
-      "preLaunchTask": "tsc: build - tsconfig.json",
-      "outFiles": ["${workspaceFolder}/out/**/*.js"]
+      "preLaunchTask": "npm: build",
+      "outFiles": ["${workspaceFolder}/out/**/*.js"],
     }
   ]
 }
