@@ -19,7 +19,6 @@ export interface LoadoutKillData {
 
 interface PlayerKillData {
   velocity: number
-  name: string
   loadout: LoadoutKillData
   current_weapon: WeaponKillData
   state: string

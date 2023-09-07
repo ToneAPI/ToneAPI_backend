@@ -13,7 +13,7 @@ interface PlayerConnect {
   match_id: number
 }
 
-router.post(
+router.put(
   '/:playerId/connect',
   param('playerId').exists().withMessage('Missing Player ID').bail().isNumeric().withMessage('Player ID is not numeric'),
   validateErrors,
