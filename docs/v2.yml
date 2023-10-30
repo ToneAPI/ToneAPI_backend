@@ -11,14 +11,14 @@ info:
   description: |-
     Stats tracking API for Titanfall 2 Northstar 
 
-    All query params can be negated using `!`. Example : (`https://tone.sleepycat.date/v2/client/gamemodes?gamemode=!sns`)
+    All query params can be negated using `!`. Example : (`https://toneapi.ovh/v2/client/gamemodes?gamemode=!sns`)
 tags:
   - name: client
     description: Routes accessibles by everyone
   - name: server
     description: Routes accessibles only to server owners
 servers:
-  - url: 'https://tone.sleepycat.date/v2'
+  - url: 'https://toneapi.ovh/v2'
 paths:
   /client/hosts:
     get:
